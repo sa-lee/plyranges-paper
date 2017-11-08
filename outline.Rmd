@@ -1,0 +1,84 @@
+---
+title: Outline of plyranges a grammar of genomic data manipulation
+output:
+  bookdown::pdf_document2:
+    toc: false
+    number_sections: false
+bibliography: references.bib
+link-citations: true
+
+---
+
+Overview of structure, references and layout for the plyranges package paper. 
+
+# Abstract
+
+The Bioconductor project has created many powerful abstractions for
+reasoning about genomics data, such as the _Ranges_ data structures 
+for representing genomic intervals. By recognising that these data structures
+follow 'tidy' data principles we have created a grammar of genomic data 
+manipulation that defines verbs for performing actions on and between genomic 
+interval data. This grammar simplifies performing common genomic data analysis 
+tasks via method chaining, type consistency and results in creating human 
+readable pipelines. We have implemented this grammar as an Bioconductor/R 
+package  plyranges.
+
+# Introduction
+
+Putting the work into context.
+
+## What do we mean by genomic data?
+  
+  - How does that relate to 'tidy' data?
+  - Why tidy data is a useful abstraction.
+  - Why _Ranges_ follow this pattern.
+
+Key references: @Wickham2014-jc, @Lawrence2013-wg
+
+## How can we analyse genomic data?
+
+  - the Ranges data structures
+  - other abstractions for analysing genomic data
+    - the query language approaches
+    - the bedtools approach
+    - relational algebras
+
+Key references: @Quinlan2010-gc, @Dale2011-js, @Kaitoua2017-pw, @Ovaska2013-gd, @Mungall2014-dg @Kozanitis2016-bm
+
+## What does plyranges contribute?
+
+`plyranges` API provides
+
+- a consistent grammar for analysing genomic data.
+- fluent interface enables readable pipelines 
+- reproducibility via code clarity, declaraitve programming,  and return consistency 
+
+Key references: 
+
+
+# Design and Implementation
+
+Discussion of the API and its key features
+
+- every action on a Range is a verb (functional composition, method chaining)
+- fluent (human readable, code describes what to do rather than 'how')
+- every function returns a class familiar to the user
+- an expressive algebra for performing arithmetic (anchoring functions)
+- split-apply-combine strategies (group_by + reduce/summarise/mutate/filter)
+- recasting overlapping/nearest etc as joins
+
+
+# Results
+
+A case study showing plyranges makes life easier...
+Perhaps could use long reads data from Matt and his post-doc Charity (interesting
+use case of looking for intron-exon junctions)
+
+# Conclusion (future directions)
+
+- availability and maintenance of package
+- extending to SummarisedExperiment class
+- natural fit with ggbio2
+
+# References
+
