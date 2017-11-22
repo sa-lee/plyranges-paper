@@ -1,0 +1,55 @@
+---
+title: "plyranges: a grammar of graphics for genomics data" 
+author:
+  - name: Stuart Lee
+    email: stuart.lee1@monash.edu
+    affiliation: Monash University
+  - name: Michael Lawrence
+    email: michael.lawrence@gene.com
+    affiliation: Genentech
+  - name: Di Cook
+    email: di.cook@monash.edu
+    affiliation: Monash University
+address:
+  - code: Monash University
+    address: Department of Econometrics and Business Statistics, Clayton, Victoria, Australia
+  - code: Genentech
+    address: Bioinformatics and Computational Biology, Genentech, Inc., South San Francisco, California, United States of America 
+abstract: |
+    The Bioconductor project has created many powerful abstractions for reasoning about genomics data, such as the _Ranges_ data structures for representing genomic intervals. By recognising that these data structures follow 'tidy' data principles we have created a grammar of genomic data manipulation that defines verbs for performing actions on and between genomic interval data. This grammar simplifies performing common genomic data analysis tasks via method chaining, type consistency and results in creating human readable pipelines. We have implemented this grammar as an Bioconductor/R package called plyranges.
+  
+
+bibliography: references.bib
+output: rticles::plos_article
+csl: plos.csl
+---
+
+# Introduction
+## What do we mean by genomic data?
+  
+  - How does that relate to 'tidy' data?
+  - Why tidy data is a useful abstraction.
+  - Why _Ranges_ follow this pattern.
+
+Key references: @Wickham2014-jc, @Lawrence2013-wg
+
+## How can we analyse genomic data?
+
+  - the Ranges data structures
+  - other abstractions for analysing genomic data
+    - the query language approaches
+    - the bedtools approach
+    - relational algebras
+
+Key references: @Quinlan2010-gc, @Dale2011-js, @Kaitoua2017-pw, @Ovaska2013-gd, @Mungall2014-dg @Kozanitis2016-bm
+
+## What does plyranges contribute?
+
+`plyranges` API provides
+
+- a consistent grammar for analysing genomic data.
+- fluent interface enables readable pipelines 
+- reproducibility via code clarity, declaraitve programming,  and return consistency 
+
+
+# References {#references .unnumbered}
