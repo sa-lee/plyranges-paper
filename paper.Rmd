@@ -25,31 +25,43 @@ csl: plos.csl
 ---
 
 # Introduction
-## What do we mean by genomic data?
-  
-  - How does that relate to 'tidy' data?
-  - Why tidy data is a useful abstraction.
-  - Why _Ranges_ follow this pattern.
 
-Key references: @Wickham2014-jc, @Lawrence2013-wg
+Genomic data may be naturally represented as sets of pairs of integers 
+corresponding to the start and end points of sequences. Further information
+such as strandedness and chromosome name may be added to these sets to 
+provide biological context. Because of the flexibility of this representation 
+supplemental information such as measurements obtained from an experimental 
+assay or annotations from a genome database can be joined to their relevant
+sequences. In the Bioconductor/R packages `IRanges` and `GenomicRanges` these representations have been implemented as a suite of data structures called _Ranges_ (@Lawrence2013-wg). These data structures cover many common data types encountered in bioinformatics analyses - a gene can be represented with its coordinates, along with its identifier and the identifiers of its exons; or
+an RNA-seq experiment may be represented as sets of genes with a matching count column.
 
-## How can we analyse genomic data?
+The Bioconductor infrastructure for computing with genomic ranges are highly 
+effecient and powerful, however the application programming interface (API) for performing analysis tasks with _Ranges_ is complex due to its large number of
+methods and classes. It also makes resulting scripts written 
+difficult for a non-programmer to read and reason about. An alternative approach 
+would be to implement a domain specific language (DSL) as a fluent interface 
+built on top _Ranges_. The goal of fluent interface is to enable users to write 
+human-readable code via method chaining and consistent function returns. Fluent 
+interfaces fit naturally in the context of Bioinformatics workflows because they 
+enable writing succinct pipelines.
 
-  - the Ranges data structures
-  - other abstractions for analysing genomic data
-    - the query language approaches
-    - the bedtools approach
-    - relational algebras
+Several other DSLs have been implemented to reason about genomics data. Broadly, 
+these are either implemented as query languages or as command line tools 
+embedded in the unix environment ^[other ideas to mention GROK @Ovaska2013-gd]. An example of the former is the Genome Query Language (GQL) and its distributed 
+implementation GenAp which use an SQL-like syntax for fast retrieval of 
+information from genomic databases and BAM files (@Kozanitis2014-va, @Kozanitis2016-bm). 
+Another  example is the Genometric Query Language (GMQL) which implements a relational algebra for combining big genomic datasets (@Kaitoua2017-pw).  The command line application 
+BEDtools develops an extensive algebra for performing arithmetic between two or 
+more sets of genomic regions  (@Quinlan2010-gc). It also has a python interface 
+which simplifies construcing scripts for performing analyses based on BEDTools  (@Dale2011-js). ^[probably should also mention something about their cons, and more detaiil]
 
-Key references: @Quinlan2010-gc, @Dale2011-js, @Kaitoua2017-pw, @Ovaska2013-gd, @Mungall2014-dg @Kozanitis2016-bm
+The abstraction provided by the _Ranges_ data structures aligns with the concept
+of tidy data developed by @Wickham2014-jc. The tidy data pattern is useful because it allows us to see how the data relates to the design of an experiment
+and the variables measured. Consequently, it makes both the modelling and manipulation of data more systematic. The _Ranges_ data structure follows this abstraction: it is a rectanglular table corresponding to a single biological context. Each row contains a single observation and each column a variable about that observation. 
 
-## What does plyranges contribute?
-
-`plyranges` API provides
-
-- a consistent grammar for analysing genomic data.
-- fluent interface enables readable pipelines 
-- reproducibility via code clarity, declaraitve programming,  and return consistency 
+The tidy data abstraction has motivated the development of `plyranges`
+a grammar of genomic data manipulation based on the _Ranges_ data structures. It
+implements and extends the grammar defined by the R package `dplyr` (@Wickham2017-dplyr). The grammar provides a consistent way of interacting with and analysing genomic data via methods for constructing, grouping, mutating, filtering, and summarising _Ranges_ and an algebra for reasoning about actions on _Ranges_ and relationships between _Ranges_.
 
 
 # References {#references .unnumbered}
