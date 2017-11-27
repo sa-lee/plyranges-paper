@@ -63,5 +63,15 @@ The tidy data abstraction has motivated the development of `plyranges`
 a grammar of genomic data manipulation based on the _Ranges_ data structures. It
 implements and extends the grammar defined by the R package `dplyr` (@Wickham2017-dplyr). The grammar provides a consistent way of interacting with and analysing genomic data via methods for constructing, grouping, mutating, filtering, and summarising _Ranges_ and an algebra for reasoning about actions on _Ranges_ and relationships between _Ranges_.
 
+# Design and Implementation
+
+Discussion of the API and its key features
+
+- every action on a Range is a verb (functional composition, method chaining)
+- fluent (human readable, code describes what to do rather than 'how')
+- every function returns a class familiar to the user
+- an expressive algebra for performing arithmetic (anchoring functions)
+- split-apply-combine strategies (group_by + reduce/summarise/mutate/filter)
+- recasting overlapping/nearest etc as joins
 
 # References {#references .unnumbered}
