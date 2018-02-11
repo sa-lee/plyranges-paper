@@ -65,13 +65,89 @@ implements and extends the grammar defined by the R package `dplyr` @Wickham2017
 
 # Design and Implementation
 
-Discussion of the API and its key features
+The _plyranges_ API implements a domain specific language using the existing
+_IRanges_ and _GenomicRanges_ packages in Bioconductor as a backend. Consequently,
+our API still has the speed and effeciency of the aforementioned packages but
+with a more coherent interface. The API also
+extends the grammar elements in _dplyr_ for performing genomic specific
+manipulations such as finding overlapping regions or nearest neighbour regions
+between many _Ranges_. The _plyranges_ API is specifically designed to enable
+fast interactive analysis of _Ranges_ objects but can also be used for scripting 
+genomic data workflows.
 
-- every action on a Range is a verb (functional composition, method chaining)
-- fluent (human readable, code describes what to do rather than 'how')
-- every function returns a class familiar to the user
-- an expressive algebra for performing arithmetic (anchoring functions)
-- split-apply-combine strategies (group_by + reduce/summarise/mutate/filter)
+We have desgined the API to be fluent. Every function call corresponds to an
+action on a _Ranges_ object (they are named verbs) and where possible
+functions have few arguments. Each verb is constructed
+to enable a tab completion based workflow. Both of these aspects reduce the 
+cognitive load on a new user  since most manipulations can be performed with a 
+vocabulary of several verbs, rather than having to memorise functions with many 
+arguments that are nouns (as is required in the existing Bioconductor packages). 
+This is also has the advantage of allowing users to write human readable code
+because verbs describe what the code is doing rather than how its doing it.
+
+Workflows can be composed by chaining verbs together via the pipe operator,`%>%` 
+(exported from the R package _magrittr_). This is possible because every 
+function call is endomorphic: when the input is _Ranges_ object the output
+will also be a _Ranges_ object. One advantage of this static typing is that it 
+does not  require any additional learning of classes beyond _Ranges_ and 
+the _DataFrame_ classes. This is similar to the bedtools API, where the
+output is usually a BED file. However, it strongly deviates from the design of 
+the _Ranges_ Bioconductor packages, where many methods return a new class
+upon return. The Bioconductor design enables effecient computing as users
+are exposed to low-level features of its API which _plyranges_ trys to abstract
+away. Method chaining via the pipe operator can also be difficult to debug,
+as there multiple points of failure.
+
+## Working with Ranges
+
+The _plyranges_ API exports the six core verbs from the _dplyr_ package
+and modifys them for use with simple _Ranges_ and _Genomic Ranges_. The
+verb `mutate()` takes a Ranges object and a set of name-value pairs
+and generates a new Ranges object that with modified or new metadata
+columns or modified core components (start, end, width, seqnames, strand). 
+The `filter()` function takes a Ranges object and logical expressions and
+restricts Ranges object to where the logical expression evaluates to true.
+The `summarise()` function takes a Ranges object and a set of name-value pairs
+and aggregates the Ranges according to functions evaluated in the name-value pairs.
+As `summarise()` is an aggregation it may break the structure of the of a Ranges
+object, hence it returns a DataFrame object. The `select()` function determines
+which metadata columns are returned and the order they are returned in. The 
+`arrange()` function sorts a Ranges object by named variables.
+The `group_by()` function creates an implicit grouping of Ranges object according
+to variables in the Ranges object. This modifies the actions of `mutate()`,
+`summarise()` and `filter()` (and also the set operations, `reduce_ranges()`
+and `disjoin_ranges()`), so they are performed on each partition created by the
+grouping. 
+
+The API has an expressive algebra for performing arithmetic on Ranges via
+the verbs `set_width()` and `stretch()`. As the names suggest `set_width()`
+modifies the width of a Ranges object, while `stretch` extends the start and
+end of a Ranges object. These can be chained with the anchoring functions
+`anchor_start()`, `anchor_end()`, `anchor_center()`, `anchor_3p()` or 
+`anchor_5p()`, which fix the coordinates of a Ranges object in place. 
+Moreover, the `shift_` and `flank_` family of functions can be used to shift
+all coordinates in a Ranges object or generate flanking regions from a Ranges 
+object to the left, right, upstream or downstream of the input. Unlike, the
+Bioconductor API, _plyranges_ makes it expclit via function calls whether to
+take into account the strand information of a _Ranges_ object.
+
 - recasting overlapping/nearest etc as joins
+
+- split-apply-combine strategies (group_by + reduce/summarise/mutate/filter)
+
+- note on the NSE
+
+# Results 
+
+# Availablilty and Future Work
+
+The _plyranges_ package is avaiable on the Bioconductor project website 
+[https://bioconductor.org](https://bioconductor.org) or can be accessed
+via Github [https://github.com/sa-lee/plyranges](https://github.com/sa-lee/plyranges).
+We aim to continue developing the `plyranges` package and extend it for use
+with more complex data structures outside of genomics such as the 
+_SummarizedExperiment_ class. As the `plyranges` interface encourages tidy data 
+practices it also integrates well with the grammar of graphics, we aim to use
+it for the visualisation of genomic ranges.
 
 # References {#references .unnumbered}
