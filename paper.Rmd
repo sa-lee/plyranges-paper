@@ -23,7 +23,13 @@ bibliography: references.bib
 output: rticles::plos_article
 csl: plos.csl
 ---
-
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, comment = "#>", 
+                      fig.width = 6, fig.height = 4)
+library(ggbio)
+library(ggplot2)
+library(plyranges)
+```
 # Introduction
 
 Genomic data may be naturally represented as sets of pairs of integers 
@@ -98,6 +104,11 @@ are exposed to low-level features of its API which _plyranges_ trys to abstract
 away. Method chaining via the pipe operator can also be difficult to debug,
 as there multiple points of failure.
 
+In order to provide a compatible API with _dplyr_, _plyranges_ makes use
+of non-standard evaluation in R via the _rlang_ package. 
+<!--- need to mention something about how this could be detrimental --->
+
+
 ## Working with Ranges
 
 ### Construction and Import/Output
@@ -105,13 +116,43 @@ as there multiple points of failure.
 The _plyranges_ API provides the methods `as_granges()` and `as_iranges()`
 for constructing Ranges from tabular data structures, such as data.frames in
 base R. These methods use non-standard evaluation so columns in a data.frame
-can be modified before a Ranges object is created. 
+can be modified before a Ranges object is created. The API also has
+convienence methods for annotating or extracting annotations from Genomic Ranges
+objects with the `set_genome_info()` and `get_genome_info()` functions.
 
-The package also provides a consistent framework for reading and writing 
+There is a consistent framework for reading and writing 
 files from and to common genomic data formats, using the `rtracklayer` package
 as a backend. The methods are implemented in the `read_/write_` family of 
 functions, currently _plyranges_ can read and write BAM, BED, BEDPE, 
 narrowPeaks, GFF/GTF, WIG and BigWig files.
+
+As an example, we use the Bioconductor package AnnotationHub to search for 
+BigWig files from ChIP-Seq experiments from the Human Epigenome Roadmap project.
+We choose to focus on assays for primary T CD8+ memory cells from peripheral 
+blood. We can then read the BigWig file  corresponding to the H3K27Me3 
+methylation mark over chromosome 10. First we gather the BigWig file
+and extract its annotation information and filter it to chromosome 10. 
+Then we read the BigWig file only extracting scores if they overlap chromosome
+10. We then add annotation information to ensure we know we are working
+with the hg19 genome build.
+
+```{r load-bw, cache = TRUE}
+# E048 corresponds to CD8+ T cells from peripheral blood
+library(plyranges)
+library(AnnotationHub)
+q <-query(AnnotationHub(), c("EpigenomeRoadMap", "E048"))
+
+bw_file <- q[["AH33458"]] 
+
+chr10_ranges <- bw_file %>% 
+  get_genome_info() %>%
+  filter(seqnames == "chr10")
+  
+chr10_scores <- bw_file %>%
+  read_bigwig(overlap_ranges = chr10_ranges) %>%
+  set_genome_info(genome = "hg19")
+chr10_scores
+```
 
 
 ### Manipulation of Ranges 
@@ -128,7 +169,8 @@ restricts Ranges object to where the logical expression evaluates to true.
 The `summarise()` function takes a Ranges object and a set of name-value pairs
 and aggregates the Ranges according to functions evaluated in the name-value pairs.
 As `summarise()` is an aggregation it may break the structure of the of a Ranges
-object, hence it returns a DataFrame object. The `select()` function determines
+object, hence it returns a DataFrame object.
+The `select()` function determines
 which metadata columns are returned and the order they are returned in. The 
 `arrange()` function sorts a Ranges object by named variables.
 The `group_by()` function creates an implicit grouping of Ranges object according
@@ -151,6 +193,18 @@ object to the left, right, upstream or downstream of the input. Unlike, the
 Bioconductor API, _plyranges_ makes it expclit via function calls whether to
 take into account the strand information of a _Ranges_ object.
 
+Returning to the Ranges object containing normalised coverage scores for
+the methylation data, we can filter to find the coordinates of the peak 
+containing maximum coverage score. We can then find 
+a 5000 nt region centered around the maximum position. 
+
+```{r max-score-region}
+chr10_max_score_region <- chr10_scores %>%
+  filter(score == max(score)) %>% 
+  anchor_center() %>%
+  set_width(5000)
+```
+
 ### Overlapping Ranges
 
 A common operation to perform between two _Ranges_ objects is to find overlaps
@@ -168,6 +222,22 @@ that overlap the subject Ranges and returns metadata of the overlapping query
 and subject Ranges. Finally, the left join performs a left outer join between
 the query and subject Ranges, it returns all genomic intervals from the query
 ranges, and returns missing values in metadata columns when there is no overlap.
+
+The overlap innner join could be used to restrict the chromosome 10
+normalised coverage scores that are within the 5000nt region that contains
+the max peak on chromosome 10 (visualised in figure ()).
+
+```{r peak_region, fig.align = "center", fig.cap = "Visualisation of peak coverage score accross 5000nt region of chromosome 10"}
+peak_region <- chr10_scores %>%
+  join_overlap_inner(., 
+                     chr10_max_score_region %>% 
+                       select(-score))
+ggbio::autoplot(peak_region, 
+                aes(y = score), 
+                geom = "blank") + 
+  geom_area(aes(x = start))
+```
+
 A user may also restrict or group by overlaps with the `filter_by_overlaps()`,
 `filter_by_non_overlaps()` and `group_by_overlaps()`. All overlap methods can
 be modified with the `within` suffix (which changes the type of overlap 
@@ -189,8 +259,6 @@ alongside their metadata columns. This data structure is similar to the _Pairs_
 data structure in the _S4Vectors_ package or the BED-PE file format. 
 <!--- should also create convience methods for grouping by pairs and pairing up, 
 unpairing, would also be useful for alignments too--->
-
-### Non-standard evaluation 
 
 
 # Results 

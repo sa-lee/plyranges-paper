@@ -96,6 +96,46 @@
 \newcommand{\lorem}{{\bf LOREM}}
 \newcommand{\ipsum}{{\bf IPSUM}}
 
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 
 
 
@@ -257,6 +297,9 @@ low-level features of its API which \emph{plyranges} trys to abstract
 away. Method chaining via the pipe operator can also be difficult to
 debug, as there multiple points of failure.
 
+In order to provide a compatible API with \emph{dplyr}, \emph{plyranges}
+makes use of non-standard evaluation in R via the \emph{rlang} package.
+
 \hypertarget{working-with-ranges}{%
 \subsection{Working with Ranges}\label{working-with-ranges}}
 
@@ -268,14 +311,65 @@ The \emph{plyranges} API provides the methods \texttt{as\_granges()} and
 \texttt{as\_iranges()} for constructing Ranges from tabular data
 structures, such as data.frames in base R. These methods use
 non-standard evaluation so columns in a data.frame can be modified
-before a Ranges object is created.
+before a Ranges object is created. The API also has convienence methods
+for annotating or extracting annotations from Genomic Ranges objects
+with the \texttt{set\_genome\_info()} and \texttt{get\_genome\_info()}
+functions.
 
-The package also provides a consistent framework for reading and writing
-files from and to common genomic data formats, using the
-\texttt{rtracklayer} package as a backend. The methods are implemented
-in the \texttt{read\_/write\_} family of functions, currently
-\emph{plyranges} can read and write BAM, BED, BEDPE, narrowPeaks,
-GFF/GTF, WIG and BigWig files.
+There is a consistent framework for reading and writing files from and
+to common genomic data formats, using the \texttt{rtracklayer} package
+as a backend. The methods are implemented in the \texttt{read\_/write\_}
+family of functions, currently \emph{plyranges} can read and write BAM,
+BED, BEDPE, narrowPeaks, GFF/GTF, WIG and BigWig files.
+
+As an example, we use the Bioconductor package AnnotationHub to search
+for BigWig files from ChIP-Seq experiments from the Human Epigenome
+Roadmap project. We choose to focus on assays for primary T CD8+ memory
+cells from peripheral blood. We can then read the BigWig file
+corresponding to the H3K27Me3 methylation mark over chromosome 10. First
+we gather the BigWig file and extract its annotation information and
+filter it to chromosome 10. Then we read the BigWig file only extracting
+scores if they overlap chromosome 10. We then add annotation information
+to ensure we know we are working with the hg19 genome build.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# E048 corresponds to CD8+ T cells from peripheral blood}
+\KeywordTok{library}\NormalTok{(plyranges)}
+\KeywordTok{library}\NormalTok{(AnnotationHub)}
+\NormalTok{q <-}\KeywordTok{query}\NormalTok{(}\KeywordTok{AnnotationHub}\NormalTok{(), }\KeywordTok{c}\NormalTok{(}\StringTok{"EpigenomeRoadMap"}\NormalTok{, }\StringTok{"E048"}\NormalTok{))}
+
+\NormalTok{bw_file <-}\StringTok{ }\NormalTok{q[[}\StringTok{"AH33458"}\NormalTok{]] }
+
+\NormalTok{chr10_ranges <-}\StringTok{ }\NormalTok{bw_file }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{get_genome_info}\NormalTok{() }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(seqnames }\OperatorTok{==}\StringTok{ "chr10"}\NormalTok{)}
+  
+\NormalTok{chr10_scores <-}\StringTok{ }\NormalTok{bw_file }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{read_bigwig}\NormalTok{(}\DataTypeTok{overlap_ranges =}\NormalTok{ chr10_ranges) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{set_genome_info}\NormalTok{(}\DataTypeTok{genome =} \StringTok{"hg19"}\NormalTok{)}
+\NormalTok{chr10_scores}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+#> GRanges object with 5789841 ranges and 1 metadata column:
+#>             seqnames                 ranges strand |              score
+#>                <Rle>              <IRanges>  <Rle> |          <numeric>
+#>         [1]    chr10         [    1, 60602]      * | 0.0422799997031689
+#>         [2]    chr10         [60603, 60781]      * |  0.163240000605583
+#>         [3]    chr10         [60782, 60816]      * |  0.372139990329742
+#>         [4]    chr10         [60817, 60995]      * |  0.163240000605583
+#>         [5]    chr10         [60996, 61625]      * | 0.0422799997031689
+#>         ...      ...                    ...    ... .                ...
+#>   [5789837]    chr10 [135524723, 135524734]      * |  0.144319996237755
+#>   [5789838]    chr10 [135524735, 135524775]      * |  0.250230014324188
+#>   [5789839]    chr10 [135524776, 135524784]      * |  0.427789986133575
+#>   [5789840]    chr10 [135524785, 135524806]      * |  0.730019986629486
+#>   [5789841]    chr10 [135524807, 135524837]      * |   1.03103005886078
+#>   -------
+#>   seqinfo: 25 sequences from hg19 genome
+\end{verbatim}
 
 \hypertarget{manipulation-of-ranges}{%
 \subsubsection{Manipulation of Ranges}\label{manipulation-of-ranges}}
@@ -322,6 +416,20 @@ upstream or downstream of the input. Unlike, the Bioconductor API,
 \emph{plyranges} makes it expclit via function calls whether to take
 into account the strand information of a \emph{Ranges} object.
 
+Returning to the Ranges object containing normalised coverage scores for
+the methylation data, we can filter to find the coordinates of the peak
+containing maximum coverage score. We can then find a 5000 nt region
+centered around the maximum position.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{chr10_max_score_region <-}\StringTok{ }\NormalTok{chr10_scores }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(score }\OperatorTok{==}\StringTok{ }\KeywordTok{max}\NormalTok{(score)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{anchor_center}\NormalTok{() }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{set_width}\NormalTok{(}\DecValTok{5000}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
 \hypertarget{overlapping-ranges}{%
 \subsubsection{Overlapping Ranges}\label{overlapping-ranges}}
 
@@ -341,8 +449,35 @@ coordinates of the query Ranges that overlap the subject Ranges and
 returns metadata of the overlapping query and subject Ranges. Finally,
 the left join performs a left outer join between the query and subject
 Ranges, it returns all genomic intervals from the query ranges, and
-returns missing values in metadata columns when there is no overlap. A
-user may also restrict or group by overlaps with the
+returns missing values in metadata columns when there is no overlap.
+
+The overlap innner join could be used to restrict the chromosome 10
+normalised coverage scores that are within the 5000nt region that
+contains the max peak on chromosome 10 (visualised in figure ()).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{peak_region <-}\StringTok{ }\NormalTok{chr10_scores }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{join_overlap_inner}\NormalTok{(., }
+\NormalTok{                     chr10_max_score_region }\OperatorTok{%>%}\StringTok{ }
+\StringTok{                       }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\NormalTok{score))}
+\NormalTok{ggbio}\OperatorTok{::}\KeywordTok{autoplot}\NormalTok{(peak_region, }
+                \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ score), }
+                \DataTypeTok{geom =} \StringTok{"blank"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_area}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ start))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+
+{\centering \includegraphics{paper_files/figure-latex/peak_region-1} 
+
+}
+
+\caption{Visualisation of peak coverage score accross 5000nt region of chromosome 10}\label{fig:peak_region}
+\end{figure}
+
+A user may also restrict or group by overlaps with the
 \texttt{filter\_by\_overlaps()}, \texttt{filter\_by\_non\_overlaps()}
 and \texttt{group\_by\_overlaps()}. All overlap methods can be modified
 with the \texttt{within} suffix (which changes the type of overlap from
@@ -366,9 +501,6 @@ of returning a Ranges, they pair up the subject and query Ranges objects
 into a DataFrame, alongside their metadata columns. This data structure
 is similar to the \emph{Pairs} data structure in the \emph{S4Vectors}
 package or the BED-PE file format.
-
-\hypertarget{non-standard-evaluation}{%
-\subsubsection{Non-standard evaluation}\label{non-standard-evaluation}}
 
 \hypertarget{results}{%
 \section{Results}\label{results}}
