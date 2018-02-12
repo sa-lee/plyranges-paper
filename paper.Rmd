@@ -100,6 +100,8 @@ as there multiple points of failure.
 
 ## Working with Ranges
 
+### Core verbs
+
 The _plyranges_ API exports the six core verbs from the _dplyr_ package
 and modifys them for use with simple _Ranges_ and _Genomic Ranges_. The
 verb `mutate()` takes a Ranges object and a set of name-value pairs
@@ -121,6 +123,8 @@ to variables in the Ranges object. This modifies the actions of `mutate()`,
 and `disjoin_ranges()`), so they are performed on each partition created by the
 grouping. 
 
+### Arithimetic 
+
 The API has an expressive algebra for performing arithmetic on Ranges via
 the verbs `set_width()` and `stretch()`. As the names suggest `set_width()`
 modifies the width of a Ranges object, while `stretch` extends the start and
@@ -132,6 +136,8 @@ all coordinates in a Ranges object or generate flanking regions from a Ranges
 object to the left, right, upstream or downstream of the input. Unlike, the
 Bioconductor API, _plyranges_ makes it expclit via function calls whether to
 take into account the strand information of a _Ranges_ object.
+
+### Overlapping Ranges
 
 A common operation to perform between two _Ranges_ objects is to find overlaps
 or nearest neighbours. The _plyranges_ API recasts these operations as 'joins'
@@ -162,16 +168,16 @@ the subject ranges when the query is a nearest neighbour of the subject. Like
 the overlap joins, these functions can modified with suffixes to find nearest
 neighbours that are left, right, upstream or downstream of the subject.
 
+The pairing operations, `pair_overlap()`, `pair_nearest()`, `pair_follow()`, 
+and `pair_precede()` are similar to the join operation but instead of returning
+a Ranges, they pair up the subject and query Ranges objects into a DataFrame,
+alongside their metadata columns. This data structure is similar to the _Pairs_
+data structure in the _S4Vectors_ package or the BED-PE file format. 
+<!--- should also create convience methods for grouping by pairs and pairing up, 
+unpairing, would also be useful for alignments too--->
 
+### Non-standard evaluation 
 
-
-and returns 
-
-- recasting overlapping/nearest etc as joins
-
-- split-apply-combine strategies (group_by + reduce/summarise/mutate/filter)
-
-- note on the NSE
 
 # Results 
 
