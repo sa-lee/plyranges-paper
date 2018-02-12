@@ -1,13 +1,18 @@
 ---
-title: Outline of plyranges a grammar of genomic data manipulation
-output:
-  bookdown::pdf_document2:
-    toc: false
-    number_sections: false
+output: github_document
 bibliography: references.bib
 link-citations: true
-
 ---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+# plyranges-paper
 
 Overview of structure, references and layout for the plyranges package paper. 
 
