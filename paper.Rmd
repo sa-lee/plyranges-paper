@@ -104,7 +104,9 @@ The _plyranges_ API exports the six core verbs from the _dplyr_ package
 and modifys them for use with simple _Ranges_ and _Genomic Ranges_. The
 verb `mutate()` takes a Ranges object and a set of name-value pairs
 and generates a new Ranges object that with modified or new metadata
-columns or modified core components (start, end, width, seqnames, strand). 
+columns or modified core components (start, end, width, seqnames, strand).
+The use of `mutate()` means that a user no longer needs knowledge of the 
+accessors of the Ranges object, as they can modify them in place.
 The `filter()` function takes a Ranges object and logical expressions and
 restricts Ranges object to where the logical expression evaluates to true.
 The `summarise()` function takes a Ranges object and a set of name-value pairs
@@ -130,6 +132,40 @@ all coordinates in a Ranges object or generate flanking regions from a Ranges
 object to the left, right, upstream or downstream of the input. Unlike, the
 Bioconductor API, _plyranges_ makes it expclit via function calls whether to
 take into account the strand information of a _Ranges_ object.
+
+A common operation to perform between two _Ranges_ objects is to find overlaps
+or nearest neighbours. The _plyranges_ API recasts these operations as 'joins'
+or 'pairing' operations. For overlaps, there are three join operations: 
+`join_overlap_intersect()`, `join_overlap_inner()` and `join_overlap_left()`
+which are shown in figure (). These operations consider any overlap between
+two input ranges and return any corresponding metadata from both Ranges objects
+as metadata. The intersect join takes the intersect of the start and end coordinates
+of overlapping intervals of the query and subject Ranges 
+(for GenomicRanges it also accounts for sequence name), when there is a overlap
+the metadata corresponding to the query and subject Ranges are returned. 
+Similarly, inner join takes the start and end coordinates of the query Ranges
+that overlap the subject Ranges and returns metadata of the overlapping query
+and subject Ranges. Finally, the left join performs a left outer join between
+the query and subject Ranges, it returns all genomic intervals from the query
+ranges, and returns missing values in metadata columns when there is no overlap.
+A user may also restrict or group by overlaps with the `filter_by_overlaps()`,
+`filter_by_non_overlaps()` and `group_by_overlaps()`. All overlap methods can
+be modified with the `within` suffix (which changes the type of overlap 
+from 'any' to 'within') or the `directed` suffix (which takes into account
+the strand of a GenomicRanges object.). 
+
+For nearest neighbours, the `plyranges` API provides `join_nearest()`, 
+`join_precede()`, and `join_follow()` functions. These functions are similar
+to the overlapping functions, in that they return the query ranges that are
+nearest (or precede or follow) the subject ranges and add metadata from
+the subject ranges when the query is a nearest neighbour of the subject. Like
+the overlap joins, these functions can modified with suffixes to find nearest
+neighbours that are left, right, upstream or downstream of the subject.
+
+
+
+
+and returns 
 
 - recasting overlapping/nearest etc as joins
 
