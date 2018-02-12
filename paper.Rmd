@@ -100,7 +100,21 @@ as there multiple points of failure.
 
 ## Working with Ranges
 
-### Core verbs
+### Construction and Import/Output
+
+The _plyranges_ API provides the methods `as_granges()` and `as_iranges()`
+for constructing Ranges from tabular data structures, such as data.frames in
+base R. These methods use non-standard evaluation so columns in a data.frame
+can be modified before a Ranges object is created. 
+
+The package also provides a consistent framework for reading and writing 
+files from and to common genomic data formats, using the `rtracklayer` package
+as a backend. The methods are implemented in the `read_/write_` family of 
+functions, currently _plyranges_ can read and write BAM, BED, BEDPE, 
+narrowPeaks, GFF/GTF, WIG and BigWig files.
+
+
+### Manipulation of Ranges 
 
 The _plyranges_ API exports the six core verbs from the _dplyr_ package
 and modifys them for use with simple _Ranges_ and _Genomic Ranges_. The
@@ -123,7 +137,7 @@ to variables in the Ranges object. This modifies the actions of `mutate()`,
 and `disjoin_ranges()`), so they are performed on each partition created by the
 grouping. 
 
-### Arithimetic 
+### Arithimetic on Ranges
 
 The API has an expressive algebra for performing arithmetic on Ranges via
 the verbs `set_width()` and `stretch()`. As the names suggest `set_width()`
@@ -187,9 +201,10 @@ The _plyranges_ package is avaiable on the Bioconductor project website
 [https://bioconductor.org](https://bioconductor.org) or can be accessed
 via Github [https://github.com/sa-lee/plyranges](https://github.com/sa-lee/plyranges).
 We aim to continue developing the `plyranges` package and extend it for use
-with more complex data structures outside of genomics such as the 
-_SummarizedExperiment_ class. As the `plyranges` interface encourages tidy data 
-practices it also integrates well with the grammar of graphics, we aim to use
-it for the visualisation of genomic ranges.
+with more complex data structures  such as the 
+_SummarizedExperiment_ class, which can be used for analysing transcriptomic
+and variant data. As the `plyranges` interface encourages tidy data 
+practices it integrates well with the principles of the grammar of graphics, 
+we aim to use it for the visualisation of genomic ranges.
 
 # References {#references .unnumbered}
