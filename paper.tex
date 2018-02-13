@@ -232,12 +232,11 @@ Language (GQL) and its distributed implementation GenAp which use an
 SQL-like syntax for fast retrieval of information from genomic databases
 and BAM files {[}3{]}; {[}4{]}. Another example is the Genometric Query
 Language (GMQL) which implements a relational algebra for combining big
-genomic datasets {[}5{]}. The command line application BEDtools develops
-an extensive algebra for performing arithmetic between two or more sets
-of genomic regions {[}6{]}. It also has a python interface which
-simplifies construcing scripts for performing analyses based on BEDTools
-{[}7{]}.\footnote{probably should also mention something about their
-  cons, and more detaiil}
+genomic datasets {[}5{]}.\\
+The command line application BEDtools develops an extensive algebra for
+performing arithmetic between two or more sets of genomic regions
+{[}6{]}. It also has a python interface which simplifies constructing
+scripts for performing analyses based on BEDTools {[}7{]}.
 
 The abstraction provided by the \emph{Ranges} data structures aligns
 with the concept of tidy data {[}8{]}. The tidy data pattern is useful
@@ -298,7 +297,12 @@ away. Method chaining via the pipe operator can also be difficult to
 debug, as there multiple points of failure.
 
 In order to provide a compatible API with \emph{dplyr}, \emph{plyranges}
-makes use of non-standard evaluation in R via the \emph{rlang} package.
+makes extensive use of non-standard evaluation in R via the \emph{rlang}
+package. Simply, this means that compuations are performed and evaluated
+in the context of the Ranges objects, which emphasises the interactive
+nature of the API. This has the disadvantage that programming with
+\emph{plyranges} becomes more difficult because a user needs to capture
+expressions inside function calls and then unquote them.
 
 \hypertarget{working-with-ranges}{%
 \subsection{Working with Ranges}\label{working-with-ranges}}
@@ -309,12 +313,12 @@ Import/Output}\label{construction-and-importoutput}}
 
 The \emph{plyranges} API provides the methods \texttt{as\_granges()} and
 \texttt{as\_iranges()} for constructing Ranges from tabular data
-structures, such as data.frames in base R. These methods use
-non-standard evaluation so columns in a data.frame can be modified
-before a Ranges object is created. The API also has convienence methods
-for annotating or extracting annotations from Genomic Ranges objects
-with the \texttt{set\_genome\_info()} and \texttt{get\_genome\_info()}
-functions.
+structures, such as the \emph{data.frame} in base R. These methods use
+non-standard evaluation so columns in a \emph{data.frame} can be
+modified before a \emph{Ranges} object is created. The API also has
+convienence methods for annotating or extracting annotations from
+Genomic Ranges objects with the \texttt{set\_genome\_info()} and
+\texttt{get\_genome\_info()} functions.
 
 There is a consistent framework for reading and writing files from and
 to common genomic data formats, using the \texttt{rtracklayer} package
@@ -326,11 +330,9 @@ As an example, we use the Bioconductor package AnnotationHub to search
 for BigWig files from ChIP-Seq experiments from the Human Epigenome
 Roadmap project. We choose to focus on assays for primary T CD8+ memory
 cells from peripheral blood. We can then read the BigWig file
-corresponding to the H3K27Me3 methylation mark over chromosome 10. First
-we gather the BigWig file and extract its annotation information and
-filter it to chromosome 10. Then we read the BigWig file only extracting
-scores if they overlap chromosome 10. We then add annotation information
-to ensure we know we are working with the hg19 genome build.
+corresponding to the H3 lysine 27 trimethylation (H3K27Me3) methylation
+mark over chromosome 10. First we gather the BigWig file and extract its
+annotation information and filter it to chromosome 10.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -344,7 +346,15 @@ to ensure we know we are working with the hg19 genome build.
 \NormalTok{chr10_ranges <-}\StringTok{ }\NormalTok{bw_file }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{get_genome_info}\NormalTok{() }\OperatorTok{%>%}
 \StringTok{  }\KeywordTok{filter}\NormalTok{(seqnames }\OperatorTok{==}\StringTok{ "chr10"}\NormalTok{)}
-  
+\end{Highlighting}
+\end{Shaded}
+
+Then we read the BigWig file only extracting scores if they overlap
+chromosome 10. We then add annotation information to ensure we know we
+are working with the hg19 genome build.
+
+\begin{Shaded}
+\begin{Highlighting}[]
 \NormalTok{chr10_scores <-}\StringTok{ }\NormalTok{bw_file }\OperatorTok{%>%}
 \StringTok{  }\KeywordTok{read_bigwig}\NormalTok{(}\DataTypeTok{overlap_ranges =}\NormalTok{ chr10_ranges) }\OperatorTok{%>%}
 \StringTok{  }\KeywordTok{set_genome_info}\NormalTok{(}\DataTypeTok{genome =} \StringTok{"hg19"}\NormalTok{)}
@@ -394,9 +404,38 @@ The \texttt{arrange()} function sorts a Ranges object by named
 variables. The \texttt{group\_by()} function creates an implicit
 grouping of Ranges object according to variables in the Ranges object.
 This modifies the actions of \texttt{mutate()}, \texttt{summarise()} and
-\texttt{filter()} (and also the set operations,
-\texttt{reduce\_ranges()} and \texttt{disjoin\_ranges()}), so they are
-performed on each partition created by the grouping.
+\texttt{filter()}, so they are performed on each partition created by
+the grouping. The \texttt{group\_by()} operation acts as a replacement
+for the \emph{GenomicRangesList} class in the original
+\emph{GenomicRanges} API.
+
+The \emph{plyranges} API introduces additional summary verbs,
+\texttt{reduce\_ranges()} and \texttt{disjoin\_ranges()}that return
+Ranges objects after being returned. The \texttt{reduce\_ranges()}
+operation merges overlapping and neighbour ranges, while
+\texttt{disjoin\_ranges()} expands ranges by taking the union of end
+points.
+
+The \texttt{reduce\_ranges()} operation could be used to find coverage
+peaks accross chromosome 10. We can manually set a threshold to restrict
+genomic regions to have a coverage score of greater than 8, and then
+merge those regions and compute the maximum coverage over all the
+regions that were reduced.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{all_peaks <-}\StringTok{ }\NormalTok{chr10_scores }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(score }\OperatorTok{>}\StringTok{ }\DecValTok{8}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{reduce_ranges}\NormalTok{(}\DataTypeTok{score =} \KeywordTok{max}\NormalTok{(score))}
+\end{Highlighting}
+\end{Shaded}
+
+The combination of these verbs together encapsulate most operations that
+can be performed in the original \emph{IRanges} and \emph{GenomicRanges}
+packages without the user be exposed to new classes. In those packages
+to perform the above operation requires users to understand what an run
+length encoding object and views object means and perform additional
+manipulations to return the result back to a \emph{Ranges}.
 
 \hypertarget{arithimetic-on-ranges}{%
 \subsubsection{Arithimetic on Ranges}\label{arithimetic-on-ranges}}
@@ -419,7 +458,8 @@ into account the strand information of a \emph{Ranges} object.
 Returning to the Ranges object containing normalised coverage scores for
 the methylation data, we can filter to find the coordinates of the peak
 containing maximum coverage score. We can then find a 5000 nt region
-centered around the maximum position.
+centered around the maximum position by anchoring and modifying the the
+width.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -438,22 +478,34 @@ find overlaps or nearest neighbours. The \emph{plyranges} API recasts
 these operations as `joins' or `pairing' operations. For overlaps, there
 are three join operations: \texttt{join\_overlap\_intersect()},
 \texttt{join\_overlap\_inner()} and \texttt{join\_overlap\_left()} which
-are shown in figure (). These operations consider any overlap between
-two input ranges and return any corresponding metadata from both Ranges
-objects as metadata. The intersect join takes the intersect of the start
-and end coordinates of overlapping intervals of the query and subject
-Ranges (for GenomicRanges it also accounts for sequence name), when
-there is a overlap the metadata corresponding to the query and subject
-Ranges are returned. Similarly, inner join takes the start and end
-coordinates of the query Ranges that overlap the subject Ranges and
-returns metadata of the overlapping query and subject Ranges. Finally,
-the left join performs a left outer join between the query and subject
-Ranges, it returns all genomic intervals from the query ranges, and
-returns missing values in metadata columns when there is no overlap.
+are shown in figure (\ref{fig:olap}).
+
+\begin{figure}
+
+{\centering \includegraphics{paper_files/figure-latex/olap-1} 
+
+}
+
+\caption{The three overlap joins: the query and subject ranges are coloured by their metadata. When an overlap is performed the resulting range is filled by the query metadata and the metadata from the subject colours the outside of the range.}\label{fig:olap}
+\end{figure}
+
+These operations consider any overlap between two input ranges and
+return any corresponding metadata from both Ranges objects as metadata.
+The intersect join takes the intersect of the start and end coordinates
+of overlapping intervals of the query and subject Ranges (for
+GenomicRanges it also accounts for sequence name), when there is a
+overlap the metadata corresponding to the query and subject Ranges are
+returned. Similarly, inner join takes the start and end coordinates of
+the query Ranges that overlap the subject Ranges and returns metadata of
+the overlapping query and subject Ranges. Finally, the left join
+performs a left outer join between the query and subject Ranges, it
+returns all genomic intervals from the query ranges, and returns missing
+values in metadata columns when there is no overlap.
 
 The overlap innner join could be used to restrict the chromosome 10
 normalised coverage scores that are within the 5000nt region that
-contains the max peak on chromosome 10 (visualised in figure ()).
+contains the max peak on chromosome 10 (visualised in figure
+\ref{fig:peak-viz}).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -461,20 +513,16 @@ contains the max peak on chromosome 10 (visualised in figure ()).
 \StringTok{  }\KeywordTok{join_overlap_inner}\NormalTok{(., }
 \NormalTok{                     chr10_max_score_region }\OperatorTok{%>%}\StringTok{ }
 \StringTok{                       }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\NormalTok{score))}
-\NormalTok{ggbio}\OperatorTok{::}\KeywordTok{autoplot}\NormalTok{(peak_region, }
-                \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ score), }
-                \DataTypeTok{geom =} \StringTok{"blank"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{geom_area}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ start))}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{figure}
 
-{\centering \includegraphics{paper_files/figure-latex/peak_region-1} 
+{\centering \includegraphics{paper_files/figure-latex/peak-viz-1} 
 
 }
 
-\caption{Visualisation of peak coverage score accross 5000nt region of chromosome 10}\label{fig:peak_region}
+\caption{Visualisation of normalised coverage scores accross a 5000nt region of chromosome 10 from H3K27Me3 ChIP-Seq assay from the Human Epigenome Roadmap project.}\label{fig:peak-viz}
 \end{figure}
 
 A user may also restrict or group by overlaps with the
@@ -505,6 +553,12 @@ package or the BED-PE file format.
 \hypertarget{results}{%
 \section{Results}\label{results}}
 
+\begin{itemize}
+\tightlist
+\item
+  Redo an analysis in https://www.nature.com/articles/nature14248
+\end{itemize}
+
 \hypertarget{availablilty-and-future-work}{%
 \section{Availablilty and Future
 Work}\label{availablilty-and-future-work}}
@@ -517,7 +571,7 @@ data structures such as the \emph{SummarizedExperiment} class, which can
 be used for analysing transcriptomic and variant data. As the
 \texttt{plyranges} interface encourages tidy data practices it
 integrates well with the principles of the grammar of graphics, we aim
-to use it for the visualisation of genomic ranges.
+to use it for the visualisation of multimodal biological datasets.
 
 \hypertarget{references}{%
 \section*{References}\label{references}}
