@@ -38,20 +38,23 @@ bw_file <- q[["AH33458"]]
 ```
 # Introduction
 
-Genomic data may be naturally represented as sets of pairs of integers 
-corresponding to the start and end points of sequences. Further information
-such as strandedness and chromosome name may be added to these sets to 
-provide biological context. Because of the flexibility of this representation 
-supplemental information such as measurements obtained from an experimental 
-assay or annotations from a genome database can be joined to their relevant
-sequences. In the Bioconductor/R packages `IRanges` and `GenomicRanges` these 
+There is a large variety of genomics data available to the modern biologist
+from sequencing assays to public collections: annotations of genomic features
+such as genes or exons for reference genomes, coverage vectors in the BigWig
+format, peaks called from ChIP-Seq experiments and many more.
+All of these hetergenous data types can be naturally represented as annotated sets of 
+integer pairs, corresponding to the start and end points of sequences, along with 
+strandedness and chromosome location to provide biological context. Measurements
+or metadata can be included as additional features on their relevant sequences. 
+As an example agene can be represented with its coordinates, along with its 
+identifier and the identifiers of its exons; or an RNA-seq experiment may be
+represented as sets of genes with a matching count column.
+
+
+In the Bioconductor/R packages `IRanges` and `GenomicRanges` these 
 representations have been implemented as a suite of data structures called
 _Ranges_ @Lawrence2013-wg; @Huber2015-ei. These data structures cover 
-many common data types  encountered in bioinformatics analyses. For
-example, a gene can be represented with its 
-coordinates, along with its identifier and the identifiers of its exons; or
-an RNA-seq experiment may be represented as sets of genes with a matching count 
-column.
+many common data types  encountered in bioinformatics analyses. 
 
 The Bioconductor infrastructure for computing with genomic ranges are highly 
 efficient and powerful, however the application programming interface (API) for 
