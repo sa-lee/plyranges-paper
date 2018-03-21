@@ -38,17 +38,16 @@ bw_file <- q[["AH33458"]]
 ```
 # Introduction
 
-There is a large variety of genomics data available to the modern biologist
-from sequencing assays to public collections: annotations of genomic features
-such as genes or exons for reference genomes, coverage vectors in the BigWig
-format, peaks called from ChIP-Seq experiments and many more.
-All of these hetergenous data types can be naturally represented as annotated sets of 
-integer pairs, corresponding to the start and end points of sequences, along with 
-strandedness and chromosome location to provide biological context. Measurements
-or metadata can be included as additional features on their relevant sequences. 
-As an example agene can be represented with its coordinates, along with its 
-identifier and the identifiers of its exons; or an RNA-seq experiment may be
-represented as sets of genes with a matching count column.
+There is a large variety of genomics data available to the scientific community,
+ranging from highly specific sequencing assays to publicly availble collections.
+These datasets similarly contain a wide variety of features: annotations of 
+genomic features such as genes or exons for reference genomes, large coverage 
+vectors, peaks called from ChIP-Seq experiments and many more. A modern biologist
+is expected to be able to reason about, combine and wrangle these heterogenous
+data sources in order to answer questions about their experimental hypotheses.
+Abstractions in the forms of data representation and software interfaces are
+key factors in inhibiting or enabling a biologist to construct reproducible data workflows
+to answer their research questions. 
 
 Many domain specific languages (DSLs) have been created to process and reason
 about heterogenous genomics data. Broadly, they are implemented as either
@@ -76,7 +75,14 @@ involved. Due to the OO interface each abstraction will behave slightly
 differently for any given generic method. There is a cognitive load on the user
 to understand the appropriate context for each abstraction. An alternative approach
 is to recognise that most genomic data analysis tasks can be performed with 
-data structures that naturally represent genomic intervals.
+data structures that naturally represent genomic intervals. That is, genomics
+data can be represented as sets of integer pairs, where each pair has a start
+and an end coordianate, along with strings representing strand and chromosome 
+location. Measurements or metadata can be included as additional annotations
+on each pair.  As an example. a gene can be represented with its coordinates, along with its 
+identifier and the identifiers of its exons; or an RNA-seq experiment may be
+represented as sets of genes with a matching count column.
+
 
 This natural abstraction aligns with the concept of tidy data @Wickham2014-jc. 
 A tidy dataset is defined to be to a tabular
@@ -95,25 +101,23 @@ The package defines a consistent syntax and style for transforming tabular data 
 functions that are named as verbs. Each function performs an action on the data
 set and is cohesive and endomorphic. Cohesion means that each function performs
 a singular task and has no side-effects, while endomorphism means a function
-call returns the same type of object as its input.  
+call returns the same type of object as its input. Taken together these
+features enable a user to write human readable analysis workflows.
 
-Then the last paragraph (already pretty close) states that:
-
-    we aim to simplify the interface to the most fundamental Ranges data structures, which we must reuse for the reasons stated above,
-    it is possible to align the Ranges data structures with the tabular notions of the dplyr API
-    so we will extend dplyr to incorporate genomic notions
-
-We have created a DSL called `plyranges` that uses the existing
-`IRanges` and `GenomicRanges` packages in Bioconductor as a back-end. Our API 
-still has the speed and efficiency of these packages but
-with a consistent interface. The API also extends the grammar elements in `dplyr` 
-for performing genomic specific manipulations such as finding overlapping 
-regions or nearest neighbour regions between genomic intervals. 
-The _plyranges_ DSL is specifically designed to enable fast interactive 
-analysis of _Ranges_ objects but can also be used for scripting 
-genomic data workflows.
+We have created a DSL called `plyranges` that is directly motivated by the design
+of `dplyr` but extends its  grammar to incorporate features of genomics data.
+Our interface uses the existing Bioconductor packages `IRanges` and 
+`GenomicRanges` but simplifies them by only exposing tidy genomic interval
+data structures to the user. Hence, we can encapsulate the features of the 
+of the `dplyr` API while performing genomic specific transformations 
+such as finding overlapping  regions or nearest neighbour regions between 
+genomic intervals.  The `plyranges` DSL is designed to enable fast interactive 
+analysis of genomics but also enables the creation of reproducible genomic 
+data workflows.
 
 # Design and Implementation
+
+<--- need to formally introduce the Ranges classes now --->
 
 We have designed the API to be fluent. Every function call corresponds to an
 action on a _Ranges_ object (they are named verbs) and where possible
