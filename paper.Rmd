@@ -117,7 +117,34 @@ data workflows.
 
 # Design and Implementation
 
-<--- need to formally introduce the Ranges classes now --->
+The `plyranges` DSL is built on two fundamental data structures defined
+by the `IRanges` and `GenomicRanges` packages called _IntegerRanges_
+and _GenomicRanges_. Unless otherwise specified, throughout the paper
+we refer to either of these data structures as _Ranges_. In its simplest form 
+the data model for an _IntegerRanges_ object is defined as a table with
+$n$ rows, where each row contains a closed interval of two integers:
+
+$$
+\textit{IntegerRange} := \{ \left[\text{start}_i, \text{end}_{i}\right]  : i = 1\dots n \}.
+$$
+In this form an _IntegerRanges_ object has three core columns: a start, an
+end, and the width of the interval. The _GenomicRanges_ data
+model has additional semantics providing biological context, strand and 
+sequence name (seqname), as well as containing an _IntegerRanges_ object.
+
+$$
+\textit{GenomicRange} := \{  \{\text{seqname}_i, \left[\text{start}_i, \text{end}_{i}\right] , \text{strand}_i\}  : i = 1\dots n \}.
+$$
+A _GenomicRanges_ object can have an additional property that provides
+annotation for each sequence name over a genome. This contstrains the the 
+start and end points for a given sequence to lie inside the bounds
+of the genome space. Additional values can be bound to the bare _IntegerRanges_ or _GenomicRanges_ and form metadata columns.
+
+By definition the _Ranges_ class encapsulate tidy data prinicples because
+every row corresponds to a sequence and every column corresponds to a variable.
+Hence, we have designed the `plyranges` DSL to have the grammar
+and principles of `dplyr`: fluency, consistency, cohesion and endomorphism. 
+
 
 We have designed the API to be fluent. Every function call corresponds to an
 action on a _Ranges_ object (they are named verbs) and where possible
