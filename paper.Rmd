@@ -143,21 +143,27 @@ of the genome space. Additional values can be bound to the bare _IntegerRanges_ 
 By definition the _Ranges_ class encapsulate tidy data prinicples because
 every row corresponds to a sequence and every column corresponds to a variable.
 Hence, we have designed the `plyranges` DSL to have the grammar
-and principles of `dplyr`: fluency, consistency, cohesion and endomorphism. 
+and design principles of `dplyr`: fluency, consistency, cohesion and endomorphism. 
 
-
-We have designed the API to be fluent. Every function call corresponds to an
-action on a _Ranges_ object (they are named verbs) and where possible
-functions have few arguments. Each verb is constructed
+To promote fluency we have designed every function call to perform an
+action on a _Ranges_ object and where possible
+functions have few arguments. Each function is named after a verb and is designed
 to enable a tab completion based workflow. Both of these aspects reduce the 
 cognitive load on a new user since most manipulations can be performed with a 
-vocabulary of several verbs, rather than having to memorise functions with many 
-arguments that are nouns (as is required in the existing Bioconductor packages). 
-This is also has the advantage of allowing users to write human readable code
-because verbs describe what the code is doing rather than how its doing it.
+vocabulary of several verbs, rather than having to memorise functions (that
+are named as nouns) with many arguments (which is required in the existing Bioconductor packages). Workflows can be composed by chaining verbs together into
+'sentences' via the forward pipe operator,`%>%` (exported from the R package `magrittr` @R-magrittr). Overall, this allows users to write human readable code
+because workflows describe what the code is doing rather than how its doing it.
 
-Workflows can be composed by chaining verbs together via the forward pipe operator,`%>%` 
-(exported from the R package _magrittr_ @R-magrittr). This is possible because every 
+In order to provide a compatible API with _dplyr_, _plyranges_ makes extensive 
+use of non-standard evaluation in R via the _rlang_ package @R-rlang. Simply, this
+means that computations are performed and evaluated in the context of the 
+_Ranges_ objects, which emphasises the interactive nature of the API. This has
+the disadvantage that programming with _plyranges_ becomes more difficult 
+because a user needs to capture expressions inside function calls and then
+unquote them.
+
+ This is possible because every 
 function call is an endomorphism: when the input is _Ranges_ object the output
 will also be a _Ranges_ object. One advantage of endomorphism is that it 
 does not  require any additional learning of classes beyond _Ranges_ and 
@@ -168,13 +174,7 @@ are exposed to low-level features of its API which _plyranges_ abstracts
 away. Method chaining via the pipe operator can also be difficult to debug,
 as there multiple points of failure.
 
-In order to provide a compatible API with _dplyr_, _plyranges_ makes extensive 
-use of non-standard evaluation in R via the _rlang_ package @R-rlang. Simply, this
-means that computations are performed and evaluated in the context of the 
-_Ranges_ objects, which emphasises the interactive nature of the API. This has
-the disadvantage that programming with _plyranges_ becomes more difficult 
-because a user needs to capture expressions inside function calls and then
-unquote them.
+
 <!--- need to make this clearer? --->
 
 ## Actions on Ranges 
