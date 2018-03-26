@@ -416,11 +416,12 @@ ggbio::autoplot(peak_region,
 The _plyranges_ package is available on the Bioconductor project website 
 [https://bioconductor.org](https://bioconductor.org) or can be accessed
 via Github [https://github.com/sa-lee/plyranges](https://github.com/sa-lee/plyranges).
-We aim to continue developing the _plyranges_ package and extend it for use
+We aim to continue developing the `plyranges` package and extend it for use
 with more complex data structures  such as the 
 _SummarizedExperiment_ class, which can be used for analysing transcriptomic
-and variant data. As the _plyranges_ interface encourages tidy data 
+and variant data. As the `plyranges` interface encourages tidy data 
 practices it integrates well with the principles of the grammar of graphics, 
-we aim to use it for the visualisation of multimodal biological datasets.
+we aim to use it to prepare data for the visualisation of multimodal biological 
+datasets.
 
 # References {#references .unnumbered}
