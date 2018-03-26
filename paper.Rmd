@@ -138,8 +138,10 @@ $$
 A _GenomicRanges_ object can have an additional property that provides
 annotation for each sequence name over a genome. This contstrains the the 
 start and end points for a given sequence to lie inside the bounds
-of the genome space. Additional values can be bound to the bare 
-_IntegerRanges_ or _GenomicRanges_ to form metadata columns.
+of the genome space. Also note that _GenomicRanges_ have one-based 
+coordinates rather than zero-based coordinates.  Additional measurements
+or annotations can be bound to the bare _IntegerRanges_ or _GenomicRanges_ to
+form metadata columns.
 
 By definition the _Ranges_ class encapsulate tidy data prinicples because
 every row corresponds to a sequence and every column corresponds to a variable.
@@ -162,17 +164,24 @@ functions can be difficult to debug.
 ## Fluency 
 
 We have designed every function to perform a single
-action on a _Ranges_ object. The `plyranges` DSL implments the core verbs from the _dplyr_ package
+action on a _Ranges_ object. The `plyranges` DSL implments the core verbs from the `dplyr` package
 and implements context specific verbs for transforming _Ranges_ objects (described in
 table ). Each verb preserves the semantics of _Ranges_ object and via
 duck typing works with derivatives of the _Ranges_ class. 
 Both of these aspects reduce the cognitive load on a new user since most 
 manipulations can be performed with a  vocabulary of several verbs, rather 
-than having to memorise function names that are nouns. Workflows can be composed
-by chaining verbs together into 'sentences' via the forward pipe operator,`%>%` 
-(exported from the R package `magrittr` @R-magrittr), which can be read as the 
-word 'then'. Overall, this  allows users to write human readable code because 
-workflows describe what the code is doing rather than how its doing it.
+than having to memorise function names that are nouns. Moreover, this approach 
+strongly constrasts the `GenomicRanges/IRanges` OO interface, which emphasises 
+the use of setter and getter methods. In that interface, core components and 
+metadata are updated via replacement methods (requiring knowledge of the
+class components), while our interface requires only a single call to `mutate()`
+to perform the modification. 
+
+Workflows can be composed by chaining verbs together into 'sentences' via the 
+forward pipe operator,`%>%`  (exported from the R package `magrittr` 
+@R-magrittr), which can be read as the word 'then'. Overall, this  allows users 
+to write human readable code because workflows describe what the code is doing 
+rather than how its doing it.
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
 library(tibble)
@@ -189,6 +198,7 @@ feature_tbl <- tribble(
 )
 ```
 
+ 
 
 ## Consistency 
 
