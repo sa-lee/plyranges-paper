@@ -138,75 +138,59 @@ $$
 A _GenomicRanges_ object can have an additional property that provides
 annotation for each sequence name over a genome. This contstrains the the 
 start and end points for a given sequence to lie inside the bounds
-of the genome space. Additional values can be bound to the bare _IntegerRanges_ or _GenomicRanges_ and form metadata columns.
+of the genome space. Additional values can be bound to the bare 
+_IntegerRanges_ or _GenomicRanges_ to form metadata columns.
 
 By definition the _Ranges_ class encapsulate tidy data prinicples because
 every row corresponds to a sequence and every column corresponds to a variable.
 Hence, we have designed the `plyranges` DSL to have the grammar
-and design principles of `dplyr`: fluency, consistency, cohesion and endomorphism. 
+and design principles of `dplyr`: fluency, consistency, cohesion and 
+endomorphism. All of these principles are discussed with respect to the 
+_Ranges_ data model below. Where possible we contrast our design to the existing
+Bioconductor infrastructure.
 
-To promote fluency we have designed every function call to perform an
-action on a _Ranges_ object and where possible
-functions have few arguments. Each function is named after a verb and is designed
-to enable a tab completion based workflow. Both of these aspects reduce the 
-cognitive load on a new user since most manipulations can be performed with a 
-vocabulary of several verbs, rather than having to memorise functions (that
-are named as nouns) with many arguments (which is required in the existing Bioconductor packages). Workflows can be composed by chaining verbs together into
-'sentences' via the forward pipe operator,`%>%` (exported from the R package `magrittr` @R-magrittr). Overall, this allows users to write human readable code
-because workflows describe what the code is doing rather than how its doing it.
-
-In order to provide a compatible API with _dplyr_, _plyranges_ makes extensive 
-use of non-standard evaluation in R via the _rlang_ package @R-rlang. Simply, this
+A caveat to constructing a compatible API with `dplyr` is that 
+`plyranges` makes extensive use of non-standard evaluation in R
+(achieved via the `rlang` package @R-rlang). Simply, this
 means that computations are performed and evaluated in the context of the 
 _Ranges_ objects, which emphasises the interactive nature of the API. This has
-the disadvantage that programming with _plyranges_ becomes more difficult 
-because a user needs to capture expressions inside function calls and then
-unquote them.
-
- This is possible because every 
-function call is an endomorphism: when the input is _Ranges_ object the output
-will also be a _Ranges_ object. One advantage of endomorphism is that it 
-does not  require any additional learning of classes beyond _Ranges_ and 
-the _DataFrame_ classes. This strongly deviates from the design of 
-the _Ranges_ Bioconductor packages, where many methods return a new class
-upon return. The Bioconductor design enables efficient computing as users
-are exposed to low-level features of its API which _plyranges_ abstracts
-away. Method chaining via the pipe operator can also be difficult to debug,
-as there multiple points of failure.
+the disadvantage that programming with `plyranges` becomes more difficult 
+because a user needs to know about non-standard evaluation and user defined
+functions can be difficult to debug.
 
 
-<!--- need to make this clearer? --->
+## Fluency 
 
-## Actions on Ranges 
+We have designed every function to perform a single
+action on a _Ranges_ object. The `plyranges` DSL implments the core verbs from the _dplyr_ package
+and implements context specific verbs for transforming _Ranges_ objects (described in
+table ). Each verb preserves the semantics of _Ranges_ object and via
+duck typing works with derivatives of the _Ranges_ class. 
+Both of these aspects reduce the cognitive load on a new user since most 
+manipulations can be performed with a  vocabulary of several verbs, rather 
+than having to memorise function names that are nouns. Workflows can be composed
+by chaining verbs together into 'sentences' via the forward pipe operator,`%>%` 
+(exported from the R package `magrittr` @R-magrittr), which can be read as the 
+word 'then'. Overall, this  allows users to write human readable code because 
+workflows describe what the code is doing rather than how its doing it.
 
-The _plyranges_ API exports the six core verbs from the _dplyr_ package
-and modifies them for use with _Ranges_ objects. The
-verb `mutate()` takes a Ranges object and a set of name-value pairs
-and generates a new Ranges object that with modified or new metadata
-columns or modified core components (start, end, width, seqnames, strand).
-The use of `mutate()` means that a user no longer needs knowledge of the 
-accessors of the Ranges object, as they can modify them in place.
-The `filter()` function takes a Ranges object and logical expressions and
-restricts Ranges object to where the logical expression evaluates to true.
-The `summarise()` function takes a Ranges object and a set of name-value pairs
-and aggregates the Ranges according to functions evaluated in the name-value pairs.
-As `summarise()` is an aggregation it may break the structure of the of a Ranges
-object, hence it returns a _DataFrame_ object.
-The `select()` function determines
-which metadata columns are returned and the order they are returned in. The 
-`arrange()` function sorts a Ranges object by named variables. 
-The `group_by()` function creates an implicit grouping of Ranges object according
-to variables in the Ranges object. This modifies the actions of `mutate()`,
-`summarise()` and `filter()`, so they are performed on each partition created 
-by the grouping. The `group_by()` operation acts as a replacement for 
-the _GenomicRangesList_ class in the original _GenomicRanges_ API.
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+library(tibble)
+feature_tbl <- tribble(
+  ~Verb, ~Action, ~Description,
+  "`mutate()`", "modifies columns", "Takes a _Ranges_ object and a set of name-value pairs and generates a new _Ranges_ object that with modified or new metadata columns or modified core components (start, end, width, seqnames, strand).",
+ "`filter()`", "subset rows", "Takes a _Ranges_ object and a set of logical expressions and restricts the _Ranges_ object to where all logical expressions are true.",
+ "`summarise()`", "aggregate one or more columns by a function", "Takes a _Ranges_ object and a set of name-value pairs and aggregates the _Ranges_ according to functions evaluated in the name-value pairs.",
+"`group_by()`", "partition a _Ranges_ object by a column", "Create an implicit grouping of _Ranges_ object by one or more columns. This modifies the actions of verbs, so they are performed on each partition created by the grouping.",
+"`select()`", "select columns of a _Ranges_ objects", "Drop or reorder metadata columns.",
+"`arrange()`", "sort a _Ranges_ object by columns", "Sort a _Ranges_ object by named variables",
+"`disjoin_ranges()`", "aggregate one more columns of a _Ranges_ object over the union of end coordinates", "Takes a _Ranges_ object and a set of name-value pairs and expands the _Ranges_ object by taking the union of end coordinates. For each row that was included to form the final union, the aggregation function defined by a name-value pair is called.",
+"`reduce_ranges()`", "aggregate one more columns of a _Ranges_ object by merging overlapping and neighbouring ranges.", "Takes a _Ranges_ object and a set of name-value pairs and reduces the _Ranges_ object by merging overlapping and neighouring ranges. For each row that was included to form merged range, the aggregation function defined by a name-value pair is called."
+)
+```
 
-The _plyranges_ API introduces additional summary verbs, `reduce_ranges()`
-and `disjoin_ranges()`that return Ranges objects after being returned. The
-`reduce_ranges()` operation merges overlapping and neighbour ranges, while
-`disjoin_ranges()` expands ranges by taking the union of end points. 
 
-## Arithimetic on Ranges
+## Consistency 
 
 The _plyranges_ API has an expressive algebra for performing arithmetic on Ranges via
 the verbs `set_width()` and `stretch()`. As the names suggest `set_width()`
@@ -219,6 +203,47 @@ all coordinates in a Ranges object or generate flanking regions from a Ranges
 object to the left, right, upstream or downstream of the input. Unlike, the
 Bioconductor API, _plyranges_ makes it explicit via function calls whether to
 take into account the strand information of a _Ranges_ object.
+
+
+The methods `as_granges()` and `as_iranges()`
+for constructing _Ranges_ from tabular data structures, such as the _data.frame_ in
+base R. These methods use non-standard evaluation so columns in a _data.frame_
+can be modified before a _Ranges_ object is created. The API also has
+convenience methods for annotating or extracting annotations from _GRanges_
+objects with the `set_genome_info()` and `get_genome_info()` functions.
+
+There is a consistent framework for reading and writing 
+files from and to common genomic data formats, using the _rtracklayer_ package
+as a back-end @Lawrence2009-nt. The methods are implemented in the `read_/write_` family of 
+functions, currently _plyranges_ can read and write BAM, BED, BEDPE, 
+narrowPeaks, GFF/GTF, WIG and BigWig files. 
+
+## Endomorphism
+
+ (that
+are named as nouns) with many arguments (which is required in the existing 
+Bioconductor packages)
+ This is possible because every 
+function call is an endomorphism: when the input is _Ranges_ object the output
+will also be a _Ranges_ object. One advantage of endomorphism is that it 
+does not  require any additional learning of classes beyond _Ranges_ and 
+the _DataFrame_ classes. This strongly deviates from the design of 
+the _Ranges_ Bioconductor packages, where many methods return a new class
+upon return. The Bioconductor design enables efficient computing as users
+are exposed to low-level features of its API which _plyranges_ abstracts
+away. Method chaining via the pipe operator can also be difficult to debug,
+as there multiple points of failure.
+
+The combination of verbs we have defined above cover most operations that
+can be performed in the original _IRanges_ and _GenomicRanges_ packages
+without the user being exposed to new classes. In those packages to perform
+most operations requires users to learn many classes and perform 
+additional manipulations to return the results of their computation back to a
+_Ranges_ object.
+
+
+## Cohesion
+
 
 ## Overlapping Ranges
 
@@ -300,27 +325,7 @@ a _Ranges_, they pair up the subject and query _Ranges_ objects into a _DataFram
 alongside their metadata columns. This data structure is similar to the _Pairs_
 data structure in the _S4Vectors_ @R-S4vectors package or the BED-PE file format. 
 
-The combination of verbs we have defined above encapsulate all operations that
-can be performed in the original _IRanges_ and _GenomicRanges_ packages
-without the user be exposed to new classes. In those packages to perform
-most operations requires users to learn many classes and perform 
-additional manipulations to return the results of their computation back to a
-_Ranges_ object.
 
-## Construction and Import/Output
-
-The methods `as_granges()` and `as_iranges()`
-for constructing _Ranges_ from tabular data structures, such as the _data.frame_ in
-base R. These methods use non-standard evaluation so columns in a _data.frame_
-can be modified before a _Ranges_ object is created. The API also has
-convenience methods for annotating or extracting annotations from _GRanges_
-objects with the `set_genome_info()` and `get_genome_info()` functions.
-
-There is a consistent framework for reading and writing 
-files from and to common genomic data formats, using the _rtracklayer_ package
-as a back-end @Lawrence2009-nt. The methods are implemented in the `read_/write_` family of 
-functions, currently _plyranges_ can read and write BAM, BED, BEDPE, 
-narrowPeaks, GFF/GTF, WIG and BigWig files. 
 
 # Results 
 
