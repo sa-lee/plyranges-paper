@@ -38,82 +38,105 @@ bw_file <- q[["AH33458"]]
 ```
 # Introduction
 
-There is a large variety of genomics data available to the scientific community,
-ranging from highly specific sequencing assays to publicly availble collections.
-These datasets similarly contain a wide variety of features: annotations of 
-genomic features such as genes or exons for reference genomes, large coverage 
-vectors, peaks called from ChIP-Seq experiments and many more. A modern biologist
-is expected to be able to reason about, combine and wrangle these heterogenous
-data sources in order to answer questions about their experimental hypotheses.
-Abstractions in the forms of data representation and software interfaces are
-key factors in inhibiting or enabling a biologist to construct reproducible data workflows
-to answer their research questions. 
+High-throughput genomics promises to unlock new disease therapies,
+reveal basic biology, and solve other problems that plague the human
+condition. To deliver on those promises, scientists must derive a
+stream of knowledge from a deluge of data. Genomic data is challenging
+in both scale and complexity. Innovations in sequencing technology
+often outstrip our capacity to process the output. Beyond their common
+association with genomic coordinates, genomic data are heterogeneous,
+consisting of raw sequence read alignments, genomic feature
+annotations like genes and exons, and summaries like coverage vectors,
+ChIP-seq peak calls, variant calls, and per-feature read
+counts. Genomic scientists need software tools to wrangle the
+different types of data, process the data at scale, test hypotheses,
+and generate new ones, all while focusing on the biology, not the
+computation. For the tool developer, the challenge is to define ways
+to model and operate on the data that align with the mental model of
+scientists, and to provide an implementation that scales with their
+ambition.
 
-Many domain specific languages (DSLs) have been created to process and reason
-about heterogenous genomics data. Broadly, they are implemented as either
-query languages or as an embedded command line tool.
-An example of the former is the Genome Query Language (GQL) and its distributed 
-implementation GenAp which use an SQL-like syntax for fast retrieval of 
-information of unprocessed sequencing data @Kozanitis2014-va; @Kozanitis2016-bm. 
-Similarly, the Genometric Query Language (GMQL) implements a 
-relational algebra for combining genomic datasets @Kaitoua2017-pw.  
-The command line application BEDtools develops an extensive algebra for 
-performing arithmetic between two or more sets of genomic regions 
-@Quinlan2010-gc; @Dale2011-js. All of the aformentioned DSLs are designed to 
-be run either at the command line or embedded in scripts for batch processing. 
-As a consquence, they are not integrated into an environment designed to 
-perform interactive data  analysis that has access to state of the art 
-methods for statistics and visualisation like the R language. 
+Several domain specific languages (DSLs) enable scientists to process
+and reason about heterogenous genomics data by expresssing common
+operations, such as range manipulation and overlap-based joins, using
+the vocabulary of genomics. Their implementations either delegate
+computations to a database, or operate over collections of files in
+standard formats like BED.  An example of the former is the Genome
+Query Language (GQL) and its distributed implementation GenAp which
+use an SQL-like syntax for fast retrieval of information of
+unprocessed sequencing data @Kozanitis2014-va; @Kozanitis2016-bm.
+Similarly, the Genometric Query Language (GMQL) implements a
+relational algebra for combining genomic datasets @Kaitoua2017-pw. The
+command line application BEDtools defines an extensive algebra for
+performing arithmetic between two or more sets of genomic regions
+stored as files @Quinlan2010-gc; @Dale2011-js. All of the
+aformentioned DSLs are designed to be evaluated either at the command
+line or embedded in scripts for batch processing. They exist in a
+sparse ecosystem, mostly consisting of UNIX and database tools that
+lack biological semantics and operate at the level of files and
+database tables.
 
-The Bioconductor/R packages `IRanges` and `GenomicRanges` 
-define a DSL for analysing genomics data with R via
-an object-oriented (OO) interface @Lawrence2013-wg; @Huber2015-ei. This interface
-provides abstractions for representing genomics data and enables interoperability
-by allowing users and developers to use these abstractions in their own code
-and packages. However, due to the large number of abstractions there are costs
-involved. Due to the OO interface each abstraction will behave slightly 
-differently for any given generic method. There is a cognitive load on the user
-to understand the appropriate context for each abstraction. An alternative approach
-is to recognise that most genomic data analysis tasks can be performed with 
-data structures that naturally represent genomic intervals. That is, genomics
-data can be represented as sets of integer pairs, where each pair has a start
-and an end coordianate, along with strings representing strand and chromosome 
-location. Measurements or metadata can be included as additional annotations
-on each pair.  As an example. a gene can be represented with its coordinates, along with its 
-identifier and the identifiers of its exons; or an RNA-seq experiment may be
-represented as sets of genes with a matching count column.
+The Bioconductor packages `IRanges` and `GenomicRanges`
+(@Lawrence2013-wg; @Huber2015-ei) define a DSL for analysing genomics
+data with R, an interactive data analysis environment that encourages
+reproducibility and provides high-level abstractions for manipulating,
+modeling and plotting data, through state of the art methods in
+statistical computing. The packages define object-oriented (OO)
+abstractions for representing genomic data and enable
+interoperability by allowing users and developers to use these
+abstractions in their own code and packages. The Bioconductor
+infrastructure models the genomic data and operations from the
+perspective of the power user, one who understands and wants to take
+advantage of the subtle differences in data types. This design has
+enabled the development of sophisticated tools, as evidenced by the
+hundreds of packages depending the framework. Unfortunately, the
+myriad of data structures have overlapping purposes and important but
+obscure differences in behavior that often confuse the typical end
+user.
 
+Recently, there has been a concerted, community effort to standardize
+R data structures and workflows around the notion of tidy data
+@Wickham2014-jc. A tidy dataset is defined to have a tabular structure
+that has observations as rows and columns as variables. Each tidy
+dataset represents measurements from a single observational unit.  The
+tidy data pattern is useful because it allows us to see how the data
+relates to the design of an experiment and the variables measured.
+The `dplyr` pacakge [@Wickham2017-dplyr] defines an API that maps
+notions from the general relational algebra to operations on tidy
+data. It expresses each operation as a cohesive, endomorphic
+verb. Taken together these features enable a user to write human
+readable analysis workflows.
 
-This natural abstraction aligns with the concept of tidy data @Wickham2014-jc. 
-A tidy dataset is defined to be to a tabular
-data structure that has observations as rows and columns as variables, and each
-tidy dataset represents measurements from a single observational unit.
-The tidy data pattern is useful because it allows 
-us to see how the data relates to the design of an experiment
-and the variables measured. The genomic interval data structure follows 
-this pattern: it is a rectangular table corresponding to a single biological 
-context. Each row contains a single observation and each column is a variable about
-that observation. 
+We have created a genomic DSL called `plyranges` that reformulates
+notions from existing genomic algebras and embeds them in R as a
+genomic extension of `dplyr`. By analogy, `plyranges` is to the
+genomic algebra, as `dplyr` is to the relational algebra.  The
+`plyranges` Bioconductor package implements the language on top of a
+key subset of Bioconductor data structures and thus fully integrates
+with the Bioconductor framework, gaining access to its scalable data
+representations and sophisticated statistical methods.
 
-The tidy data abstraction enables the construction of fluent application programming interfaces (APIs) [@Fowler2010-zd] that are optimised for readability. An example of a 
-fluent interface built on the tidy data pattern is the R pacakge `dplyr` [@Wickham2017-dplyr]. 
-The package defines a consistent syntax and style for transforming tabular data sets via
-functions that are named as verbs. Each function performs an action on the data
-set and is cohesive and endomorphic. Cohesion means that each function performs
-a singular task and has no side-effects, while endomorphism means a function
-call returns the same type of object as its input. Taken together these
-features enable a user to write human readable analysis workflows.
+# Stuff pushed out of the intro (needs a home)
 
-We have created a DSL called `plyranges` that is directly motivated by the design
-of `dplyr` but extends its  grammar to incorporate features of genomics data.
-Our interface uses the existing Bioconductor packages `IRanges` and 
-`GenomicRanges` but simplifies them by only exposing tidy genomic interval
-data structures to the user. Hence, we can encapsulate the features of the 
-of the `dplyr` API while performing genomic specific transformations 
-such as finding overlapping  regions or nearest neighbour regions between 
-genomic intervals.  The `plyranges` DSL is designed to enable fast interactive 
-analysis of genomics but also enables the creation of reproducible genomic 
-data workflows.
+The most general Bioconductor data structure, GRanges, is capable of
+representing all types of genomic data at a semantic level that
+roughly matches the intuition of most users.  A GRanges is essentially
+a table, with columns for the chromosome, stand and end coordinates,
+and the strand, along with an arbitrary set of additional columns,
+consisting of measurements or metadata specific to the data type or
+experiment.  For example, a gene can be represented by its chromosomal
+coordinates, along with its identifier and the identifiers of its
+exons; or an RNA-seq experiment may be represented as sets of genes
+with a matching count column.
+
+GRanges follows the tidy data pattern: it is a rectangular table
+corresponding to a single biological context. Each row contains a
+single observation and each column is a variable about that
+observation.
+
+Cohesion means that each function performs a singular task and has no
+side-effects, while endomorphism means a function call returns the
+same type of object as its input.
 
 # Design and Implementation
 
