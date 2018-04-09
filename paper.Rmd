@@ -117,6 +117,24 @@ representations and sophisticated statistical methods.
 
 # Design and Implementation
 
+
+The most general Bioconductor data structure, GRanges, is capable of
+representing all types of genomic data at a semantic level that
+roughly matches the intuition of most users.  A GRanges is essentially
+a table, with columns for the chromosome, stand and end coordinates,
+and the strand, along with an arbitrary set of additional columns,
+consisting of measurements or metadata specific to the data type or
+experiment.  For example, a gene can be represented by its chromosomal
+coordinates, along with its identifier and the identifiers of its
+exons; or an RNA-seq experiment may be represented as sets of genes
+with a matching count column.
+
+GRanges follows the tidy data pattern: it is a rectangular table
+corresponding to a single biological context. Each row contains a
+single observation and each column is a variable about that
+observation.
+
+
 via
  This interface
 provides abstractions for representing genomics data and enables interoperability
