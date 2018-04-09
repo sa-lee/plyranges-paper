@@ -60,31 +60,32 @@ about heterogenous genomics data heterogenous genomics data by expresssing commo
 operations, such as range manipulation and overlap-based joins, using
 the vocabulary of genomics. Their implementations either delegate
 computations to a database, or operate over collections of files in
-standard formats like BED.
-An example of the former is the Genome Query Language (GQL) and its distributed 
-implementation GenAp which use an SQL-like syntax for fast retrieval of 
-information of unprocessed sequencing data @Kozanitis2014-va; @Kozanitis2016-bm. 
-Similarly, the Genometric Query Language (GMQL) implements a 
-relational algebra for combining genomic datasets @Kaitoua2017-pw.  
-The command line application BEDtools develops an extensive algebra for 
-performing arithmetic between two or more sets of genomic regions 
-@Quinlan2010-gc; @Dale2011-js. All of the
-aformentioned DSLs are designed to be evaluated either at the command
-line or embedded in scripts for batch processing. They exist in a
-sparse ecosystem, mostly consisting of UNIX and database tools that
+standard formats like BED.An example of the former is the Genome Query 
+Language (GQL) and its distributed implementation GenAp which use an 
+SQL-like syntax for fast retrieval of information of unprocessed sequencing data @Kozanitis2014-va; @Kozanitis2016-bm. Similarly, the Genometric Query Language 
+(GMQL) implements a relational algebra for combining genomic datasets 
+@Kaitoua2017-pw.  The command line application BEDtools develops an extensive algebra for performing arithmetic between two or more sets of genomic regions 
+@Quinlan2010-gc. All of the aformentioned DSLs are designed to be evaluated
+either at the commandline or embedded in scripts for batch processing. They 
+exist in asparse ecosystem, mostly consisting of UNIX and database tools that
 lack biological semantics and operate at the level of files and
 database tables.
 
 The Bioconductor/R packages `IRanges` and `GenomicRanges` 
-[@Lawrence2013-wg; @Huber2015-ei] define a DSL for analysing genomics data with 
-R, an interactive data analysis environment that encourages
-reproducibility and provides high-level abstractions for manipulating,
+[@r-core; @Lawrence2013-wg; @Huber2015-ei] define a DSL for 
+analysing genomics data with R, an interactive data analysis environment that 
+encouragesreproducibility and provides high-level abstractions for manipulating,
 modeling and plotting data, through state of the art methods in
 statistical computing. The packages define object-oriented (OO)
 abstractions for representing genomic data and enable
 interoperability by allowing users and developers to use these
-abstractions in their own code and packages. The Bioconductor
-infrastructure models the genomic data and operations from the
+abstractions in their own code and packages. Other genomic DSLs 
+that are embedded in programming languages include pybedtools and valr 
+[@Dale2011-js; @Kent2017], however these packages lack the interoperability
+provided by in the aformentioned Bioconductor packages and are not easily 
+extended.
+
+The Bioconductor infrastructure models the genomic data and operations from the
 perspective of the power user, one who understands and wants to take
 advantage of the subtle differences in data types. This design has
 enabled the development of sophisticated tools, as evidenced by the
@@ -100,10 +101,11 @@ data structure that has observations as rows and columns as variables, and each
 tidy dataset represents measurements from a single observational unit.
 The tidy data pattern is useful because it allows 
 us to see how the data relates to the design of an experiment
-and the variables measured. The genomic interval data structure follows 
-this pattern: it is a rectangular table corresponding to a single biological 
-context. Each row contains a single observation and each column is a variable about
-that observation. 
+and the variables measured. The `dplyr` pacakge [@Wickham2017-dplyr] 
+defines an API that maps notions from the general relational algebra to 
+operations on tidy data. It expresses each operation as a cohesive, endomorphic
+verb. Taken together these features enable a user to write human
+readable analysis workflows.
 
 We have created a genomic DSL called `plyranges` that reformulates
 notions from existing genomic algebras and embeds them in R as a
