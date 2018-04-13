@@ -238,6 +238,9 @@ tracks(query = p1, subject = p2,
  
 ## Consistency 
 
+* replacing arguments with functions
+* standardised inputs for reading/writing genomics data as GRanges objects
+
 The methods `as_granges()` and `as_iranges()`
 for constructing GRanges from tabular data structures, such as the _data.frame_ in
 base R. These methods use non-standard evaluation so columns in a _data.frame_
@@ -253,25 +256,20 @@ narrowPeaks, GFF/GTF, WIG and BigWig files.
 
 ## Endomorphism
 
-This is possible because every function call is an endomorphism: when the input 
-is GRanges object the output will also be a GRanges object. One advantage of 
-endomorphism is that it does not  require any additional learning of classes 
-beyond GRanges and the DataFrame classes. This strongly deviates from the design of 
-the GRanges Bioconductor packages, where many methods return a new class
-upon return. The Bioconductor design enables efficient computing as users
-are exposed to low-level features of its API which _plyranges_ abstracts
-away.
+Most function calls in `plyranges` are endomorphisms: when the input 
+is GRanges object the output will also be a GRanges object. The use of
+endmoprhism in the `plyranges` DSL enables a user to predict the structure of 
+the output of their computations and does not require them to learn any 
+additional classes beyond GRanges and DataFrames. 
 
-The combination of verbs we have defined above cover most operations that
-can be performed in the original _IRanges_ and _GenomicRanges_ packages
-without the user being exposed to new classes. In those packages to perform
-most operations requires users to learn many classes and perform 
-additional manipulations to return the results of their computation back to a
-GRanges object.
+This design pattern strongly deviates from the design of the OO interface in 
+`GenomicRanges`, where many methods return a new class that is unfamiliar to 
+the user upon return. These low-level classes enable efficient computing at the cost
+of complexity and are abstracted away in `plyranges` interface. 
 
 ## Fluency 
 
-Using the design principles defined above every function in `plyranges`
+As a consequence of the design principles defined above every function in `plyranges`
 performs a single action on GRanges objects. The `plyranges` DSL implments the 
 core verbs from the `dplyr` package and implements a genomic relational algebra
 for transforming GRanges objects (table x, y). Each verb preserves the 
@@ -309,17 +307,14 @@ feature_tbl <- tribble(
 
 ## Limitations
 
-A caveat to constructing a compatible API with `dplyr` is that 
+A caveat to constructing a compatible interface with `dplyr` is that 
 `plyranges` makes extensive use of non-standard evaluation in R
 (achieved via the `rlang` package @R-rlang). Simply, this
 means that computations are performed and evaluated in the context of the 
-GRanges objects, which emphasises the interactive nature of the API. This has
-the disadvantage that programming with `plyranges` becomes more difficult 
+GRanges objects, which emphasises the interactive nature of the interface.
+This has the disadvantage that programming with `plyranges` becomes more difficult 
 because a user needs to know about non-standard evaluation and user defined
 functions can be difficult to debug.
-
-Method chaining via the pipe operator can also be difficult to debug,
-as there multiple points of failure
 
 # Results 
 
