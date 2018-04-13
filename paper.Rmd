@@ -16,7 +16,7 @@ address:
   - code: Genentech
     address: Bioinformatics and Computational Biology, Genentech, Inc., South San Francisco, California, United States of America 
 abstract: |
-    The Bioconductor project has created many useful data abstractions for analysing high-throughput genomics experiments. However, there is a cognitive load placed on a user in learning a data abstraction and understanding its appropriate use. Throughout a standard workflow, a user must navigate and know many of these abstractions to perform an genomic analysis task, when a single data abstraction, a _Ranges_ object will suffice. The _Ranges_ class naturally represent genomic intervals and their associated measurements. By recognising that the _Ranges_ class follows 'tidy' data principles we have created a grammar of genomic data transformation. The grammar defines verbs for performing actions on and between genomic interval data. It provides a principled way
+    The Bioconductor project has created many useful data abstractions for analysing high-throughput genomics experiments. However, there is a cognitive load placed on a user in learning a data abstraction and understanding its appropriate use. Throughout a standard workflow, a user must navigate and know many of these abstractions to perform an genomic analysis task, when a single data abstraction, a GRanges object will suffice. The GRanges class naturally represent genomic intervals and their associated measurements. By recognising that the GRanges class follows 'tidy' data principles we have created a grammar of genomic data transformation. The grammar defines verbs for performing actions on and between genomic interval data. It provides a principled way
     of performing common genomic data analysis tasks through a coherent interface to existing Bioconductor infrastructure, resulting in human readable analysis workflows. We have implemented this grammar as an Bioconductor/R package called plyranges.
   
 bibliography: references.bib
@@ -133,7 +133,6 @@ its chromosomal coordinates, and along with its exon identifiers; or
 a GRanges can represent an RNA-seq experiment as a set of genes
 with a corresponding count column.
 
-
 By definition the GRanges follow  the tidy data pattern: it is a rectangular 
 table corresponding to a single biological context. Each row contains a
 single observation and each column is a variable about that
@@ -158,20 +157,43 @@ the same operation regardless of whether a GRanges object is anchored or not.
 The only difference is the result of performing the arithimetic changes when
 contextual information is added to the GRanges object. 
 
-Another example of altering object semantics, while maintaining cohesion is
-through the 'group_by' operator. Like anchoring, this operator decorates
-a GRanges object with a column name (or names) that imply a partitioning of the 
-GRanges by the unique values in the column(s). Functions defined in the 
-`plyranges` DSL that perform restriction, aggregation, or column modfication
-still perform those singular tasks, however grouping changes how those tasks
-are performed. 
+Another example of our algebra altering object semantics, while maintaining 
+cohesion is through the 'group_by' operator. Like anchoring, this operator 
+decorates a GRanges object with a column name (or names) that defines a 
+partitioning of the  GRanges by the unique values in the column(s). Functions 
+defined in the  `plyranges` DSL that perform restriction, aggregation, or 
+column modfication still perform those singular tasks, however grouping changes
+how those tasks are performed. 
 
+Our algebra recasts the actions of finding overlaps or nearest neightbours 
+between two genomic regions as a relational join operator. The join operator 
+acts on two GRanges object, a query and a subject. The join operator is 
+relational in the sense that metadata from the query and subject ranges is 
+retained in the joined range.  The commonality between
+all join operators in the `plyranges` DSL is to use the index of where in
+the query range the subject range 'hits' the query range as a primary key 
+(figure *need to make figure*). The notion of 'hits' and hence
+the resulting key is determined by the type of join (preceding, nearest, follows
+overlaps). 
 
-A common operation to perform between two _Ranges_ objects is to find overlaps
-or nearest neighbours. The _plyranges_ API recasts these operations as 'joins'
-or 'pairing' operations. For overlaps, there are three join operations: 
-`join_overlap_intersect()`, `join_overlap_inner()` and `join_overlap_left()`
-which are shown in figure (\ref{fig:olap}). 
+We extend this idea by introducing three types of overlap joins: inner,
+intersect and left. The inner join considers a hit to be any overlap between
+subject and query and expands the query range to have length equal to the 
+number of hits. The intersect join uses the same definition of a hit as
+the inner join but returns a range where the start and end coordinates
+are the intersect of coordinates in the subject that hit the query. Finally,
+the overlap left join is akin to left outer join in Cobb's relational algebra:
+it performs an overlap inner join but also returns all query ranges that
+are not hit by the subject.
+
+The behaviour of a join operator can be further altered with additional
+suffixes by restricting or expanding how a subject 'hits' a query. For example,
+for overlap joins we can use suffixes to encapsulate Allan's Interval Algebra:
+to consider subject 'hits' that are entirely 'within' a query range, the 'within'
+prefix is used. We also use the 'directed' suffix to explicitly include 
+notions of strandedness in our algebra. 
+
+comparsion to Bioconductor API here?
 
 ```{r olap, echo = FALSE, fig.cap="The three overlap joins: the query and subject ranges are coloured by their metadata. When an overlap is performed the resulting range is filled by the query metadata and the metadata from the subject colours the outside of the range.", fig.width = 5, fig.height = 7}
 a <- GRanges(seqnames = "chr1",
@@ -213,58 +235,14 @@ tracks(query = p1, subject = p2,
        `left` = p5) 
 ```
 
-These operations consider any overlap between
-two input ranges and return any corresponding metadata from both Ranges objects
-as metadata. The intersect join takes the intersect of the start and end coordinates
-of overlapping intervals of the query and subject _Ranges_ 
-(for _GenomicRanges_ it also accounts for sequence name), when there is a overlap
-the metadata corresponding to the query and subject _Ranges_ are returned. 
-Similarly, inner join takes the start and end coordinates of the query _Ranges_
-that overlap the subject _Ranges_ and returns metadata of the overlapping query
-and subject _Ranges_. Finally, the left join performs a left outer join between
-the query and subject _Ranges_, it returns all genomic intervals from the query
-ranges, and returns missing values in metadata columns when there is no overlap.
-
-A user may also restrict or group by overlaps with the `filter_by_overlaps()`,
-`filter_by_non_overlaps()` and `group_by_overlaps()`. All overlap methods can
-be modified with the `within` suffix (which changes the type of overlap 
-from 'any' to 'within') or the `directed` suffix (which takes into account
-the strand of a _GenomicRanges_ object.). 
-
-For nearest neighbours, the _plyranges_ API provides `join_nearest()`, 
-`join_precede()`, and `join_follow()` functions. These functions are similar
-to the overlapping functions, in that they return the query ranges that are
-nearest (or precede or follow) the subject ranges and add metadata from
-the subject ranges when the query is a nearest neighbour of the subject. Like
-the overlap joins, these functions can modified with suffixes to find nearest
-neighbours that are left, right, upstream or downstream of the subject.
-
-The pairing operations, `pair_overlap()`, `pair_nearest()`, `pair_follow()`, 
-and `pair_precede()` are similar to the join operation but instead of returning
-a _Ranges_, they pair up the subject and query _Ranges_ objects into a _DataFrame_,
-alongside their metadata columns. This data structure is similar to the _Pairs_
-data structure in the _S4Vectors_ @R-S4vectors package or the BED-PE file format. 
-
-
-
+ 
 ## Consistency 
 
-The _plyranges_ API has an expressive algebra for performing arithmetic on Ranges via
-the verbs `set_width()` and `stretch()`. As the names suggest `set_width()`
-modifies the width of a Ranges object, while `stretch` extends the start and
-end of a Ranges object. These can be chained with the anchoring functions
-`anchor_start()`, `anchor_end()`, `anchor_center()`, `anchor_3p()` or 
-`anchor_5p()`, which fix the coordinates of a Ranges object in place. 
-Moreover, the `shift_` and `flank_` family of functions can be used to shift
-all coordinates in a Ranges object or generate flanking regions from a Ranges 
-object to the left, right, upstream or downstream of the input. Unlike, the
-Bioconductor API, _plyranges_ makes it explicit via function calls whether to
-take into account the strand information of a _Ranges_ object.
 
 The methods `as_granges()` and `as_iranges()`
-for constructing _Ranges_ from tabular data structures, such as the _data.frame_ in
+for constructing GRanges from tabular data structures, such as the _data.frame_ in
 base R. These methods use non-standard evaluation so columns in a _data.frame_
-can be modified before a _Ranges_ object is created. The API also has
+can be modified before a GRanges object is created. The API also has
 convenience methods for annotating or extracting annotations from _GRanges_
 objects with the `set_genome_info()` and `get_genome_info()` functions.
 
@@ -274,13 +252,36 @@ as a back-end @Lawrence2009-nt. The methods are implemented in the `read_/write_
 functions, currently _plyranges_ can read and write BAM, BED, BEDPE, 
 narrowPeaks, GFF/GTF, WIG and BigWig files. 
 
+## Endomorphism
+
+ (that
+are named as nouns) with many arguments (which is required in the existing 
+Bioconductor packages)
+ This is possible because every 
+function call is an endomorphism: when the input is GRanges object the output
+will also be a GRanges object. One advantage of endomorphism is that it 
+does not  require any additional learning of classes beyond GRanges and 
+the _DataFrame_ classes. This strongly deviates from the design of 
+the GRanges Bioconductor packages, where many methods return a new class
+upon return. The Bioconductor design enables efficient computing as users
+are exposed to low-level features of its API which _plyranges_ abstracts
+away. Method chaining via the pipe operator can also be difficult to debug,
+as there multiple points of failure.
+
+The combination of verbs we have defined above cover most operations that
+can be performed in the original _IRanges_ and _GenomicRanges_ packages
+without the user being exposed to new classes. In those packages to perform
+most operations requires users to learn many classes and perform 
+additional manipulations to return the results of their computation back to a
+GRanges object.
+
 ## Fluency 
 
 We have designed every function to perform a single
-action on a _Ranges_ object. The `plyranges` DSL implments the core verbs from the `dplyr` package
-and implements context specific verbs for transforming _Ranges_ objects (described in
-table ). Each verb preserves the semantics of _Ranges_ object and via
-duck typing works with derivatives of the _Ranges_ class. 
+action on a GRanges object. The `plyranges` DSL implments the core verbs from the `dplyr` package
+and implements context specific verbs for transforming GRanges objects (described in
+table ). Each verb preserves the semantics of GRanges object and via
+duck typing works with derivatives of the GRanges class. 
 Both of these aspects reduce the cognitive load on a new user since most 
 manipulations can be performed with a  vocabulary of several verbs, rather 
 than having to memorise function names that are nouns. Moreover, this approach 
@@ -296,48 +297,28 @@ forward pipe operator,`%>%`  (exported from the R package `magrittr`
 to write human readable code because workflows describe what the code is doing 
 rather than how its doing it.
 
-```{r, echo = FALSE, message = FALSE, warning = FALSE}
-library(tibble)
-feature_tbl <- tribble(
-  ~Verb, ~Action, ~Description,
-  "`mutate()`", "modifies columns", "Takes a _Ranges_ object and a set of name-value pairs and generates a new _Ranges_ object that with modified or new metadata columns or modified core components (start, end, width, seqnames, strand).",
- "`filter()`", "subset rows", "Takes a _Ranges_ object and a set of logical expressions and restricts the _Ranges_ object to where all logical expressions are true.",
- "`summarise()`", "aggregate one or more columns by a function", "Takes a _Ranges_ object and a set of name-value pairs and aggregates the _Ranges_ according to functions evaluated in the name-value pairs.",
-"`group_by()`", "partition a _Ranges_ object by a column", "Create an implicit grouping of _Ranges_ object by one or more columns. This modifies the actions of verbs, so they are performed on each partition created by the grouping.",
-"`select()`", "select columns of a _Ranges_ objects", "Drop or reorder metadata columns.",
-"`arrange()`", "sort a _Ranges_ object by columns", "Sort a _Ranges_ object by named variables",
-"`disjoin_ranges()`", "aggregate one more columns of a _Ranges_ object over the union of end coordinates", "Takes a _Ranges_ object and a set of name-value pairs and expands the _Ranges_ object by taking the union of end coordinates. For each row that was included to form the final union, the aggregation function defined by a name-value pair is called.",
-"`reduce_ranges()`", "aggregate one more columns of a _Ranges_ object by merging overlapping and neighbouring ranges.", "Takes a _Ranges_ object and a set of name-value pairs and reduces the _Ranges_ object by merging overlapping and neighouring ranges. For each row that was included to form merged range, the aggregation function defined by a name-value pair is called."
-)
-```
+
 
  
 
 
 
-## Endomorphism
 
- (that
-are named as nouns) with many arguments (which is required in the existing 
-Bioconductor packages)
- This is possible because every 
-function call is an endomorphism: when the input is _Ranges_ object the output
-will also be a _Ranges_ object. One advantage of endomorphism is that it 
-does not  require any additional learning of classes beyond _Ranges_ and 
-the _DataFrame_ classes. This strongly deviates from the design of 
-the _Ranges_ Bioconductor packages, where many methods return a new class
-upon return. The Bioconductor design enables efficient computing as users
-are exposed to low-level features of its API which _plyranges_ abstracts
-away. Method chaining via the pipe operator can also be difficult to debug,
-as there multiple points of failure.
 
-The combination of verbs we have defined above cover most operations that
-can be performed in the original _IRanges_ and _GenomicRanges_ packages
-without the user being exposed to new classes. In those packages to perform
-most operations requires users to learn many classes and perform 
-additional manipulations to return the results of their computation back to a
-_Ranges_ object.
-
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+library(tibble)
+feature_tbl <- tribble(
+  ~Verb, ~Action, ~Description,
+  "`mutate()`", "modifies columns", "Takes a GRanges object and a set of name-value pairs and generates a new GRanges object that with modified or new metadata columns or modified core components (start, end, width, seqnames, strand).",
+ "`filter()`", "subset rows", "Takes a GRanges object and a set of logical expressions and restricts the GRanges object to where all logical expressions are true.",
+ "`summarise()`", "aggregate one or more columns by a function", "Takes a GRanges object and a set of name-value pairs and aggregates the GRanges according to functions evaluated in the name-value pairs.",
+"`group_by()`", "partition a GRanges object by a column", "Create an implicit grouping of GRanges object by one or more columns. This modifies the actions of verbs, so they are performed on each partition created by the grouping.",
+"`select()`", "select columns of a GRanges objects", "Drop or reorder metadata columns.",
+"`arrange()`", "sort a GRanges object by columns", "Sort a GRanges object by named variables",
+"`disjoin_ranges()`", "aggregate one more columns of a GRanges object over the union of end coordinates", "Takes a GRanges object and a set of name-value pairs and expands the GRanges object by taking the union of end coordinates. For each row that was included to form the final union, the aggregation function defined by a name-value pair is called.",
+"`reduce_ranges()`", "aggregate one more columns of a GRanges object by merging overlapping and neighbouring ranges.", "Takes a GRanges object and a set of name-value pairs and reduces the GRanges object by merging overlapping and neighouring ranges. For each row that was included to form merged range, the aggregation function defined by a name-value pair is called."
+)
+```
 
 ## Limitations
 
@@ -345,7 +326,7 @@ A caveat to constructing a compatible API with `dplyr` is that
 `plyranges` makes extensive use of non-standard evaluation in R
 (achieved via the `rlang` package @R-rlang). Simply, this
 means that computations are performed and evaluated in the context of the 
-_Ranges_ objects, which emphasises the interactive nature of the API. This has
+GRanges objects, which emphasises the interactive nature of the API. This has
 the disadvantage that programming with `plyranges` becomes more difficult 
 because a user needs to know about non-standard evaluation and user defined
 functions can be difficult to debug.
