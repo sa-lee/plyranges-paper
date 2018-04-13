@@ -193,7 +193,7 @@ to consider subject 'hits' that are entirely 'within' a query range, the 'within
 prefix is used. We also use the 'directed' suffix to explicitly include 
 notions of strandedness in our algebra. 
 
-comparsion to Bioconductor API here?
+comparsion to Bioconductor API here? table of join ops?
 
 ```{r olap, echo = FALSE, fig.cap="The three overlap joins: the query and subject ranges are coloured by their metadata. When an overlap is performed the resulting range is filled by the query metadata and the metadata from the subject colours the outside of the range.", fig.width = 5, fig.height = 7}
 a <- GRanges(seqnames = "chr1",
@@ -238,7 +238,6 @@ tracks(query = p1, subject = p2,
  
 ## Consistency 
 
-
 The methods `as_granges()` and `as_iranges()`
 for constructing GRanges from tabular data structures, such as the _data.frame_ in
 base R. These methods use non-standard evaluation so columns in a _data.frame_
@@ -254,10 +253,7 @@ narrowPeaks, GFF/GTF, WIG and BigWig files.
 
 ## Endomorphism
 
- (that
-are named as nouns) with many arguments (which is required in the existing 
-Bioconductor packages)
- This is possible because every 
+This is possible because every 
 function call is an endomorphism: when the input is GRanges object the output
 will also be a GRanges object. One advantage of endomorphism is that it 
 does not  require any additional learning of classes beyond GRanges and 
@@ -265,8 +261,7 @@ the _DataFrame_ classes. This strongly deviates from the design of
 the GRanges Bioconductor packages, where many methods return a new class
 upon return. The Bioconductor design enables efficient computing as users
 are exposed to low-level features of its API which _plyranges_ abstracts
-away. Method chaining via the pipe operator can also be difficult to debug,
-as there multiple points of failure.
+away.
 
 The combination of verbs we have defined above cover most operations that
 can be performed in the original _IRanges_ and _GenomicRanges_ packages
@@ -277,33 +272,26 @@ GRanges object.
 
 ## Fluency 
 
-We have designed every function to perform a single
-action on a GRanges object. The `plyranges` DSL implments the core verbs from the `dplyr` package
-and implements context specific verbs for transforming GRanges objects (described in
-table ). Each verb preserves the semantics of GRanges object and via
-duck typing works with derivatives of the GRanges class. 
+Using the design principles defined above every function in `plyranges`
+performs a single action on GRanges objects. The `plyranges` DSL implments the 
+core verbs from the `dplyr` package and implements a genomic relational algebra
+for transforming GRanges objects (table x, y). Each verb preserves the 
+semantics of GRanges object and works with derivatives of the GRanges class. 
 Both of these aspects reduce the cognitive load on a new user since most 
-manipulations can be performed with a  vocabulary of several verbs, rather 
-than having to memorise function names that are nouns. Moreover, this approach 
-strongly constrasts the `GenomicRanges/IRanges` OO interface, which emphasises 
-the use of setter and getter methods. In that interface, core components and 
-metadata are updated via replacement methods (requiring knowledge of the
-class components), while our interface requires only a single call to `mutate()`
-to perform the modification. 
+manipulations can be performed with a vocabulary of several verbs, rather 
+than having to memorise function names that are nouns. 
+
+This approach strongly constrasts the `GenomicRanges/IRanges` OO interface, 
+which emphasises the use of setter and getter methods. In that interface, 
+core components and metadata are updated via replacement methods 
+(requiring knowledge of the class components), while our interface requires 
+only a single call to `mutate()` to perform the modification. 
 
 Workflows can be composed by chaining verbs together into 'sentences' via the 
 forward pipe operator,`%>%`  (exported from the R package `magrittr` 
-@R-magrittr), which can be read as the word 'then'. Overall, this  allows users 
+@R-magrittr), which can be read as the word 'then'. Overall, this allows users 
 to write human readable code because workflows describe what the code is doing 
 rather than how its doing it.
-
-
-
- 
-
-
-
-
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
 library(tibble)
@@ -331,10 +319,13 @@ the disadvantage that programming with `plyranges` becomes more difficult
 because a user needs to know about non-standard evaluation and user defined
 functions can be difficult to debug.
 
-
+Method chaining via the pipe operator can also be difficult to debug,
+as there multiple points of failure
 
 # Results 
 
+Here we provide examples on how to use the `plyranges` DSL to construct
+genomic data workflows.
 
 ## Peak Finding
 
