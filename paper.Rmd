@@ -62,9 +62,11 @@ the vocabulary of genomics. Their implementations either delegate
 computations to a database, or operate over collections of files in
 standard formats like BED.An example of the former is the Genome Query 
 Language (GQL) and its distributed implementation GenAp which use an 
-SQL-like syntax for fast retrieval of information of unprocessed sequencing data @Kozanitis2014-va; @Kozanitis2016-bm. Similarly, the Genometric Query Language 
-(GMQL) implements a relational algebra for combining genomic datasets 
-@Kaitoua2017-pw.  The command line application BEDtools develops an extensive algebra for performing arithmetic between two or more sets of genomic regions 
+SQL-like syntax for fast retrieval of information of unprocessed 
+sequencing data @Kozanitis2014-va; @Kozanitis2016-bm. Similarly, the Genometric 
+Query Language (GMQL) implements a relational algebra for combining genomic datasets 
+@Kaitoua2017-pw.  The command line application BEDtools develops an extensive 
+algebra for performing arithmetic between two or more sets of genomic regions 
 @Quinlan2010-gc. All of the aformentioned DSLs are designed to be evaluated
 either at the commandline or embedded in scripts for batch processing. They 
 exist in asparse ecosystem, mostly consisting of UNIX and database tools that
@@ -119,189 +121,51 @@ representations and sophisticated statistical methods.
 
 # Design and Implementation
 
-
-The most general Bioconductor data structure, GRanges, is capable of
+The `plyranges` DSL is built on the most general Bioconductor data structure, 
+GRanges, which is capable of
 representing all types of genomic data at a semantic level that
 roughly matches the intuition of most users.  A GRanges is essentially
-a table, with columns for the chromosome, stand and end coordinates,
+a table, with columns for the chromosome, start and end coordinates,
 and the strand, along with an arbitrary set of additional columns,
 consisting of measurements or metadata specific to the data type or
-experiment.  For example, a gene can be represented by its chromosomal
-coordinates, along with its identifier and the identifiers of its
-exons; or an RNA-seq experiment may be represented as sets of genes
-with a matching count column.
+experiment. For example a GRanges can be used to represent a gene with
+its chromosomal coordinates, and along with its exon identifiers; or 
+a GRanges can represent an RNA-seq experiment as a set of genes
+with a corresponding count column.
 
-GRanges follows the tidy data pattern: it is a rectangular table
-corresponding to a single biological context. Each row contains a
+
+By definition the GRanges follow  the tidy data pattern: it is a rectangular 
+table corresponding to a single biological context. Each row contains a
 single observation and each column is a variable about that
-observation.
-
-
-via
- This interface
-provides abstractions for representing genomics data and enables interoperability
-by allowing users and developers to use these abstractions in their own code
-and packages. However, due to the large number of abstractions there are costs
-involved. Due to the OO interface each abstraction will behave slightly 
-differently for any given generic method. There is a cognitive load on the user
-to understand the appropriate context for each abstraction. An alternative approach
-is to recognise that most genomic data analysis tasks can be performed with 
-data structures that naturally represent genomic intervals. That is, genomics
-data can be represented as sets of integer pairs, where each pair has a start
-and an end coordianate, along with strings representing strand and chromosome 
-location. Measurements or metadata can be included as additional annotations
-on each pair.  As an example. a gene can be represented with its coordinates, along with its 
-identifier and the identifiers of its exons; or an RNA-seq experiment may be
-represented as sets of genes with a matching count column.
-
-The tidy data abstraction enables the construction of fluent application programming interfaces (APIs) [@Fowler2010-zd] that are optimised for readability. An example of a 
-fluent interface built on the tidy data pattern is the R pacakge `dplyr` [@Wickham2017-dplyr]. 
-The package defines a consistent syntax and style for transforming tabular data sets via
-functions that are named as verbs. Each function performs an action on the data
-set and is cohesive and endomorphic. Cohesion means that each function performs
-a singular task and has no side-effects, while endomorphism means a function
-call returns the same type of object as its input. Taken together these
-features enable a user to write human readable analysis workflows.
-
-The `plyranges` DSL is built on two fundamental data structures defined
-by the `IRanges` and `GenomicRanges` packages called _IntegerRanges_
-and _GenomicRanges_. Unless otherwise specified, throughout the paper
-we refer to either of these data structures as _Ranges_. In its simplest form 
-the data model for an _IntegerRanges_ object is defined as a table with
-$n$ rows, where each row contains a closed interval of two integers:
-
-$$
-\textit{IntegerRange} := \{ \left[\text{start}_i, \text{end}_{i}\right]  : i = 1\dots n \}.
-$$
-In this form an _IntegerRanges_ object has three core columns: a start, an
-end, and the width of the interval. The _GenomicRanges_ data
-model has additional semantics providing biological context, strand and 
-sequence name (seqname), as well as containing an _IntegerRanges_ object.
-
-$$
-\textit{GenomicRange} := \{  \{\text{seqname}_i, \left[\text{start}_i, \text{end}_{i}\right] , \text{strand}_i\}  : i = 1\dots n \}.
-$$
-A _GenomicRanges_ object can have an additional property that provides
-annotation for each sequence name over a genome. This contstrains the the 
-start and end points for a given sequence to lie inside the bounds
-of the genome space. Also note that _GenomicRanges_ have one-based 
-coordinates rather than zero-based coordinates.  Additional measurements
-or annotations can be bound to the bare _IntegerRanges_ or _GenomicRanges_ to
-form metadata columns.
-
-By definition the _Ranges_ class encapsulate tidy data prinicples because
-every row corresponds to a sequence and every column corresponds to a variable.
-Hence, we have designed the `plyranges` DSL to have the grammar
-and design principles of `dplyr`: fluency, consistency, cohesion and 
-endomorphism. All of these principles are discussed with respect to the 
-_Ranges_ data model below. Where possible we contrast our design to the existing
-Bioconductor infrastructure.
-
-A caveat to constructing a compatible API with `dplyr` is that 
-`plyranges` makes extensive use of non-standard evaluation in R
-(achieved via the `rlang` package @R-rlang). Simply, this
-means that computations are performed and evaluated in the context of the 
-_Ranges_ objects, which emphasises the interactive nature of the API. This has
-the disadvantage that programming with `plyranges` becomes more difficult 
-because a user needs to know about non-standard evaluation and user defined
-functions can be difficult to debug.
-
-
-## Fluency 
-
-We have designed every function to perform a single
-action on a _Ranges_ object. The `plyranges` DSL implments the core verbs from the `dplyr` package
-and implements context specific verbs for transforming _Ranges_ objects (described in
-table ). Each verb preserves the semantics of _Ranges_ object and via
-duck typing works with derivatives of the _Ranges_ class. 
-Both of these aspects reduce the cognitive load on a new user since most 
-manipulations can be performed with a  vocabulary of several verbs, rather 
-than having to memorise function names that are nouns. Moreover, this approach 
-strongly constrasts the `GenomicRanges/IRanges` OO interface, which emphasises 
-the use of setter and getter methods. In that interface, core components and 
-metadata are updated via replacement methods (requiring knowledge of the
-class components), while our interface requires only a single call to `mutate()`
-to perform the modification. 
-
-Workflows can be composed by chaining verbs together into 'sentences' via the 
-forward pipe operator,`%>%`  (exported from the R package `magrittr` 
-@R-magrittr), which can be read as the word 'then'. Overall, this  allows users 
-to write human readable code because workflows describe what the code is doing 
-rather than how its doing it.
-
-```{r, echo = FALSE, message = FALSE, warning = FALSE}
-library(tibble)
-feature_tbl <- tribble(
-  ~Verb, ~Action, ~Description,
-  "`mutate()`", "modifies columns", "Takes a _Ranges_ object and a set of name-value pairs and generates a new _Ranges_ object that with modified or new metadata columns or modified core components (start, end, width, seqnames, strand).",
- "`filter()`", "subset rows", "Takes a _Ranges_ object and a set of logical expressions and restricts the _Ranges_ object to where all logical expressions are true.",
- "`summarise()`", "aggregate one or more columns by a function", "Takes a _Ranges_ object and a set of name-value pairs and aggregates the _Ranges_ according to functions evaluated in the name-value pairs.",
-"`group_by()`", "partition a _Ranges_ object by a column", "Create an implicit grouping of _Ranges_ object by one or more columns. This modifies the actions of verbs, so they are performed on each partition created by the grouping.",
-"`select()`", "select columns of a _Ranges_ objects", "Drop or reorder metadata columns.",
-"`arrange()`", "sort a _Ranges_ object by columns", "Sort a _Ranges_ object by named variables",
-"`disjoin_ranges()`", "aggregate one more columns of a _Ranges_ object over the union of end coordinates", "Takes a _Ranges_ object and a set of name-value pairs and expands the _Ranges_ object by taking the union of end coordinates. For each row that was included to form the final union, the aggregation function defined by a name-value pair is called.",
-"`reduce_ranges()`", "aggregate one more columns of a _Ranges_ object by merging overlapping and neighbouring ranges.", "Takes a _Ranges_ object and a set of name-value pairs and reduces the _Ranges_ object by merging overlapping and neighouring ranges. For each row that was included to form merged range, the aggregation function defined by a name-value pair is called."
-)
-```
-
- 
-
-## Consistency 
-
-The _plyranges_ API has an expressive algebra for performing arithmetic on Ranges via
-the verbs `set_width()` and `stretch()`. As the names suggest `set_width()`
-modifies the width of a Ranges object, while `stretch` extends the start and
-end of a Ranges object. These can be chained with the anchoring functions
-`anchor_start()`, `anchor_end()`, `anchor_center()`, `anchor_3p()` or 
-`anchor_5p()`, which fix the coordinates of a Ranges object in place. 
-Moreover, the `shift_` and `flank_` family of functions can be used to shift
-all coordinates in a Ranges object or generate flanking regions from a Ranges 
-object to the left, right, upstream or downstream of the input. Unlike, the
-Bioconductor API, _plyranges_ makes it explicit via function calls whether to
-take into account the strand information of a _Ranges_ object.
-
-
-The methods `as_granges()` and `as_iranges()`
-for constructing _Ranges_ from tabular data structures, such as the _data.frame_ in
-base R. These methods use non-standard evaluation so columns in a _data.frame_
-can be modified before a _Ranges_ object is created. The API also has
-convenience methods for annotating or extracting annotations from _GRanges_
-objects with the `set_genome_info()` and `get_genome_info()` functions.
-
-There is a consistent framework for reading and writing 
-files from and to common genomic data formats, using the _rtracklayer_ package
-as a back-end @Lawrence2009-nt. The methods are implemented in the `read_/write_` family of 
-functions, currently _plyranges_ can read and write BAM, BED, BEDPE, 
-narrowPeaks, GFF/GTF, WIG and BigWig files. 
-
-## Endomorphism
-
- (that
-are named as nouns) with many arguments (which is required in the existing 
-Bioconductor packages)
- This is possible because every 
-function call is an endomorphism: when the input is _Ranges_ object the output
-will also be a _Ranges_ object. One advantage of endomorphism is that it 
-does not  require any additional learning of classes beyond _Ranges_ and 
-the _DataFrame_ classes. This strongly deviates from the design of 
-the _Ranges_ Bioconductor packages, where many methods return a new class
-upon return. The Bioconductor design enables efficient computing as users
-are exposed to low-level features of its API which _plyranges_ abstracts
-away. Method chaining via the pipe operator can also be difficult to debug,
-as there multiple points of failure.
-
-The combination of verbs we have defined above cover most operations that
-can be performed in the original _IRanges_ and _GenomicRanges_ packages
-without the user being exposed to new classes. In those packages to perform
-most operations requires users to learn many classes and perform 
-additional manipulations to return the results of their computation back to a
-_Ranges_ object.
+observation. Hence, we have designed the `plyranges` DSL to extend the grammar
+and design principles of `dplyr`:  cohesion, consistency, endomorphism,
+and fluency. All of these principles are defined and discussed
+below in the context of the GRanges class. Where applicable we contrast our 
+design to the existing Bioconductor infrastructure.
 
 
 ## Cohesion
 
+A function is cohesive if it performs a singular task and does not produce
+any side-effects. In the `plyranges` DSL our algebra for performing
+genomic arithmetic is a key example of cohesion. We define anchoring operators
+that decorate a GRanges object with an 'anchor' and modify the semantics
+of performing genomic arithmetic. The anchoring operators amount to fixing a GRanges
+object by its start, center, or end coordinates (or fixing these coordinates
+by strand). This enables any arithmetic function that performs a 
+coordinate transformation to remain cohesive: that is they always perfom
+the same operation regardless of whether a GRanges object is anchored or not.
+The only difference is the result of performing the arithimetic changes when
+contextual information is added to the GRanges object. 
 
-## Overlapping Ranges
+Another example of altering object semantics, while maintaining cohesion is
+through the 'group_by' operator. Like anchoring, this operator decorates
+a GRanges object with a column name (or names) that imply a partitioning of the 
+GRanges by the unique values in the column(s). Functions defined in the 
+`plyranges` DSL that perform restriction, aggregation, or column modfication
+still perform those singular tasks, however grouping changes how those tasks
+are performed. 
+
 
 A common operation to perform between two _Ranges_ objects is to find overlaps
 or nearest neighbours. The _plyranges_ API recasts these operations as 'joins'
@@ -383,17 +247,125 @@ data structure in the _S4Vectors_ @R-S4vectors package or the BED-PE file format
 
 
 
+## Consistency 
+
+The _plyranges_ API has an expressive algebra for performing arithmetic on Ranges via
+the verbs `set_width()` and `stretch()`. As the names suggest `set_width()`
+modifies the width of a Ranges object, while `stretch` extends the start and
+end of a Ranges object. These can be chained with the anchoring functions
+`anchor_start()`, `anchor_end()`, `anchor_center()`, `anchor_3p()` or 
+`anchor_5p()`, which fix the coordinates of a Ranges object in place. 
+Moreover, the `shift_` and `flank_` family of functions can be used to shift
+all coordinates in a Ranges object or generate flanking regions from a Ranges 
+object to the left, right, upstream or downstream of the input. Unlike, the
+Bioconductor API, _plyranges_ makes it explicit via function calls whether to
+take into account the strand information of a _Ranges_ object.
+
+The methods `as_granges()` and `as_iranges()`
+for constructing _Ranges_ from tabular data structures, such as the _data.frame_ in
+base R. These methods use non-standard evaluation so columns in a _data.frame_
+can be modified before a _Ranges_ object is created. The API also has
+convenience methods for annotating or extracting annotations from _GRanges_
+objects with the `set_genome_info()` and `get_genome_info()` functions.
+
+There is a consistent framework for reading and writing 
+files from and to common genomic data formats, using the _rtracklayer_ package
+as a back-end @Lawrence2009-nt. The methods are implemented in the `read_/write_` family of 
+functions, currently _plyranges_ can read and write BAM, BED, BEDPE, 
+narrowPeaks, GFF/GTF, WIG and BigWig files. 
+
+## Fluency 
+
+We have designed every function to perform a single
+action on a _Ranges_ object. The `plyranges` DSL implments the core verbs from the `dplyr` package
+and implements context specific verbs for transforming _Ranges_ objects (described in
+table ). Each verb preserves the semantics of _Ranges_ object and via
+duck typing works with derivatives of the _Ranges_ class. 
+Both of these aspects reduce the cognitive load on a new user since most 
+manipulations can be performed with a  vocabulary of several verbs, rather 
+than having to memorise function names that are nouns. Moreover, this approach 
+strongly constrasts the `GenomicRanges/IRanges` OO interface, which emphasises 
+the use of setter and getter methods. In that interface, core components and 
+metadata are updated via replacement methods (requiring knowledge of the
+class components), while our interface requires only a single call to `mutate()`
+to perform the modification. 
+
+Workflows can be composed by chaining verbs together into 'sentences' via the 
+forward pipe operator,`%>%`  (exported from the R package `magrittr` 
+@R-magrittr), which can be read as the word 'then'. Overall, this  allows users 
+to write human readable code because workflows describe what the code is doing 
+rather than how its doing it.
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+library(tibble)
+feature_tbl <- tribble(
+  ~Verb, ~Action, ~Description,
+  "`mutate()`", "modifies columns", "Takes a _Ranges_ object and a set of name-value pairs and generates a new _Ranges_ object that with modified or new metadata columns or modified core components (start, end, width, seqnames, strand).",
+ "`filter()`", "subset rows", "Takes a _Ranges_ object and a set of logical expressions and restricts the _Ranges_ object to where all logical expressions are true.",
+ "`summarise()`", "aggregate one or more columns by a function", "Takes a _Ranges_ object and a set of name-value pairs and aggregates the _Ranges_ according to functions evaluated in the name-value pairs.",
+"`group_by()`", "partition a _Ranges_ object by a column", "Create an implicit grouping of _Ranges_ object by one or more columns. This modifies the actions of verbs, so they are performed on each partition created by the grouping.",
+"`select()`", "select columns of a _Ranges_ objects", "Drop or reorder metadata columns.",
+"`arrange()`", "sort a _Ranges_ object by columns", "Sort a _Ranges_ object by named variables",
+"`disjoin_ranges()`", "aggregate one more columns of a _Ranges_ object over the union of end coordinates", "Takes a _Ranges_ object and a set of name-value pairs and expands the _Ranges_ object by taking the union of end coordinates. For each row that was included to form the final union, the aggregation function defined by a name-value pair is called.",
+"`reduce_ranges()`", "aggregate one more columns of a _Ranges_ object by merging overlapping and neighbouring ranges.", "Takes a _Ranges_ object and a set of name-value pairs and reduces the _Ranges_ object by merging overlapping and neighouring ranges. For each row that was included to form merged range, the aggregation function defined by a name-value pair is called."
+)
+```
+
+ 
+
+
+
+## Endomorphism
+
+ (that
+are named as nouns) with many arguments (which is required in the existing 
+Bioconductor packages)
+ This is possible because every 
+function call is an endomorphism: when the input is _Ranges_ object the output
+will also be a _Ranges_ object. One advantage of endomorphism is that it 
+does not  require any additional learning of classes beyond _Ranges_ and 
+the _DataFrame_ classes. This strongly deviates from the design of 
+the _Ranges_ Bioconductor packages, where many methods return a new class
+upon return. The Bioconductor design enables efficient computing as users
+are exposed to low-level features of its API which _plyranges_ abstracts
+away. Method chaining via the pipe operator can also be difficult to debug,
+as there multiple points of failure.
+
+The combination of verbs we have defined above cover most operations that
+can be performed in the original _IRanges_ and _GenomicRanges_ packages
+without the user being exposed to new classes. In those packages to perform
+most operations requires users to learn many classes and perform 
+additional manipulations to return the results of their computation back to a
+_Ranges_ object.
+
+
+## Limitations
+
+A caveat to constructing a compatible API with `dplyr` is that 
+`plyranges` makes extensive use of non-standard evaluation in R
+(achieved via the `rlang` package @R-rlang). Simply, this
+means that computations are performed and evaluated in the context of the 
+_Ranges_ objects, which emphasises the interactive nature of the API. This has
+the disadvantage that programming with `plyranges` becomes more difficult 
+because a user needs to know about non-standard evaluation and user defined
+functions can be difficult to debug.
+
+
+
 # Results 
 
-As an example, we use the Bioconductor package _AnnotationHub_ @R-ahub to search for 
-BigWig files from ChIP-Seq experiments from the Human Epigenome Roadmap project @Roadmap_Epigenomics_Consortium2015-pr.
-We choose to focus on assays for primary T CD8+ memory cells from peripheral 
-blood. We can then read the BigWig file  corresponding to the H3 lysine 27 
- trimethylation (H3K27Me3) 
-methylation mark over chromosome 10. 
 
-First, we gather the BigWig file
-and extract its annotation information and filter it to chromosome 10.
+## Peak Finding
+
+We use the Bioconductor package _AnnotationHub_ @R-ahub to search for 
+BigWig files from ChIP-Seq experiments from the Human Epigenome Roadmap project 
+@Roadmap_Epigenomics_Consortium2015-pr. We choose to focus on assays for primary
+T CD8+ memory cells from peripheral blood. We can then read the BigWig file 
+corresponding to the H3 lysine 27 trimethylation (H3K27Me3) methylation mark 
+over chromosome 10. 
+
+First, we gather the BigWig file and extract its annotation information and 
+filter it to chromosome 10.
 
 ```{r load-bw, cache = TRUE}
 library(plyranges)
@@ -417,7 +389,7 @@ The `reduce_ranges()` operation is used to find coverage peaks
 across chromosome 10. We can manually set a threshold to restrict genomic
 regions to have a coverage score of greater than 8, and
 then merge nearby regions. The maximum coverage is computed over all the
-coverage scores in regions that were reduced. 
+coverage scores in the regions that were reduced. 
 
 ```{r}
 all_peaks <- chr10_scores %>% 
@@ -425,9 +397,9 @@ all_peaks <- chr10_scores %>%
   reduce_ranges(score = max(score))
 ```
 
-Returning to the _Ranges_ object containing normalised coverage scores for
+Returning to the GRanges object containing normalised coverage scores for
 the methylation data, we can filter to find the coordinates of the peak 
-containing maximum coverage score. We can then find 
+containing the maximum coverage score. We can then find 
 a 5000 nt region centered around the maximum position by anchoring and 
 modifying the the width. 
 
@@ -438,24 +410,32 @@ chr10_max_score_region <- chr10_scores %>%
   set_width(5000)
 ```
 
-Finally, the overlap inner join could be used to restrict the chromosome 10
-normalised coverage scores that are within the 5000nt region that contains
+Finally, the overlap inner join is used to restrict the chromosome 10
+normalised coverage scores that are within the 5000nt region that contain
 the max peak on chromosome 10 (visualised in figure \ref{fig:peak-viz}).
 
 ```{r peak_region}
 peak_region <- chr10_scores %>%
-  join_overlap_inner(chr10_max_score_region %>% 
-                       select(-score))
+  join_overlap_inner(chr10_max_score_region)
 
 ```
 
 ```{r peak-viz, echo = FALSE, fig.cap = "Visualisation of normalised coverage scores accross a 5000nt region of chromosome 10 from H3K27Me3 ChIP-Seq assay from the Human Epigenome Roadmap project."}
 ggbio::autoplot(peak_region, 
-                aes(y = score), 
+                aes(y = score.x), 
                 geom = "blank") + 
   geom_area(aes(x = start))
 ```
 
+
+## Computing Windowed Statistics
+
+(example of group_by_overlaps + summarise)
+
+## Transition Transversion Ratio
+
+(example of group_by + mutate + summarise and working on an object that inherits
+from GRanges)
 
 # Availablilty and Future Work
 
