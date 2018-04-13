@@ -253,11 +253,10 @@ narrowPeaks, GFF/GTF, WIG and BigWig files.
 
 ## Endomorphism
 
-This is possible because every 
-function call is an endomorphism: when the input is GRanges object the output
-will also be a GRanges object. One advantage of endomorphism is that it 
-does not  require any additional learning of classes beyond GRanges and 
-the _DataFrame_ classes. This strongly deviates from the design of 
+This is possible because every function call is an endomorphism: when the input 
+is GRanges object the output will also be a GRanges object. One advantage of 
+endomorphism is that it does not  require any additional learning of classes 
+beyond GRanges and the DataFrame classes. This strongly deviates from the design of 
 the GRanges Bioconductor packages, where many methods return a new class
 upon return. The Bioconductor design enables efficient computing as users
 are exposed to low-level features of its API which _plyranges_ abstracts
