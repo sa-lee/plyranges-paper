@@ -56,7 +56,7 @@ scientists, and to provide an implementation that scales with their
 ambition.
 
 Several domain specific languages (DSLs) enable scientists to process and reason
-about heterogenous genomics data heterogenous genomics data by expresssing common
+about heterogeneous genomics data heterogeneous genomics data by expressing common
 operations, such as range manipulation and overlap-based joins, using
 the vocabulary of genomics. Their implementations either delegate
 computations to a database, or operate over collections of files in
@@ -67,24 +67,24 @@ sequencing data @Kozanitis2014-va; @Kozanitis2016-bm. Similarly, the Genometric
 Query Language (GMQL) implements a relational algebra for combining genomic datasets 
 @Kaitoua2017-pw.  The command line application BEDtools develops an extensive 
 algebra for performing arithmetic between two or more sets of genomic regions 
-@Quinlan2010-gc. All of the aformentioned DSLs are designed to be evaluated
-either at the commandline or embedded in scripts for batch processing. They 
-exist in asparse ecosystem, mostly consisting of UNIX and database tools that
+@Quinlan2010-gc. All of the aforementioned DSLs are designed to be evaluated
+either at the command line or embedded in scripts for batch processing. They 
+exist in sparse ecosystem, mostly consisting of UNIX and database tools that
 lack biological semantics and operate at the level of files and
 database tables.
 
 The Bioconductor/R packages `IRanges` and `GenomicRanges` 
 [@r-core; @Lawrence2013-wg; @Huber2015-ei] define a DSL for 
 analysing genomics data with R, an interactive data analysis environment that 
-encouragesreproducibility and provides high-level abstractions for manipulating,
-modeling and plotting data, through state of the art methods in
+encourages reproducibility and provides high-level abstractions for manipulating,
+modelling and plotting data, through state of the art methods in
 statistical computing. The packages define object-oriented (OO)
 abstractions for representing genomic data and enable
 interoperability by allowing users and developers to use these
 abstractions in their own code and packages. Other genomic DSLs 
 that are embedded in programming languages include pybedtools and valr 
 [@Dale2011-js; @Kent2017], however these packages lack the interoperability
-provided by in the aformentioned Bioconductor packages and are not easily 
+provided by in the aforementioned Bioconductor packages and are not easily 
 extended.
 
 The Bioconductor infrastructure models the genomic data and operations from the
@@ -93,7 +93,7 @@ advantage of the subtle differences in data types. This design has
 enabled the development of sophisticated tools, as evidenced by the
 hundreds of packages depending the framework. Unfortunately, the
 myriad of data structures have overlapping purposes and important but
-obscure differences in behavior that often confuse the typical end
+obscure differences in behaviour that often confuse the typical end
 user.
 
 Recently, there has been a concerted, community effort to standardize
@@ -103,7 +103,7 @@ data structure that has observations as rows and columns as variables, and each
 tidy dataset represents measurements from a single observational unit.
 The tidy data pattern is useful because it allows 
 us to see how the data relates to the design of an experiment
-and the variables measured. The `dplyr` pacakge [@Wickham2017-dplyr] 
+and the variables measured. The `dplyr` package [@Wickham2017-dplyr] 
 defines an API that maps notions from the general relational algebra to 
 operations on tidy data. It expresses each operation as a cohesive, endomorphic
 verb. Taken together these features enable a user to write human
@@ -152,9 +152,9 @@ that decorate a GRanges object with an 'anchor' and modify the semantics
 of performing genomic arithmetic. The anchoring operators amount to fixing a GRanges
 object by its start, center, or end coordinates (or fixing these coordinates
 by strand). This enables any arithmetic function that performs a 
-coordinate transformation to remain cohesive: that is they always perfom
+coordinate transformation to remain cohesive: that is they always perform
 the same operation regardless of whether a GRanges object is anchored or not.
-The only difference is the result of performing the arithimetic changes when
+The only difference is the result of performing the arithmetic changes when
 contextual information is added to the GRanges object. 
 
 Another example of our algebra altering object semantics, while maintaining 
@@ -162,10 +162,10 @@ cohesion is through the 'group_by' operator. Like anchoring, this operator
 decorates a GRanges object with a column name (or names) that defines a 
 partitioning of the  GRanges by the unique values in the column(s). Functions 
 defined in the  `plyranges` DSL that perform restriction, aggregation, or 
-column modfication still perform those singular tasks, however grouping changes
+column modification still perform those singular tasks, however grouping changes
 how those tasks are performed. 
 
-Our algebra recasts the actions of finding overlaps or nearest neightbours 
+Our algebra recasts the actions of finding overlaps or nearest neighbours 
 between two genomic regions as a relational join operator. The join operator 
 acts on two GRanges object, a query and a subject. The join operator is 
 relational in the sense that metadata from the query and subject ranges is 
@@ -193,72 +193,35 @@ to consider subject 'hits' that are entirely 'within' a query range, the 'within
 prefix is used. We also use the 'directed' suffix to explicitly include 
 notions of strandedness in our algebra. 
 
-comparsion to Bioconductor API here? table of join ops?
-
-```{r olap, echo = FALSE, fig.cap="The three overlap joins: the query and subject ranges are coloured by their metadata. When an overlap is performed the resulting range is filled by the query metadata and the metadata from the subject colours the outside of the range.", fig.width = 5, fig.height = 7}
-a <- GRanges(seqnames = "chr1",
-               strand = c("+", "-"),
-               ranges = IRanges(c(1, 9), c(7, 10)),
-               key.a = letters[1:2])
-
-b <- GRanges(seqnames = "chr1",
-               strand = c("-", "+"),
-               ranges = IRanges(c(2, 6), c(4, 8)),
-               key.b = LETTERS[1:2])
-
-c <- join_overlap_intersect(a,b)
-d <- join_overlap_inner(a, b)
-e <- join_overlap_left(a, b)
-
-p1 <- autoplot(a, aes(fill = key.a)) + 
-  scale_fill_brewer(type = "qual", palette = "Set2") + 
-  guides(fill = FALSE)
-p2 <- autoplot(b, aes(fill = key.b))  + 
-  scale_fill_brewer(type = "qual", palette = "Set1") +
-  guides(fill = FALSE)
-p3 <- autoplot(c, aes(fill = key.a, colour = key.b)) + 
-  scale_fill_brewer(type = "qual", palette = "Set2") +
-  scale_color_brewer(type = "qual", palette = "Set1") +
-  guides(fill = FALSE, color = FALSE) 
-p4 <- autoplot(d, aes(fill = key.a, colour = key.b)) + 
-  scale_fill_brewer(type = "qual", palette = "Set2") +
-  scale_color_brewer(type = "qual", palette = "Set1") +
-  guides(fill = FALSE, colour = FALSE)
-p5 <- autoplot(e, aes(fill = key.a, colour = key.b))  +
-  scale_fill_brewer(type = "qual", palette = "Set2") +
-  scale_color_brewer(type = "qual", palette = "Set1") +
-  guides(fill = FALSE, colour = FALSE)
-
-tracks(query = p1, subject = p2, 
-       `intersect` = p3, 
-       `inner` = p4, 
-       `left` = p5) 
-```
-
+more comparison to Bioconductor API here? table of join ops?
  
 ## Consistency 
 
-* replacing arguments with functions
-* standardised inputs for reading/writing genomics data as GRanges objects
+A core design principle of the `plyranges` DSL is interface consistency:
+a user should not be surprised by the input or output of `plyranges` code.
+A key example of consistency is how `plyranges` handles strand information.
+Every function that computes with strand information indicates its intentions
+by including suffixes such as 'directed', 'upstream' or 'downstream' in its
+name, otherwise strand is ignored. This strongly differs from 
+the Bioconductor packages, which produces surprising output by assuming the 
+user is always interested in using strand in the majority of circumstances 
+(unless a user is computing coverage or finding flanking ranges). 
 
-The methods `as_granges()` and `as_iranges()`
-for constructing GRanges from tabular data structures, such as the _data.frame_ in
-base R. These methods use non-standard evaluation so columns in a _data.frame_
-can be modified before a GRanges object is created. The API also has
-convenience methods for annotating or extracting annotations from _GRanges_
-objects with the `set_genome_info()` and `get_genome_info()` functions.
+Our use of suffixes in function names, also highlights are core tenet of 
+the `plyranges` design: avoid complex generic functions with many arguments
+and instead use cohesive functions with a minimal number of arguments. As an
+example, we have written a consistent framework for reading and writing 
+files from and to common genomic data formats as GRanges, 
+using the `rtracklayer` package as a back-end @Lawrence2009-nt. We have replaced
+that packages generic functions for importing files with a family of reader
+functions that all take the exact same arguments.
 
-There is a consistent framework for reading and writing 
-files from and to common genomic data formats, using the _rtracklayer_ package
-as a back-end @Lawrence2009-nt. The methods are implemented in the `read_/write_` family of 
-functions, currently _plyranges_ can read and write BAM, BED, BEDPE, 
-narrowPeaks, GFF/GTF, WIG and BigWig files. 
 
 ## Endomorphism
 
 Most function calls in `plyranges` are endomorphisms: when the input 
 is GRanges object the output will also be a GRanges object. The use of
-endmoprhism in the `plyranges` DSL enables a user to predict the structure of 
+endomorphism in the `plyranges` DSL enables a user to predict the structure of 
 the output of their computations and does not require them to learn any 
 additional classes beyond GRanges and DataFrames. 
 
@@ -270,7 +233,7 @@ of complexity and are abstracted away in `plyranges` interface.
 ## Fluency 
 
 As a consequence of the design principles defined above every function in `plyranges`
-performs a single action on GRanges objects. The `plyranges` DSL implments the 
+performs a single action on GRanges objects. The `plyranges` DSL implements the 
 core verbs from the `dplyr` package and implements a genomic relational algebra
 for transforming GRanges objects (table x, y). Each verb preserves the 
 semantics of GRanges object and works with derivatives of the GRanges class. 
@@ -278,7 +241,7 @@ Both of these aspects reduce the cognitive load on a new user since most
 manipulations can be performed with a vocabulary of several verbs, rather 
 than having to memorise function names that are nouns. 
 
-This approach strongly constrasts the `GenomicRanges/IRanges` OO interface, 
+This approach strongly contrasts the `GenomicRanges/IRanges` OO interface, 
 which emphasises the use of setter and getter methods. In that interface, 
 core components and metadata are updated via replacement methods 
 (requiring knowledge of the class components), while our interface requires 
