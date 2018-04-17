@@ -34,6 +34,7 @@ library(plyranges)
 
 library(AnnotationHub)
 q <- AnnotationHub()
+# T-cell BW file
 bw_file <- q[["AH33458"]] 
 ```
 # Introduction
@@ -141,7 +142,6 @@ and design principles of `dplyr`:  cohesion, consistency, endomorphism,
 and fluency. All of these principles are defined and discussed
 below in the context of the GRanges class. Where applicable we contrast our 
 design to the existing Bioconductor infrastructure.
-
 
 ## Cohesion
 
@@ -266,6 +266,8 @@ feature_tbl <- tribble(
 "`disjoin_ranges()`", "aggregate one more columns of a GRanges object over the union of end coordinates", "Takes a GRanges object and a set of name-value pairs and expands the GRanges object by taking the union of end coordinates. For each row that was included to form the final union, the aggregation function defined by a name-value pair is called.",
 "`reduce_ranges()`", "aggregate one more columns of a GRanges object by merging overlapping and neighbouring ranges.", "Takes a GRanges object and a set of name-value pairs and reduces the GRanges object by merging overlapping and neighouring ranges. For each row that was included to form merged range, the aggregation function defined by a name-value pair is called."
 )
+
+knitr::kable(feature_tbl, booktabs = TRUE)
 ```
 
 ## Limitations
@@ -282,16 +284,17 @@ functions can be difficult to debug.
 # Results 
 
 Here we provide examples on how to use the `plyranges` DSL to construct
-genomic data workflows.
+genomic data workflows and highlight its interoperability with existing
+Bionconductor packages.
 
 ## Peak Finding
 
-We use the Bioconductor package _AnnotationHub_ @R-ahub to search for 
+The Bioconductor package `AnnotationHub` @R-ahub  can be used to search for 
 BigWig files from ChIP-Seq experiments from the Human Epigenome Roadmap project 
-@Roadmap_Epigenomics_Consortium2015-pr. We choose to focus on assays for primary
-T CD8+ memory cells from peripheral blood. We can then read the BigWig file 
-corresponding to the H3 lysine 27 trimethylation (H3K27Me3) methylation mark 
-over chromosome 10. 
+@Roadmap_Epigenomics_Consortium2015-pr. Here we focus on assays for primary
+T CD8+ memory cells from peripheral blood. Using `plyranges` we will read the 
+BigWig file  corresponding to the H3 lysine 27 trimethylation (H3K27Me3) 
+methylation mark over chromosome 10. 
 
 First, we gather the BigWig file and extract its annotation information and 
 filter it to chromosome 10.
@@ -311,7 +314,6 @@ case the hg19 genome build).
 chr10_scores <- bw_file %>%
   read_bigwig(overlap_ranges = chr10_ranges) %>%
   set_genome_info(genome = "hg19")
-chr10_scores
 ```
 
 The `reduce_ranges()` operation is used to find coverage peaks 
@@ -326,8 +328,8 @@ all_peaks <- chr10_scores %>%
   reduce_ranges(score = max(score))
 ```
 
-Returning to the GRanges object containing normalised coverage scores for
-the methylation data, we can filter to find the coordinates of the peak 
+Returning to the GRanges object containing normalised coverage scores, 
+we filter to find the coordinates of the peak 
 containing the maximum coverage score. We can then find 
 a 5000 nt region centered around the maximum position by anchoring and 
 modifying the the width. 
@@ -341,7 +343,7 @@ chr10_max_score_region <- chr10_scores %>%
 
 Finally, the overlap inner join is used to restrict the chromosome 10
 normalised coverage scores that are within the 5000nt region that contain
-the max peak on chromosome 10 (visualised in figure \ref{fig:peak-viz}).
+the max peak on chromosome 10 (figure \ref{fig:peak-viz}).
 
 ```{r peak_region}
 peak_region <- chr10_scores %>%
@@ -356,24 +358,52 @@ ggbio::autoplot(peak_region,
   geom_area(aes(x = start))
 ```
 
-
 ## Computing Windowed Statistics
 
-(example of group_by_overlaps + summarise)
+Another common operation in genomics data analysis is to compute data
+summaries over genomic windows. In `plyranges` this can be achieved via
+the `group_by_overlaps` operator. Continuing with the data from the 
+Human Epigenome Roadmap Consortium data, we can count the number of reads
+that fall into a fixed bins of size 10000bp over a BAM file of H3K27Me3 methylation
+marks from the H1 cell line. We extract reads that have a mapping quality
+score greater than 20:
+
+```{r}
+h1_bam <- read_bam("h1.bam") %>%
+  filter(mapq > 20) 
+```
+
+Note that the BAM file is only read into memory once we perform an operation
+on it. Next we generate our genomic bins using the `tile` function
+from `GenomicRanges`:
+
+```{r}
+bins <- tile(h1_bam, width = 10000)
+```
+
+Finally, we can use `group_by_overlaps` with `summarise` to compute the
+total number of reads with in each window.
+
+```{r}
+h1_bam_read_summary <- h1_bam %>%
+  group_by_overlaps(bins) %>%
+  summarise(n_reads = n())
+```
 
 ## Transition Transversion Ratio
+
 
 (example of group_by + mutate + summarise and working on an object that inherits
 from GRanges)
 
 # Availablilty and Future Work
 
-The _plyranges_ package is available on the Bioconductor project website 
+The `plyranges` package is available on the Bioconductor project website 
 [https://bioconductor.org](https://bioconductor.org) or can be accessed
 via Github [https://github.com/sa-lee/plyranges](https://github.com/sa-lee/plyranges).
 We aim to continue developing the `plyranges` package and extend it for use
 with more complex data structures  such as the 
-_SummarizedExperiment_ class, which can be used for analysing transcriptomic
+SummarizedExperiment class, which can be used for analysing transcriptomic
 and variant data. As the `plyranges` interface encourages tidy data 
 practices it integrates well with the principles of the grammar of graphics, 
 we aim to use it to prepare data for the visualisation of multimodal biological 
