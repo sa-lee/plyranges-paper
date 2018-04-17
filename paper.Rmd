@@ -57,11 +57,11 @@ scientists, and to provide an implementation that scales with their
 ambition.
 
 Several domain specific languages (DSLs) enable scientists to process and reason
-about heterogeneous genomics data heterogeneous genomics data by expressing common
+about heterogeneous genomics data by expressing common
 operations, such as range manipulation and overlap-based joins, using
 the vocabulary of genomics. Their implementations either delegate
 computations to a database, or operate over collections of files in
-standard formats like BED.An example of the former is the Genome Query 
+standard formats like BED. An example of the former is the Genome Query 
 Language (GQL) and its distributed implementation GenAp which use an 
 SQL-like syntax for fast retrieval of information of unprocessed 
 sequencing data @Kozanitis2014-va; @Kozanitis2016-bm. Similarly, the Genometric 
@@ -70,7 +70,7 @@ Query Language (GMQL) implements a relational algebra for combining genomic data
 algebra for performing arithmetic between two or more sets of genomic regions 
 @Quinlan2010-gc. All of the aforementioned DSLs are designed to be evaluated
 either at the command line or embedded in scripts for batch processing. They 
-exist in sparse ecosystem, mostly consisting of UNIX and database tools that
+exist in a sparse ecosystem, mostly consisting of UNIX and database tools that
 lack biological semantics and operate at the level of files and
 database tables.
 
@@ -92,18 +92,18 @@ The Bioconductor infrastructure models the genomic data and operations from the
 perspective of the power user, one who understands and wants to take
 advantage of the subtle differences in data types. This design has
 enabled the development of sophisticated tools, as evidenced by the
-hundreds of packages depending the framework. Unfortunately, the
+hundreds of packages depending on the framework. Unfortunately, the
 myriad of data structures have overlapping purposes and important but
 obscure differences in behaviour that often confuse the typical end
 user.
 
 Recently, there has been a concerted, community effort to standardize
 R data structures and workflows around the notion of tidy data
-@Wickham2014-jc. A tidy dataset is defined to be to a tabular
-data structure that has observations as rows and columns as variables, and each
-tidy dataset represents measurements from a single observational unit.
+@Wickham2014-jc. A tidy dataset is defined as a tabular
+data structure that has observations as rows and columns as variables,
+and all measurements pertain to a single observational unit.
 The tidy data pattern is useful because it allows 
-us to see how the data relates to the design of an experiment
+us to see how the data relate to the design of an experiment
 and the variables measured. The `dplyr` package [@Wickham2017-dplyr] 
 defines an API that maps notions from the general relational algebra to 
 operations on tidy data. It expresses each operation as a cohesive, endomorphic
@@ -129,12 +129,11 @@ roughly matches the intuition of most users.  A GRanges is essentially
 a table, with columns for the chromosome, start and end coordinates,
 and the strand, along with an arbitrary set of additional columns,
 consisting of measurements or metadata specific to the data type or
-experiment. For example a GRanges can be used to represent a gene with
-its chromosomal coordinates, and along with its exon identifiers; or 
-a GRanges can represent an RNA-seq experiment as a set of genes
-with a corresponding count column.
+experiment. For example, a GRanges can represent a gene with
+its chromosomal coordinates, exonic structure, and a count column
+summarized from an RNA-seq experiment.
 
-By definition the GRanges follow  the tidy data pattern: it is a rectangular 
+By definition GRanges follows the tidy data pattern: it is a rectangular 
 table corresponding to a single biological context. Each row contains a
 single observation and each column is a variable about that
 observation. Hence, we have designed the `plyranges` DSL to extend the grammar
