@@ -35,7 +35,7 @@ Yours sincerely,
 
 ---
 
-## Presubmission inquiry checklist
+## Presubmission Enquiry Checklist
 
 1. The software name and the address of the repository used for the software:
 _plyranges_ is the name of our package. The development version is available at
@@ -51,7 +51,9 @@ Output: same as input except for BAM
 4. Between two and four keywords: Data Analysis, Bioconductor, Genomics,
 Grammar
 5. The number of users who tested the software outside of the authors group.
-The software has undergone code review at Bioconductor 
+The software has undergone extensive code review at Bioconductor and users
+have reported bugs at our issues page. We will have more accurate estimates
+of user numbers once the next Bioconductor version is released.
 6. The number of inputs analyzed during testing.
 Our software has high test coverage and has an extensive test suite
 that checks plyranges can read, process and write genomics data from
@@ -60,10 +62,12 @@ a variety of formats.
 Most functions in the package have examples, there is a also an extensive
 vignette detailing how to use _plyranges_.
 8. Any other similar or related methods (with links and citations).
-BEDTools and GenomicRanges
+The _plyranges_ grammar is built on top of the _GenomicRanges_ package (doi = [10.1371/journal.pcbi.1003118](https://doi.org/10.1371/journal.pcbi.1003118)). 
+Another closely related command line tool is BEDtools (doi = 
+[10.1093/bioinformatics/btq033](https://academic.oup.com/bioinformatics/article/26/6/841/244688)).
 9. _A description of continuous integration of the software, a bug reporting URL (such
 as bugzilla or github issues), and a mailing list or chat rooms, if these things exist._
-The github repository has continuous integration handled via travis. This
-service is also handled by the Bioconductor projects build system. Support for
-users is available at the github repository or via
-the Bioconductor support site (https://support.bioconductor.org)
+The github repository has continuous integration handled via travis. Continuous
+integration is also handled by the Bioconductor projects build system. 
+Support for users is available at the github repository or via
+the Bioconductor support site (https://support.bioconductor.org).
