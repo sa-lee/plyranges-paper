@@ -364,6 +364,8 @@ endomorphism in the `plyranges` DSL enables a user to predict the structure of
 the output of their computations and does not require them to learn any 
 additional classes beyond GRanges and DataFrames. 
 
+* compute coverage as an example here
+
 This design pattern strongly deviates from the design of the OO interface in 
 `GenomicRanges`, where many methods return a new class that is unfamiliar to 
 the user upon return. These low-level classes enable efficient computing at the cost
@@ -529,13 +531,16 @@ bins <- tile(h1_bam, width = 10000)
 ```
 
 Finally, we can use `group_by_overlaps` with `summarise` to compute the
-total number of reads with in each window.
+total number of reads within each window.
 
 ```{r}
 h1_bam_read_summary <- h1_bam %>%
   group_by_overlaps(bins) %>%
   summarise(n_reads = n())
 ```
+
+
+https://support.bioconductor.org/p/71601/ also useful example?
 
 ## Transition Transversion Ratio
 
