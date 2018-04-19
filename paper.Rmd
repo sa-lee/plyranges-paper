@@ -409,16 +409,24 @@ feature_tbl <- tribble(
 knitr::kable(feature_tbl, booktabs = TRUE)
 ```
 
-## Limitations
+## Opportunities 
 
 A caveat to constructing a compatible interface with `dplyr` is that 
 `plyranges` makes extensive use of non-standard evaluation in R
 (achieved via the `rlang` package @R-rlang). Simply, this
 means that computations are performed and evaluated in the context of the 
-GRanges objects, which emphasises the interactive nature of the interface.
-This has the disadvantage that programming with `plyranges` becomes more difficult 
-because a user needs to know about non-standard evaluation and user defined
-functions can be difficult to debug.
+GRanges objects; emphasising the interactive nature of our API.
+Consequently, when programming with `plyranges` a user needs to be aware of
+how non-standard evaluation in R works and how to adapt their code 
+accordingly. However, with the rise of R packages like `rlang` this process
+is becoming less difficult.
+
+While GRanges are an intuitive representation for data measured on genomic regions,
+more flexible data structures are required to represent data from multiple sample
+experiments. The Bionconductor class SummarizedExperiment is the canonical 
+data structure for representing data for combining multiomic measurements 
+from multiple samples. The grammar and design of the `plryanges` DSL can be
+naturally extended to the SummarizedExperiment. 
 
 # Results 
 
