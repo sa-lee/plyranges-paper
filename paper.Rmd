@@ -25,17 +25,33 @@ output:
 csl: plos.csl
 ---
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(message = FALSE, warning = FALSE, comment = "#>", 
-                      fig.width = 5, fig.height = 3, fig.align = "center")
-options(digits = 2)
+library(tibble)
+library(knitr)
+opts_chunk$set(message = FALSE, 
+               warning = FALSE, 
+               comment = "#>", 
+               fig.width = 5, 
+               fig.height = 3, 
+               fig.align = "center")
+# for peak figures
 library(ggbio)
-library(ggplot2)
+
 library(plyranges)
 
+# -- Data from the Human Epigenomics RoadMap consortium
+# retrieving a BigWigFile from AnnotationHub
 library(AnnotationHub)
 q <- AnnotationHub()
 # T-cell BW file
 bw_file <- q[["AH33458"]] 
+
+# a BamFile from the H1 cell line
+h1_bam <- "data/GSM433167_BI.H3K27me3.bam"
+
+# Genotype Files accross h1 cell line methylation marks
+h1_geno <- "data/GSM1463263_JS-ESCH1.txt.gz"
+
+
 ```
 # Introduction
 
@@ -395,7 +411,6 @@ to write human readable code because workflows describe what the code is doing
 rather than how its doing it.
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
-library(tibble)
 feature_tbl <- tribble(
   ~Verb, ~Action, ~Description,
   "`mutate()`", "modifies columns", "Takes a GRanges object and a set of name-value pairs and generates a new GRanges object that with modified or new metadata columns or modified core components (start, end, width, seqnames, strand).",
