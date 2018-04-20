@@ -25,17 +25,33 @@ output:
 csl: plos.csl
 ---
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(message = FALSE, warning = FALSE, comment = "#>", 
-                      fig.width = 5, fig.height = 3, fig.align = "center")
-options(digits = 2)
+library(tibble)
+library(knitr)
+opts_chunk$set(message = FALSE, 
+               warning = FALSE, 
+               comment = "#>", 
+               fig.width = 5, 
+               fig.height = 3, 
+               fig.align = "center")
+# for peak figures
 library(ggbio)
-library(ggplot2)
+
 library(plyranges)
 
+# -- Data from the Human Epigenomics RoadMap consortium
+# retrieving a BigWigFile from AnnotationHub
 library(AnnotationHub)
 q <- AnnotationHub()
 # T-cell BW file
 bw_file <- q[["AH33458"]] 
+
+# a BamFile from the H1 cell line
+h1_bam <- "data/GSM433167_BI.H3K27me3.bam"
+
+# Genotype Files accross h1 cell line methylation marks
+h1_geno <- "data/GSM1463263_JS-ESCH1.txt.gz"
+
+
 ```
 # Introduction
 
@@ -144,155 +160,46 @@ design to the existing Bioconductor infrastructure.
 
 ## Genomic Relational Algebra
 
-* Arithmetic
-** Unary
-   IRanges has already explored this space and defined its own
-   "algebra", but we could revisit it. bedtools is also inspiring.
+The `plyranges` DSL defines an expressive algebra for performing genomic
+arithemtic withn and between GRanges objects. Often in analyses of
+genomic regions we are required to make adjustments to the start, end,
+and width columns. This is supported directly in `plyranges` via extending
+the `mutate()` function in `dplyr` (table 1). However, often adjustments
+need to be relative: there is a mutual dependence between the start, end and
+width columns over a genomic region. Changing the start,column needs to change
+either the width or the end to preserve integrity of the object. The GRanges 
+object by design, causes a user to think of the range as a pair of endpoints, 
+and hence we have developed operators that perform coordinate transfomations with 
+the notion of an 'anchoring' combinator. 
 
-   We need to make adjustments to the start, end and width. Extending
-   dplyr, this would just be =mutate()=, e.g.:
-   #+begin_src R
-   mutate(x, start=start+1L)
-   #+end_src
-   And while that could be supported, we typically want to make
-   relative adjustments.
-   
-   One complication is that the start, end and width are mutually
-   dependent. Changing the start, as above, needs to change either
-   the width or the end to preserve integrity. We assume that the
-   user thinks of the range as a pair of endpoints (this is natural
-   in genomics anyway), so setting the start will modify the width
-   but preserve the end. The opposite, preserving the start but not
-   the other endpoint, is =IRanges::shift()=. Maybe we should be more
-   explicit about whether the width or the other endpoint is changed
-   by side effect.
-   
-   Here are some possible verbs for changing the width:
-   * =stretch_start/end= :: Extend the range by 'x' by pulling the
-	start or the end (and leaving the other one anchored),
-   * =squeeze_start/end= :: Opposite of stretch (could just use
-	negative value for stretch, but being explicit seems
-	preferable in many cases),
+For width modification, we can stretch the range by a fixed amount or
+resize the width of a range. The 'anchoring' combinator preserves one of the 
+endpoints or the  midpoint of a range when altering performing
+width modification. It can also be used to preserve coordinates over strand, 
+for example, anchoring over the three prime end of a genomic region, will 
+preserve the start on the negative strand and end on the positive strand. 
+Anchoring the width would not make sense, because it is not a point that can be
+intuitively anchored and stretching and resizing obviously modify the width, 
+so it would not apply to those.
 
-   Not sure whether =squeeze= is actually useful, as we typically
-   want to stretch a range to consider context, not squeeze it.
-    
-   Or maybe it would be more obvious if we supported the notion of
-   anchoring, similar to grouping. This would require decorating the
-   object. For example,
-   #+begin_src R
-     stretch(anchor_end(x), y)
-   #+end_src
-   This pushes information from the syntax to the object state. While
-   it simplifies the grammar, object behavior is more complex and
-   implicit. But if the code is part of the same chain, it seems
-   intuitive.
+Transformations that are width invariant are designed to be explicit
+about the direction to modify and are performed via the shift operator. 
+For GRanges objects strand modulates direction and we distinguish left/right 
+(chromosomal coordinates) from the direction of transcription. To generate
+flanking regions, we use the flank operator which is also explicit about the
+direction of the input range.
 
-   There would be three ways to anchor:
-   * =anchor_start()=
-   * =anchor_end()=
-   * =anchor_center()=
-
-   Anchoring the midpoint would enable symmetric zooming.
-
-   This is basically a deconstruction of =IRanges::resize()=, except
-   =resize()= is absolute. Perhaps =set_width()= could play
-   the role of =resize()=. It is not clear whether we need
-   =set_start()= and =set_end()=.
-    
-   When strand is involved, we will need something like:
-   * =anchor_3p= (start for negative strand)
-   * =anchor_5p= (end for negative strand)
-
-   Anchoring the width would not make sense, because (1) it is not a
-   point that can be intuitively anchored and (2) stretching and
-   squeezing obviously modify the width, so it would not apply to
-   those.
-
-   For width-invariant changes, there is =shift()= from the IRanges
-   API. That is a symmetric operation (positive for right, negative
-   for left). We could introduce:
-   * =shift_left()=
-   * =shift_right()=
-   If we wanted the direction to be explicit.
-
-   Note that with GRanges, strand can modulate direction, and we need
-   to distinguish left/right (chromosomal coordinates) from the
-   direction of transcription:
-   * =shift_upstream()=
-   * =shift_downstream()=
-
-  Note that =resize,GRanges()= and =slop -s= use the strand for
-  direction, i.e, =anchor_3p()= and =anchor_5p()=. Bedtools supports
-  width-relative adjustment with =slop -pct=; we will let the user
-  be explicit, e.g.: =stretch(x, 2*width(x))=.
-  
-  One problem is that can be stretched or shifted out of bounds, or squeezed out of existence.
-  Currently, GenomicRanges will warn the user when a range is pushed
-  out of bounds and suggest calling =trim()=. We should probably
-  throw an error in this case, because it is never a good idea for
-  an object to be in a (semi)-invalid state. The resolution needs
-  to be explicit, as part of the function call. By default,
-  we throw an error. There could be variants of all of these
-  operations with the post fix =_up_to= that imply the trim, 
-  e.g., =stretch_up_to()= or =set_width_up_to()=. Another
-  resolution would be to drop the ranges that would become
-  out of bounds. Those could use the =_or_drop()= postfix.
-  
-  We could also use this anchoring notion to define a new verb
-  =flip()= that generates flanking regions, but that will cause
-  semantic issues with strandedness. Instead, we probably need
-  =flank_left()= and =flank_right()=. With strand, there would be
-  =flank_before()= and =flank_after()=.
-
-** Binary
-   Binary operations between two ranges mostly align with set
-   operations that treat ranges as sets of integers. These are
-   parallel/vectorized operations between two vectors/tables of
-   ranges, so are not to be confused with the aggregating set
-   operations described later.
-
-   Currently, these set operations have the =p= prefix, e.g.,
-   =punion()=. We could make the binary nature more obvious by
-   aliasing them as operators:
-   * =%union%=
-   * =%intersect%=
-   * =%setdiff%=
-
-   There are also operations that relate to the relative positions of
-   two ranges:
-   * =between()=: the range in the gap between the two ranges
-     * To get the separation, just do =width(between(x, y))=
-   * =span()=: a range that spans both ranges (and the gap)
-
-   As a note, to express a binary operation involving the subject of a
-   =mutate()=, =summarize()= or whatever call, we could use the pronoun:
-   #+begin_src R
-   mutate(x, foo = width(. %intersect% other_ranges))
-   #+end_src
-   
-
-## Cohesion
-
-A function is cohesive if it performs a singular task and does not produce
-any side-effects. In the `plyranges` DSL our algebra for performing
-genomic arithmetic is a key example of cohesion. We define anchoring operators
-that decorate a GRanges object with an 'anchor' and modify the semantics
-of performing genomic arithmetic. The anchoring operators amount to fixing a GRanges
-object by its start, center, or end coordinates (or fixing these coordinates
-by strand). This enables any arithmetic function that performs a 
-coordinate transformation to remain cohesive: that is they always perform
-the same operation regardless of whether a GRanges object is anchored or not.
-The only difference is the result of performing the arithmetic changes when
-contextual information is added to the GRanges object. 
-
-Another example of our algebra altering object semantics, while maintaining 
-cohesion is through the 'group_by' operator. Like anchoring, this operator 
-decorates a GRanges object with a column name (or names) that defines a 
-partitioning of the  GRanges by the unique values in the column(s). Functions 
-defined in the  `plyranges` DSL that perform restriction, aggregation, or 
-column modification still perform those singular tasks, however grouping changes
-how those tasks are performed. 
+Binary operations between two ranges mostly align with set
+operations that treat ranges as sets of integers. These are
+parallel/vectorized operations between two vectors/tables of
+ranges, and are not to be confused with the aggregating 
+operations defined in table x. We make the binary nature of these operators
+by having in-fix functions in R for the parallel union, intersect and
+asymetric set difference. There are also operations that relate to the 
+relative positions of two ranges such as the 'between' operator which
+returns the range in the gap between two ranges and the 'span' operator 
+a range that spans both ranges. The binary operations can be expressed within
+the functions in table x.
 
 Our algebra recasts the actions of finding overlaps or nearest neighbours 
 between two genomic regions as a relational join operator. The join operator 
@@ -320,10 +227,31 @@ suffixes by restricting or expanding how a subject 'hits' a query. For example,
 for overlap joins we can use suffixes to encapsulate Allan's Interval Algebra:
 to consider subject 'hits' that are entirely 'within' a query range, the 'within'
 prefix is used. We also use the 'directed' suffix to explicitly include 
-notions of strandedness in our algebra. 
+notions of strandedness in our algebra.    
 
-more comparison to Bioconductor API here? table of join ops?
- 
+## Cohesion
+
+A function is cohesive if it performs a singular task and does not produce
+any side-effects. In the `plyranges` DSL our algebra for performing
+genomic arithmetic is a key example of cohesion. We define anchoring operators
+that decorate a GRanges object with an 'anchor' and modify the semantics
+of performing genomic arithmetic. The anchoring operators amount to fixing a GRanges
+object by its start, center, or end coordinates (or fixing these coordinates
+by strand). This enables any arithmetic function that performs a 
+coordinate transformation to remain cohesive: that is they always perform
+the same operation regardless of whether a GRanges object is anchored or not.
+The only difference is the result of performing the arithmetic changes when
+contextual information is added to the GRanges object. 
+
+Another example of our algebra altering object semantics, while maintaining 
+cohesion is through the 'group_by' operator. Like anchoring, this operator 
+decorates a GRanges object with a column name (or names) that defines a 
+partitioning of the  GRanges by the unique values in the column(s). Functions 
+defined in the  `plyranges` DSL that perform restriction, aggregation, or 
+column modification still perform those singular tasks, however grouping changes
+how those tasks are performed. 
+
+
 ## Consistency 
 
 A core design principle of the `plyranges` DSL is interface consistency:
@@ -358,8 +286,8 @@ additional classes beyond GRanges and DataFrames.
 
 This design pattern strongly deviates from the design of the OO interface in 
 `GenomicRanges`, where many methods return a new class that is unfamiliar to 
-the user upon return. These low-level classes enable efficient computing at the cost
-of complexity and are abstracted away in `plyranges` interface. 
+the user upon return. These low-level classes enable efficient computing at 
+the cost of complexity and are abstracted away in `plyranges` interface. 
 
 ## Fluency 
 
@@ -385,7 +313,6 @@ to write human readable code because workflows describe what the code is doing
 rather than how its doing it.
 
 ```{r, echo = FALSE, eval = FALSE}
-library(tibble)
 feature_tbl <- tribble(
   ~Verb, ~Action, ~Description,
   "`mutate()`", "modifies columns", "Takes a GRanges object and a set of name-value pairs and generates a new GRanges object that with modified or new metadata columns or modified core components (start, end, width, seqnames, strand).",
@@ -508,7 +435,7 @@ marks from the H1 cell line. We extract reads that have a mapping quality
 score greater than 20:
 
 ```{r, eval = FALSE}
-h1_bam <- read_bam("h1.bam") %>%
+alignments <- read_bam(h1_bam) %>%
   filter(mapq > 20) 
 ```
 
