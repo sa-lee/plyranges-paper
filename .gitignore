@@ -3,3 +3,6 @@
 .RData
 .Ruserdata
 data/
+paper_cache/
+paper_files/
+PLOS-submission*
