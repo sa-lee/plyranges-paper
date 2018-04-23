@@ -493,7 +493,6 @@ ti_tv_results %>%
   geom_hline(yintercept = 3, colour = "white", size = 4) +
   labs(x = "Chromosome", y = "Transition Transverion Ratio") +
   coord_flip() 
-
 ```
 
 ## Computing Windowed Statistics
