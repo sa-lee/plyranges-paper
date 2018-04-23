@@ -47,11 +47,6 @@ bw_file <- q[["AH33458"]]
 
 # a BamFile from the H1 cell line
 h1_bam <- "data/GSM433167_BI.H3K27me3.bam"
-
-# Genotype Files accross h1 cell line methylation marks
-h1_geno <- "data/GSM1463263_JS-ESCH1.txt.gz"
-
-
 ```
 # Introduction
 
@@ -424,6 +419,83 @@ ggbio::autoplot(peak_region,
   geom_area(aes(x = start))
 ```
 
+## Quality Control Metrics
+
+```{r, echo = FALSE, warning = FALSE, cache = TRUE}
+# prepare a GRanges object from array data
+library(readr)
+# annotation information available here
+# https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL18952
+# chromosome zero are 'problem' probes and should be filtered
+anno <- read_tsv("data/GPL18952_HumanOmni25M-8v1-1_B.annotated.txt.gz",
+                 trim_ws = TRUE,
+                 col_types = c("cccc----")) %>%
+  dplyr::filter(Chr != "0")
+
+# genotypes for H1 cell line, data starts on line 10
+# data obtained from https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM1463263
+geno <- read_tsv("data/GSM1463263_JS-ESCH1.txt.gz", skip = 10) 
+
+# rename columns
+geno <- geno %>% 
+  dplyr::select(name = `SNP Name`, 
+         score = `GC Score`, 
+         baf = `B Allele Freq`, 
+         logR = `Log R Ratio`)
+
+# merge everything
+complete_vranges_df <- dplyr::inner_join(geno, anno, by = c("name" = "Name")) %>%
+  dplyr::rename(alleles = Alleles, seqnames = Chr, start = MapInfo)
+
+h1_snp_array <- as_granges(complete_vranges_df,
+                           start = as.integer(start),
+                           end = as.integer(start))
+h1_snp_array <- h1_snp_array %>% 
+  mutate(ref = stringr::str_replace(alleles, "\\[(.)/.*", "\\1"),
+         alt = stringr::str_replace(alleles, ".*/(.)\\]", "\\1"))
+```
+
+We have created a GRanges object from genotyping performed on the
+H1 cell line, consisting of approximately two million single nucleotide
+polymorphisms (SNP) and short insertion/deletions (indel). The GRanges object consists
+of 7 columns, relating to the alleles of a SNP or indel, the B-allele frequency,
+log relative intensity of the probes, GC content score over a probe, and the
+name of the probe. We can use this information to compute the transition-transversion
+ratio, a quality control metric, within each chromosome in GRanges object.
+
+First we filter out any insertion or deletion alleles and 
+the SNPs present on the mitochondria then create a logical vector corresponding
+to whether there is a transition event. 
+```{r}
+h1_snp_array <- h1_snp_array %>%
+  filter(!(ref %in% c("I", "D")), seqnames != "M") %>%
+  mutate(transition = (ref %in% c("A", "G") & alt %in% c("G","A")) |
+                      (ref %in% c("C","T") & alt %in% c("T", "C")))
+```
+
+We can then compute the transition-transversion ratio using the `group_by`
+and `summarise` pattern, it is computed as the total number of transition
+SNPs divided by the total number of transversion SNPs within each chromsome
+(figure \ref{fig:titv-viz}).
+
+```{r}
+ti_tv_results <- h1_snp_array %>% 
+  group_by(seqnames) %>%
+  summarise(n_snps = n(),
+            ti_tv = sum(transition) / sum(!transition)) 
+```
+
+```{r titv-viz, echo = FALSE, fig.cap = "Dot plot of chromosomes ordered by estimated transition-transversion ratio. A white reference line is drawn at the expected ratio for a human exome."}
+ti_tv_results %>% 
+  as.data.frame() %>% 
+  ggplot(aes(forcats::fct_reorder(seqnames, ti_tv), ti_tv)) +
+  geom_point() + 
+  geom_hline(yintercept = 3, colour = "white", size = 4) +
+  labs(x = "Chromosome", y = "Transition Transverion Ratio") +
+  coord_flip() 
+
+```
+
 ## Computing Windowed Statistics
 
 Another common operation in genomics data analysis is to compute data
@@ -459,11 +531,6 @@ h1_bam_read_summary <- h1_bam %>%
 
 https://support.bioconductor.org/p/71601/ also useful example?
 
-## Transition Transversion Ratio
-
-
-(example of group_by + mutate + summarise and working on an object that inherits
-from GRanges)
 
 # Availablilty and Future Work
 
@@ -485,6 +552,8 @@ We would like to thank Dr Matthew Ritchie at the Walter and Eliza Hall
 Institute and Dr Paul Harrison for their feedback on earlier drafts of
 this work. We would also like to thank Lori Shepherd and Hèrve Pages
 for the code review they performed. This report was written with
-`knitr` @R-knitr and the figures were made with `ggbio` @R-ggbio.
+`knitr` @R-knitr and the figures were made with `ggbio` @R-ggbio. All code
+required to reproduce this report is available at 
+https://github.com/sa-lee/plyranges-paper.
 
 # References {#references .unnumbered}
