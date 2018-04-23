@@ -203,15 +203,18 @@ relational in the sense that metadata from the query and subject ranges is
 retained in the joined range.  The commonality between
 all join operators in the `plyranges` DSL is to use the index of where in
 the query range the subject range 'hits' the query range as a primary key 
-(figure *need to make figure*). The notion of 'hits' and hence
+(figure \ref{fig:olaps-fig}). The notion of 'hits' and hence
 the resulting key is determined by the type of join (preceding, nearest, follows
 overlaps). 
 
+```{r olaps-fig, echo = FALSE, out.width="400pt", fig.cap="Illustration of the three overlap join operators. Each join takes query and subject range as input (black and grey rectangles, respectively) with associated metadata (pink and orange rectangles respectively). An index for the join is computed via returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query or (take the intersect) of the query ranges with subject ranges and return metadata associated with each input. This principle is gnerally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations."}
+knitr::include_graphics("olaps-figure.png")
+```
 We extend this idea by introducing three types of overlap joins: inner,
-intersect and left. The inner join considers a hit to be any overlap between
-subject and query and expands the query range to have length equal to the 
-number of hits. The intersect join uses the same definition of a hit as
-the inner join but returns a range where the start and end coordinates
+intersect and left (figure \ref{fig:olaps-fig}). The inner join considers a
+hit to be any overlap between subject and query and expands the query range to 
+have length equal to the  number of hits. The intersect join uses the same 
+definition of a hit as the inner join but returns a range where the start and end coordinates
 are the intersect of coordinates in the subject that hit the query. Finally,
 the overlap left join is akin to left outer join in Cobb's relational algebra:
 it performs an overlap inner join but also returns all query ranges that
