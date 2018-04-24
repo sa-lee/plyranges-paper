@@ -498,6 +498,11 @@ ti_tv_results %>%
   coord_flip() 
 ```
 
+<!-- 
+Trivial example? Could do something with a smooth summarised over
+genomic coordinates? 
+-->
+
 ## Computing Windowed Statistics
 
 Another common operation in genomics data analysis is to compute data
@@ -555,7 +560,7 @@ Institute and Dr Paul Harrison for their feedback on earlier drafts of
 this work. We would also like to thank Lori Shepherd and Hèrve Pages
 for the code review they performed. This report was written with
 `knitr` @R-knitr and the figures were made with `ggbio` @R-ggbio. All code
-required to reproduce this report is available at 
+required to reproduce this article is available at 
 https://github.com/sa-lee/plyranges-paper.
 
 # References {#references .unnumbered}
