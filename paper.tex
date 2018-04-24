@@ -297,24 +297,57 @@ single observation and each column is a variable about that observation.
 Hence, we have designed the \texttt{plyranges} DSL to extend the grammar
 and design principles of \texttt{dplyr}: cohesion, consistency,
 endomorphism, and fluency. All of these principles are defined and
-discussed below in the context of the GRanges class. Where applicable we
+discussed below in the context of the GRanges class and an overview of
+the grammar is provided in table \ref{tab:grammar}. Where applicable we
 contrast our design to the existing Bioconductor infrastructure.
+
+\begin{table}[ht]
+\label{tab:grammar}
+\centering
+\begin{tabular}{|l|l|p{4cm}|}
+  \hline
+Operation Type & Verb &  Description \\ 
+  \hline
+  Arithmetic &  `mutate()` & modifies any column \\
+  Arithmetic & `select()` & select columns \\
+  Arithmetic & `arrange()` & sort by columns \\
+  Arithmetic & `set\_width()` & modifies width \\
+  Arithmetic & `stretch()` & extend range by fixed amount \\
+  Arithmetic & `shift\_(direction)` & shift coordinates \\
+  Arithmetic & `flank\_(direction)` & generate flanking regions \\
+  Arithmetic & `\%setop\%` & row-wise set operations \\
+  Restriction & `filter()` & subset rows \\
+  Restriction & `filter\_by\_overlaps()` & subset by overlap \\
+  Restriction & `filter\_by\_non\_overlaps()` & subset by no overlap \\
+  Merging & `join\_overlap\_()` & merge by overlapping ranges \\
+  Merging & `join\_(follow/precedes/nearest)` & merge nearest neighbours \\
+  Merging & `(setop)\_ranges` & range-wise set operations \\
+  Aggregation & `summarise()` & aggregate over column(s) \\ 
+  Aggregation & `disjoin\_ranges()` & aggregate column(s) over the union of end coordinates \\
+  Aggregation & `reduce\_ranges()` & aggregate column(s) by merging overlapping and neighbouring ranges \\
+  Modifier & `group\_by()` & partition by column(s)  \\ 
+  Modifier & `group\_by\_overlaps()` & partition by overlaps \\
+  Modifier & `anchor\_direction()` & fix coordinates \\
+   \hline
+\end{tabular}
+\caption{Overview of `plyranges` grammar.}
+\end{table}
 
 \subsection{Genomic Relational
 Algebra}\label{genomic-relational-algebra}
 
 The \texttt{plyranges} DSL defines an expressive algebra for performing
-genomic arithemtic withn and between GRanges objects. Often in analyses
+genomic arithmetic with and between GRanges objects. Often in analyses
 of genomic regions we are required to make adjustments to the start,
 end, and width columns. This is supported directly in \texttt{plyranges}
 via extending the \texttt{mutate()} function in \texttt{dplyr} (table
-1). However, often adjustments need to be relative: there is a mutual
-dependence between the start, end and width columns over a genomic
-region. Changing the start,column needs to change either the width or
-the end to preserve integrity of the object. The GRanges object by
-design, causes a user to think of the range as a pair of endpoints, and
-hence we have developed operators that perform coordinate transfomations
-with the notion of an `anchoring' combinator.
+\ref{tab:grammar}). However, often adjustments need to be relative:
+there is a mutual dependence between the start, end and width columns
+over a genomic region. Changing the start,column needs to change either
+the width or the end to preserve integrity of the object. The GRanges
+object by design, causes a user to think of the range as a pair of
+endpoints, and hence we have developed operators that perform coordinate
+transformations with the notion of an `anchoring' combinator.
 
 For width modification, we can stretch the range by a fixed amount or
 resize the width of a range. The `anchoring' combinator preserves one of
@@ -336,13 +369,14 @@ which is also explicit about the direction of the input range.
 Binary operations between two ranges mostly align with set operations
 that treat ranges as sets of integers. These are parallel/vectorized
 operations between two vectors/tables of ranges, and are not to be
-confused with the aggregating operations defined in table x. We make the
-binary nature of these operators by having in-fix functions in R for the
-parallel union, intersect and asymetric set difference. There are also
-operations that relate to the relative positions of two ranges such as
-the `between' operator which returns the range in the gap between two
-ranges and the `span' operator a range that spans both ranges. The
-binary operations can be expressed within the functions in table x.
+confused with the merging operations defined in table \ref{tab:grammar}.
+We make the binary nature of these operators by having in-fix functions
+in R for the parallel union, intersect and asymmetric set difference.
+There are also operations that relate to the relative positions of two
+ranges such as the `between' operator which returns the range in the gap
+between two ranges and the `span' operator a range that spans both
+ranges. The binary operations can be expressed within the arithmetic,
+restriction or aggregation functions in table \ref{tab:grammar}.
 
 Our algebra recasts the actions of finding overlaps or nearest
 neighbours between two genomic regions as a relational join operator.
@@ -365,14 +399,15 @@ range as a primary key (figure \ref{fig:olaps-fig}). The notion of
 \end{figure}
 
 We extend this idea by introducing three types of overlap joins: inner,
-intersect and left. The inner join considers a hit to be any overlap
-between subject and query and expands the query range to have length
-equal to the number of hits. The intersect join uses the same definition
-of a hit as the inner join but returns a range where the start and end
-coordinates are the intersect of coordinates in the subject that hit the
-query. Finally, the overlap left join is akin to left outer join in
-Cobb's relational algebra: it performs an overlap inner join but also
-returns all query ranges that are not hit by the subject.
+intersect and left (figure \ref{fig:olaps-fig}). The inner join
+considers a hit to be any overlap between subject and query and expands
+the query range to have length equal to the number of hits. The
+intersect join uses the same definition of a hit as the inner join but
+returns a range where the start and end coordinates are the intersect of
+coordinates in the subject that hit the query. Finally, the overlap left
+join is akin to left outer join in Cobb's relational algebra: it
+performs an overlap inner join but also returns all query ranges that
+are not hit by the subject.
 
 The behaviour of a join operator can be further altered with additional
 suffixes by restricting or expanding how a subject `hits' a query. For
@@ -437,17 +472,17 @@ predict the structure of the output of their computations and does not
 require them to learn any additional classes beyond GRanges and
 DataFrames.
 
-\begin{itemize}
-\tightlist
-\item
-  compute coverage as an example here
-\end{itemize}
-
-This design pattern strongly deviates from the design of the OO
-interface in \texttt{GenomicRanges}, where many methods return a new
-class that is unfamiliar to the user upon return. These low-level
-classes enable efficient computing at the cost of complexity and are
-abstracted away in \texttt{plyranges} interface.
+As an example, in \texttt{plyranges} when we compute coverage over a
+GRanges object, the result of the operation is an expanded GRanges
+object with a score column, corresponding the estimated coverage over a
+genomic region. Hence, the resulting coverage score can easily be
+composed with other expressions in our algebra. This pattern strongly
+deviates from the design of the OO interface in \texttt{GenomicRanges},
+which in the case of computing coverage would return an RleList, an
+object that has many new methods and that is potentially unfamiliar to a
+new user. While, these low-level classes enable efficient computing, the
+increase complexity, and as a consequence are abstracted away in the
+\texttt{plyranges} DSL.
 
 \subsection{Fluency}\label{fluency}
 
@@ -608,7 +643,7 @@ to whether there is a transition event.
 We can then compute the transition-transversion ratio using the
 \texttt{group\_by} and \texttt{summarise} pattern, it is computed as the
 total number of transition SNPs divided by the total number of
-transversion SNPs within each chromsome (figure \ref{fig:titv-viz}).
+transversion SNPs within each chromosome (figure \ref{fig:titv-viz}).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -647,8 +682,9 @@ reads that have a mapping quality score greater than 20:
 \end{Shaded}
 
 Note that the BAM file is only read into memory once we perform an
-operation on it. Next we generate our genomic bins using the
-\texttt{tile} function from \texttt{GenomicRanges}:
+operation on it. Because of interoperability over Bioconductor, we can
+generate genomic bins using the \texttt{tile} function from
+\texttt{GenomicRanges}:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -690,7 +726,7 @@ Institute and Dr Paul Harrison for their feedback on earlier drafts of
 this work. We would also like to thank Lori Shepherd and Hèrve Pages for
 the code review they performed. This report was written with
 \texttt{knitr} {[}17{]} and the figures were made with \texttt{ggbio}
-{[}18{]}. All code required to reproduce this report is available at
+{[}18{]}. All code required to reproduce this article is available at
 https://github.com/sa-lee/plyranges-paper.
 
 \section*{References}\label{references}

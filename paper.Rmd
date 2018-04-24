@@ -17,7 +17,7 @@ address:
     address: Bioinformatics and Computational Biology, Genentech, Inc., South San Francisco, California, United States of America 
 abstract: |
     The Bioconductor project has created many useful data abstractions for analysing high-throughput genomics experiments. However, there is a cognitive load placed on a user in learning a data abstraction and understanding its appropriate use. Throughout a standard workflow, a user must navigate and know many of these abstractions to perform an genomic analysis task, when a single data abstraction, a GRanges object will suffice. The GRanges class naturally represent genomic intervals and their associated measurements. By recognising that the GRanges class follows 'tidy' data principles we have created a grammar of genomic data transformation. The grammar defines verbs for performing actions on and between genomic interval data. It provides a principled way
-    of performing common genomic data analysis tasks through a coherent interface to existing Bioconductor infrastructure, resulting in human readable analysis workflows. We have implemented this grammar as an Bioconductor/R package called plyranges.
+    of performing common genomic data analysis tasks through a coherent interface to existing Bioconductor infrastructure, resulting in human readable analysis workflows. We have implemented this grammar as a Bioconductor/R package called plyranges.
   
 bibliography: references.bib
 output: 
@@ -150,21 +150,55 @@ single observation and each column is a variable about that
 observation. Hence, we have designed the `plyranges` DSL to extend the grammar
 and design principles of `dplyr`:  cohesion, consistency, endomorphism,
 and fluency. All of these principles are defined and discussed
-below in the context of the GRanges class. Where applicable we contrast our 
-design to the existing Bioconductor infrastructure.
+below in the context of the GRanges class and an overview of 
+the grammar is provided in table \ref{tab:grammar}. 
+Where applicable we contrast our design to the existing Bioconductor infrastructure.
+
+\begin{table}[ht]
+\label{tab:grammar}
+\centering
+\begin{tabular}{|l|l|p{4cm}|}
+  \hline
+Operation Type & Verb &  Description \\ 
+  \hline
+  Arithmetic &  `mutate()` & modifies any column \\
+  Arithmetic & `select()` & select columns \\
+  Arithmetic & `arrange()` & sort by columns \\
+  Arithmetic & `set\_width()` & modifies width \\
+  Arithmetic & `stretch()` & extend range by fixed amount \\
+  Arithmetic & `shift\_(direction)` & shift coordinates \\
+  Arithmetic & `flank\_(direction)` & generate flanking regions \\
+  Arithmetic & `\%setop\%` & row-wise set operations \\
+  Restriction & `filter()` & subset rows \\
+  Restriction & `filter\_by\_overlaps()` & subset by overlap \\
+  Restriction & `filter\_by\_non\_overlaps()` & subset by no overlap \\
+  Merging & `join\_overlap\_()` & merge by overlapping ranges \\
+  Merging & `join\_(follow/precedes/nearest)` & merge nearest neighbours \\
+  Merging & `(setop)\_ranges` & range-wise set operations \\
+  Aggregation & `summarise()` & aggregate over column(s) \\ 
+  Aggregation & `disjoin\_ranges()` & aggregate column(s) over the union of end coordinates \\
+  Aggregation & `reduce\_ranges()` & aggregate column(s) by merging overlapping and neighbouring ranges \\
+  Modifier & `group\_by()` & partition by column(s)  \\ 
+  Modifier & `group\_by\_overlaps()` & partition by overlaps \\
+  Modifier & `anchor\_direction()` & fix coordinates \\
+   \hline
+\end{tabular}
+\caption{Overview of `plyranges` grammar.}
+\end{table}
 
 ## Genomic Relational Algebra
 
 The `plyranges` DSL defines an expressive algebra for performing genomic
-arithemtic withn and between GRanges objects. Often in analyses of
+arithmetic with and between GRanges objects. Often in analyses of
 genomic regions we are required to make adjustments to the start, end,
 and width columns. This is supported directly in `plyranges` via extending
-the `mutate()` function in `dplyr` (table 1). However, often adjustments
+the `mutate()` function in `dplyr` (table \ref{tab:grammar}). 
+However, often adjustments
 need to be relative: there is a mutual dependence between the start, end and
 width columns over a genomic region. Changing the start,column needs to change
 either the width or the end to preserve integrity of the object. The GRanges 
 object by design, causes a user to think of the range as a pair of endpoints, 
-and hence we have developed operators that perform coordinate transfomations with 
+and hence we have developed operators that perform coordinate transformations with 
 the notion of an 'anchoring' combinator. 
 
 For width modification, we can stretch the range by a fixed amount or
@@ -187,14 +221,15 @@ direction of the input range.
 Binary operations between two ranges mostly align with set
 operations that treat ranges as sets of integers. These are
 parallel/vectorized operations between two vectors/tables of
-ranges, and are not to be confused with the aggregating 
-operations defined in table x. We make the binary nature of these operators
+ranges, and are not to be confused with the merging 
+operations defined in table \ref{tab:grammar}. We make the binary nature of 
+these operators
 by having in-fix functions in R for the parallel union, intersect and
-asymetric set difference. There are also operations that relate to the 
+asymmetric set difference. There are also operations that relate to the 
 relative positions of two ranges such as the 'between' operator which
 returns the range in the gap between two ranges and the 'span' operator 
 a range that spans both ranges. The binary operations can be expressed within
-the functions in table x.
+the arithmetic, restriction or aggregation functions in table \ref{tab:grammar}.
 
 Our algebra recasts the actions of finding overlaps or nearest neighbours 
 between two genomic regions as a relational join operator. The join operator 
@@ -210,6 +245,7 @@ overlaps).
 ```{r olaps-fig, echo = FALSE, out.width="400pt", fig.cap="Illustration of the three overlap join operators. Each join takes query and subject range as input (black and grey rectangles, respectively) with associated metadata (pink and orange rectangles respectively). An index for the join is computed via returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query or (take the intersect) of the query ranges with subject ranges and return metadata associated with each input. This principle is gnerally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations."}
 knitr::include_graphics("olaps-figure.png")
 ```
+
 We extend this idea by introducing three types of overlap joins: inner,
 intersect and left (figure \ref{fig:olaps-fig}). The inner join considers a
 hit to be any overlap between subject and query and expands the query range to 
@@ -249,7 +285,6 @@ defined in the  `plyranges` DSL that perform restriction, aggregation, or
 column modification still perform those singular tasks, however grouping changes
 how those tasks are performed. 
 
-
 ## Consistency 
 
 A core design principle of the `plyranges` DSL is interface consistency:
@@ -280,12 +315,16 @@ endomorphism in the `plyranges` DSL enables a user to predict the structure of
 the output of their computations and does not require them to learn any 
 additional classes beyond GRanges and DataFrames. 
 
-* compute coverage as an example here
-
-This design pattern strongly deviates from the design of the OO interface in 
-`GenomicRanges`, where many methods return a new class that is unfamiliar to 
-the user upon return. These low-level classes enable efficient computing at 
-the cost of complexity and are abstracted away in `plyranges` interface. 
+As an example, in `plyranges` when we compute coverage over a GRanges object,
+the result of the operation is an expanded GRanges object with a score column,
+corresponding the estimated coverage over a genomic region. Hence, the resulting
+coverage score can easily be composed with other expressions in our algebra.
+This pattern strongly deviates from the design of the OO interface in 
+`GenomicRanges`, which in the case of computing coverage would return an RleList,
+an object that has many new methods and that is potentially unfamiliar to 
+a new user. While, these low-level classes enable efficient computing,
+the increase complexity, and as a consequence are abstracted away in the 
+`plyranges` DSL. 
 
 ## Fluency 
 
@@ -309,22 +348,6 @@ forward pipe operator,`%>%`  (exported from the R package `magrittr`
 @R-magrittr), which can be read as the word 'then'. Overall, this allows users 
 to write human readable code because workflows describe what the code is doing 
 rather than how its doing it.
-
-```{r, echo = FALSE, eval = FALSE}
-feature_tbl <- tribble(
-  ~Verb, ~Action, ~Description,
-  "`mutate()`", "modifies columns", "Takes a GRanges object and a set of name-value pairs and generates a new GRanges object that with modified or new metadata columns or modified core components (start, end, width, seqnames, strand).",
- "`filter()`", "subset rows", "Takes a GRanges object and a set of logical expressions and restricts the GRanges object to where all logical expressions are true.",
- "`summarise()`", "aggregate one or more columns by a function", "Takes a GRanges object and a set of name-value pairs and aggregates the GRanges according to functions evaluated in the name-value pairs.",
-"`group_by()`", "partition a GRanges object by a column", "Create an implicit grouping of GRanges object by one or more columns. This modifies the actions of verbs, so they are performed on each partition created by the grouping.",
-"`select()`", "select columns of a GRanges objects", "Drop or reorder metadata columns.",
-"`arrange()`", "sort a GRanges object by columns", "Sort a GRanges object by named variables",
-"`disjoin_ranges()`", "aggregate one more columns of a GRanges object over the union of end coordinates", "Takes a GRanges object and a set of name-value pairs and expands the GRanges object by taking the union of end coordinates. For each row that was included to form the final union, the aggregation function defined by a name-value pair is called.",
-"`reduce_ranges()`", "aggregate one more columns of a GRanges object by merging overlapping and neighbouring ranges.", "Takes a GRanges object and a set of name-value pairs and reduces the GRanges object by merging overlapping and neighouring ranges. For each row that was included to form merged range, the aggregation function defined by a name-value pair is called."
-)
-
-knitr::kable(feature_tbl, format = "latex")
-```
 
 ## Opportunities 
 
@@ -469,6 +492,7 @@ ratio, a quality control metric, within each chromosome in GRanges object.
 First we filter out any insertion or deletion alleles and 
 the SNPs present on the mitochondria then create a logical vector corresponding
 to whether there is a transition event. 
+
 ```{r}
 h1_snp_array <- h1_snp_array %>%
   filter(!(ref %in% c("I", "D")), seqnames != "M") %>%
@@ -478,7 +502,7 @@ h1_snp_array <- h1_snp_array %>%
 
 We can then compute the transition-transversion ratio using the `group_by`
 and `summarise` pattern, it is computed as the total number of transition
-SNPs divided by the total number of transversion SNPs within each chromsome
+SNPs divided by the total number of transversion SNPs within each chromosome
 (figure \ref{fig:titv-viz}).
 
 ```{r}
@@ -519,8 +543,8 @@ alignments <- read_bam(h1_bam) %>%
 ```
 
 Note that the BAM file is only read into memory once we perform an operation
-on it. Next we generate our genomic bins using the `tile` function
-from `GenomicRanges`:
+on it. Because of interoperability over Bioconductor, we can generate
+genomic bins using the `tile` function from `GenomicRanges`:
 
 ```{r, eval = FALSE}
 bins <- tile(h1_bam, width = 10000)
@@ -551,7 +575,6 @@ and variant data. As the `plyranges` interface encourages tidy data
 practices it integrates well with the principles of the grammar of graphics, 
 we aim to use it to prepare data for the visualisation of multimodal biological 
 datasets.
-
 
 # Acknowledgements
 
