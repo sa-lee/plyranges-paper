@@ -190,7 +190,7 @@ transformation. The grammar defines verbs for performing actions on and
 between genomic interval data. It provides a principled way of
 performing common genomic data analysis tasks through a coherent
 interface to existing Bioconductor infrastructure, resulting in human
-readable analysis workflows. We have implemented this grammar as an
+readable analysis workflows. We have implemented this grammar as a
 Bioconductor/R package called plyranges.
 
 % Please keep the Author Summary between 150 and 200 words
@@ -255,8 +255,7 @@ take advantage of the subtle differences in data types. This design has
 enabled the development of sophisticated tools, as evidenced by the
 hundreds of packages depending on the framework. Unfortunately, the
 myriad of data structures have overlapping purposes and important but
-obscure differences in behaviour that often confuse the typical end
-user.
+obscure differences in behavior that often confuse the typical end user.
 
 Recently, there has been a concerted, community effort to standardize R
 data structures and workflows around the notion of tidy data {[}10{]}. A
@@ -279,12 +278,14 @@ language on top of a key subset of Bioconductor data structures and thus
 fully integrates with the Bioconductor framework, gaining access to its
 scalable data representations and sophisticated statistical methods.
 
-\section{Design and Implementation}\label{design-and-implementation}
+\section{Genomic relational algebra}\label{genomic-relational-algebra}
 
-The \texttt{plyranges} DSL is built on the most general Bioconductor
-data structure, GRanges, which is capable of representing all types of
-genomic data at a semantic level that roughly matches the intuition of
-most users. A GRanges is essentially a table, with columns for the
+\subsection{Data model}\label{data-model}
+
+The \texttt{plyranges} DSL is built on the core Bioconductor data
+structure GRanges, which is capable of representing all types of genomic
+data at a semantic level that roughly matches the intuition of most
+users. A GRanges is essentially a table, with columns for the
 chromosome, start and end coordinates, and the strand, along with an
 arbitrary set of additional columns, consisting of measurements or
 metadata specific to the data type or experiment. For example, a GRanges
@@ -333,61 +334,88 @@ Operation Type & Verb &  Description \\
 \caption{Overview of `plyranges` grammar.}
 \end{table}
 
-\subsection{Genomic Relational
-Algebra}\label{genomic-relational-algebra}
+\subsection{Algebraic operations}\label{algebraic-operations}
 
 The \texttt{plyranges} DSL defines an expressive algebra for performing
-genomic arithmetic with and between GRanges objects. Often in analyses
-of genomic regions we are required to make adjustments to the start,
-end, and width columns. This is supported directly in \texttt{plyranges}
-via extending the \texttt{mutate()} function in \texttt{dplyr} (table
-\ref{tab:grammar}). However, often adjustments need to be relative:
-there is a mutual dependence between the start, end and width columns
-over a genomic region. Changing the start,column needs to change either
-the width or the end to preserve integrity of the object. The GRanges
-object by design, causes a user to think of the range as a pair of
-endpoints, and hence we have developed operators that perform coordinate
-transformations with the notion of an `anchoring' combinator.
+genomic operations with and between GRanges objects (see table
+\ref{tab:grammar}). {[}ML: add a couple overview sentences indicating
+the classes of operations like arithmetic, merging, aggregation{]}
 
-For width modification, we can stretch the range by a fixed amount or
-resize the width of a range. The `anchoring' combinator preserves one of
-the endpoints or the midpoint of a range when altering performing width
-modification. It can also be used to preserve coordinates over strand,
-for example, anchoring over the three prime end of a genomic region,
-will preserve the start on the negative strand and end on the positive
-strand. Anchoring the width would not make sense, because it is not a
-point that can be intuitively anchored and stretching and resizing
-obviously modify the width, so it would not apply to those.
+GRanges describes the within-sequence coordinates of a range by its
+\emph{start}, \emph{end} and \emph{width}. Those three variables are
+mutually dependent and partially redundant, so direct manipulation of
+them is problematic. For example, changing the \emph{width} column needs
+to change either the \emph{start}, \emph{end} or both to preserve
+integrity of the object. We introduce the \emph{anchor} combinator to
+disambiguate these adjustments. Supported anchor points include the
+start, end and midpoint, as well as the 3' and 5' ends for
+strand-directed ranges. For example, if we anchor the start, then
+setting the width will adjust the end while leaving the start
+stationary.
 
-Transformations that are width invariant are designed to be explicit
-about the direction to modify and are performed via the shift operator.
-For GRanges objects strand modulates direction and we distinguish
-left/right (chromosomal coordinates) from the direction of
-transcription. To generate flanking regions, we use the flank operator
-which is also explicit about the direction of the input range.
+{[}ML: where does the word `combinator' come from here? maybe `modifier'
+is better? that's what the table uses{]}
 
-Binary operations between two ranges mostly align with set operations
-that treat ranges as sets of integers. These are parallel/vectorized
-operations between two vectors/tables of ranges, and are not to be
-confused with the merging operations defined in table \ref{tab:grammar}.
-We make the binary nature of these operators by having in-fix functions
-in R for the parallel union, intersect and asymmetric set difference.
-There are also operations that relate to the relative positions of two
-ranges such as the `between' operator which returns the range in the gap
-between two ranges and the `span' operator a range that spans both
-ranges. The binary operations can be expressed within the arithmetic,
-restriction or aggregation functions in table \ref{tab:grammar}.
+The algebra also defines conveniences for relative coordinate
+adjustments: \emph{shift} (unanchored adjustment to both start and end)
+and \emph{stretch} (anchored adjustment of width). We can perform any
+relative adjustment by some combination of those two operations. The
+\emph{stretch} operation requires an anchor and assumes the midpoint by
+default. Since \emph{shift} is unanchored, the user specifies a suffix
+for indicating the direction: left/right or, for stranded features,
+upstream/downstream. For example, \emph{shift\_right} shifts a range to
+the right.
 
-Our algebra recasts the actions of finding overlaps or nearest
-neighbours between two genomic regions as a relational join operator.
-The join operator acts on two GRanges object, a query and a subject. The
-join operator is relational in the sense that metadata from the query
-and subject ranges is retained in the joined range. The commonality
-between all join operators in the \texttt{plyranges} DSL is to use the
-index of where in the query range the subject range `hits' the query
-range as a primary key (figure \ref{fig:olaps-fig}). The notion of
-`hits' and hence the resulting key is determined by the type of join
-(preceding, nearest, follows overlaps).
+The \emph{flank} operation generates new ranges that are adjacent to
+existing ones. This is useful, for example, when generating upstream
+promoter regions for genes. Analogous to \emph{shift}, a suffix
+indicates the side of the input range to flank.
+
+As with other genomic grammars, we define set operations that treat
+ranges as sets of integers, including \emph{intersect}, \emph{union},
+\emph{difference}, and \emph{complement}. There are two sets of these:
+parallel and merging. The parallel operations map to infix operators,
+which we surround with \emph{\%} symbols in accordance with R syntax
+rules. For example, the parallel intersection (\emph{x \%intersect\% y})
+finds the intersecting range between \emph{xi} and \emph{yi} for
+\emph{i} in \emph{1\ldots{}n}, where \emph{n} is the length of both
+\emph{x} and \emph{y}. In constrast, the merging intersection
+(\emph{intersect\_ranges(x, y)}) returns a new set of disjoint ranges
+representing whereever there was overlap between a range in \emph{x} and
+a range in \emph{y}. We use the infix syntax for the parallel
+operations, since it is the conventional syntax for parallel, binary
+operations in R. Finding the parallel union will fail when two ranges
+have a gap, so we introduce a \emph{span} operator that takes the union
+while filling any gap. The \emph{complement} operation is unique in that
+it is unary. It finds the regions not covered by any of the ranges in a
+single set. Closely related is the \emph{between} parallel operation,
+which finds the gap separating \emph{xi} and \emph{yi}. The binary
+operations are callable from within the arithmetic, restriction and
+aggregation expressions.
+
+Our algebra recasts finding overlaps or nearest neighbours between two
+genomic regions as variants of the relational join operator. A join acts
+on two GRanges objects, a query and a subject. The join operator is
+relational in the sense that metadata from the query and subject ranges
+is retained in the joined range. All join operators in the
+\texttt{plyranges} DSL generate a set of hits based on overlap or
+proximity of ranges and use those hits to merge the two datasets in
+different ways. There are four supported matching algorithms:
+\emph{overlap}, \emph{nearest}, \emph{precede}, and \emph{follow}. We
+can further restrict the matching by whether the query is completely
+\emph{within} the subject, and adding the \emph{directed} suffix ensures
+that matching ranges have the same direction (strand).
+
+For merging based on the hits, we have three modes: \emph{inner},
+\emph{intersect} and \emph{left}. The \emph{inner} overlap join is
+similar to the conventional inner join in that there is a row in the
+result for every match. A major difference is that the matching is not
+by identity, so we have to choose one of the ranges from each pair. We
+always choose the left range. The \emph{intersect} join uses the
+intersection instead of the left range. Finally, the overlap \emph{left}
+join is akin to left outer join in Cobb's relational algebra: it
+performs an overlap inner join but also returns all query ranges that
+are not hit by the subject.
 
 \begin{figure}
 
@@ -398,23 +426,8 @@ range as a primary key (figure \ref{fig:olaps-fig}). The notion of
 \caption{Illustration of the three overlap join operators. Each join takes query and subject range as input (black and grey rectangles, respectively) with associated metadata (pink and orange rectangles respectively). An index for the join is computed via returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query or (take the intersect) of the query ranges with subject ranges and return metadata associated with each input. This principle is gnerally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations.}\label{fig:olaps-fig}
 \end{figure}
 
-We extend this idea by introducing three types of overlap joins: inner,
-intersect and left (figure \ref{fig:olaps-fig}). The inner join
-considers a hit to be any overlap between subject and query and expands
-the query range to have length equal to the number of hits. The
-intersect join uses the same definition of a hit as the inner join but
-returns a range where the start and end coordinates are the intersect of
-coordinates in the subject that hit the query. Finally, the overlap left
-join is akin to left outer join in Cobb's relational algebra: it
-performs an overlap inner join but also returns all query ranges that
-are not hit by the subject.
-
-The behaviour of a join operator can be further altered with additional
-suffixes by restricting or expanding how a subject `hits' a query. For
-example, for overlap joins we can use suffixes to encapsulate Allan's
-Interval Algebra: to consider subject `hits' that are entirely `within'
-a query range, the `within' prefix is used. We also use the `directed'
-suffix to explicitly include notions of strandedness in our algebra.
+{[} add a simple paragraph about how we can filter, sort, group and
+aggregate just like other tabular structures {]}
 
 \subsection{Cohesion}\label{cohesion}
 
