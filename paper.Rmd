@@ -147,18 +147,6 @@ experiment (figure \ref{fig:GRanges}).
 knitr::include_graphics("diagrams/diagrams.001.png")
 ```
 
-By definition GRanges follows the tidy data pattern: it is a rectangular 
-table corresponding to a single biological context. Each row contains a
-single observation and each column is a variable about that
-observation. Hence, we have designed the `plyranges` DSL to extend the grammar
-and design principles of `dplyr`:  cohesion, consistency, endomorphism,
-and fluency. All of these principles are defined and discussed
-below in the context of the GRanges class and an overview of 
-the grammar is provided in table \ref{tab:grammar}. 
-Where applicable we contrast our design to the existing Bioconductor infrastructure.
-
-*
-
 \begin{table}[ht]
 \label{tab:grammar}
 \centering
@@ -166,31 +154,55 @@ Where applicable we contrast our design to the existing Bioconductor infrastruct
   \hline
   & Verb &  Description \\ 
   \hline
-  Arithmetic &  {\tt mutate()} & modifies any column \\
-  Arithmetic & `select()` & select columns \\
-  Arithmetic & `arrange()` & sort by columns \\
-  Arithmetic & `set\_width()` & modifies width \\
-  Arithmetic & `stretch()` & extend range by fixed amount \\
-  Arithmetic & `shift\_(direction)` & shift coordinates \\
-  Arithmetic & `flank\_(direction)` & generate flanking regions \\
-  Arithmetic & `\%setop\%` & row-wise set operations \\
-  Restriction & `filter()` & subset rows \\
-  Restriction & `filter\_by\_overlaps()` & subset by overlap \\
-  Restriction & `filter\_by\_non\_overlaps()` & subset by no overlap \\
-  Merging & `join\_overlap\_()` & merge by overlapping ranges \\
-  Merging & `join\_(follow/precedes/nearest)` & merge nearest neighbours \\
-  Merging & `(setop)\_ranges` & range-wise set operations \\
-  Aggregation & `summarise()` & aggregate over column(s) \\ 
-  Aggregation & `disjoin\_ranges()` & aggregate column(s) over the union of end coordinates \\
-  Aggregation & `reduce\_ranges()` & aggregate column(s) by merging overlapping and neighbouring ranges \\
-  Modifier & `group\_by()` & partition by column(s)  \\ 
-  Modifier & `group\_by\_overlaps()` & partition by overlaps \\
-  Modifier & `anchor\_direction()` & fix coordinates \\
+   & \textbf{\emph{summarise()}} & aggregate over column(s) \\ 
+   Aggregation & \emph{disjoin\_ranges()} & aggregate column(s) over the union of end coordinates \\
+   &  \emph{\reduce\_ranges()} & aggregate column(s) by merging overlapping and neighbouring ranges \\
+   \hline
+   &  \textbf{\emph{mutate()}} & modifies any column \\
+   & \textbf{\emph{select()}} & select columns \\
+  Arithmetic (Unary) & \textbf{\emph{arrange()}} & sort by columns \\
+   & \emph{stretch()} & extend range by fixed amount \\
+   &  \emph{shift\_(direction)} & shift coordinates \\
+   & \emph{flank\_(direction)} & generate flanking regions \\
+   & \emph{\%intersection\% } & row-wise intersection \\
+   & \emph{\%union\%} & row-wise union \\
+  Arithmetic (Binary) & { \tt \%setdiff\% } & row-wise set difference \\
+   & \emph{between()} & row-wise gap range \\
+   & \emph{span()} & row-wise spanning range \\
+   \hline
+    & \emph{join\_overlap\_*()} & merge by overlapping ranges \\
+    & \emph{join\_nearest} & merge by nearest neighbour ranges \\
+    & \emph{join\_follow} & merge by following ranges \\
+    Merging & \emph{join\_precedes} & merge by preceding ranges \\
+    & \emph{union_ranges} & range-wise union \\
+    & \emph{intersect_ranges} & range-wise intersect \\
+    & \emph{setdiff_ranges} & range-wise set difference \\
+    & \emph{complement_ranges} & range-wise union \\
+  \hline
+   & \textbf{\emph{anchor\_direction()}} & fix coordinates at direction \\
+  Modifier & \textbf{\emph{group\_by()}} & partition by column(s)  \\ 
+   & \emph{group\_by\_overlaps()} & partition by overlaps \\\
+   \hline
+   & \textbf{\emph{filter()}} & subset rows \\
+  Restriction & \emph{filter\_by\_overlaps()} & subset by overlap \\
+    & \emph{filter\_by\_non\_overlaps()} & subset by no overlap \\
    \hline
 \end{tabular}
-\caption{Overview of `plyranges` grammar. Expand here (bold to emphasise
-dplyr adaptations)}
+\caption{Overview of the \texttt{plyranges} grammar. The core verbs are
+briefly described and categorised into one of: aggregation, unary or binary
+arithmetic, merging, modifier, or restriction. A verb is given bold text if
+its origin is from the \texttt{dplyr} grammar.}
 \end{table}
+
+By definition GRanges follows the tidy data pattern: it is a rectangular 
+table corresponding to a single biological context. Each row contains a
+single observation and each column is a variable about that
+observation. Hence, we have designed the `plyranges` DSL to extend the grammar
+and design principles of `dplyr`:  cohesion, consistency, endomorphism,
+and fluency. All of these principles are defined and discussed
+below in the context of the GRanges class and an overview of 
+the grammar is provided in table \ref{tab:grammar}. Where applicable we contrast
+our design to the existing Bioconductor infrastructure.
 
 ## Algebraic operations
 
