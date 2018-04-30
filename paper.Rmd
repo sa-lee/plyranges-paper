@@ -96,7 +96,7 @@ interoperability by allowing users and developers to use these
 abstractions in their own code and packages. Other genomic DSLs 
 that are embedded in programming languages include pybedtools and valr 
 [@Dale2011-js; @Kent2017], however these packages lack the interoperability
-provided by in the aforementioned Bioconductor packages and are not easily 
+provided by the aforementioned Bioconductor packages and are not easily 
 extended.
 
 The Bioconductor infrastructure models the genomic data and operations from the
@@ -130,7 +130,6 @@ key subset of Bioconductor data structures and thus fully integrates
 with the Bioconductor framework, gaining access to its scalable data
 representations and sophisticated statistical methods.
 
-
 # Genomic relational algebra
 
 ## Data model
@@ -142,9 +141,11 @@ roughly matches the intuition of most users.  A GRanges is essentially
 a table, with columns for the chromosome, start and end coordinates,
 and the strand, along with an arbitrary set of additional columns,
 consisting of measurements or metadata specific to the data type or
-experiment. For example, a GRanges can represent a gene with
-its chromosomal coordinates, exonic structure, and a count column
-summarized from an RNA-seq experiment.
+experiment (figure \ref{fig:GRanges}).
+
+```{r GRanges, echo = FALSE, out.width="400pt", fig.cap="An illustration of the GRanges data model for a sample from an RNA-seq experiment. The core components of the data model inlcude a seqnames column (representing the chromosome), a ranges column which consists of start and end coordinates for a genomic region, and a strand identifier (either positive, negative, or unstranded). Metadata are included as columns to the right of the dotted line as annotations (gene_id) or range level covariates (GC score and count)."}
+knitr::include_graphics("diagrams/diagrams.001.png")
+```
 
 By definition GRanges follows the tidy data pattern: it is a rectangular 
 table corresponding to a single biological context. Each row contains a
@@ -156,14 +157,16 @@ below in the context of the GRanges class and an overview of
 the grammar is provided in table \ref{tab:grammar}. 
 Where applicable we contrast our design to the existing Bioconductor infrastructure.
 
+*
+
 \begin{table}[ht]
 \label{tab:grammar}
 \centering
 \begin{tabular}{|l|l|p{4cm}|}
   \hline
-Operation Type & Verb &  Description \\ 
+  & Verb &  Description \\ 
   \hline
-  Arithmetic &  `mutate()` & modifies any column \\
+  Arithmetic &  {\tt mutate()} & modifies any column \\
   Arithmetic & `select()` & select columns \\
   Arithmetic & `arrange()` & sort by columns \\
   Arithmetic & `set\_width()` & modifies width \\
@@ -185,7 +188,8 @@ Operation Type & Verb &  Description \\
   Modifier & `anchor\_direction()` & fix coordinates \\
    \hline
 \end{tabular}
-\caption{Overview of `plyranges` grammar.}
+\caption{Overview of `plyranges` grammar. Expand here (bold to emphasise
+dplyr adaptations)}
 \end{table}
 
 ## Algebraic operations
@@ -269,7 +273,7 @@ join in Cobb's relational algebra: it performs an overlap inner join
 but also returns all query ranges that are not hit by the subject.
 
 ```{r olaps-fig, echo = FALSE, out.width="400pt", fig.cap="Illustration of the three overlap join operators. Each join takes query and subject range as input (black and grey rectangles, respectively) with associated metadata (pink and orange rectangles respectively). An index for the join is computed via returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query or (take the intersect) of the query ranges with subject ranges and return metadata associated with each input. This principle is gnerally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations."}
-knitr::include_graphics("olaps-figure.png")
+knitr::include_graphics("diagrams/diagrams.002.png")
 ```
 
 [ add a simple paragraph about how we can filter, sort, group and
@@ -382,6 +386,7 @@ naturally extended to the SummarizedExperiment.
 
 # Results 
 
+(change this)
 Here we provide examples on how to use the `plyranges` DSL to construct
 genomic data workflows and highlight its interoperability with existing
 Bionconductor packages.
@@ -437,7 +442,7 @@ modifying the the width.
 chr10_max_score_region <- chr10_scores %>%
   filter(score == max(score)) %>% 
   anchor_center() %>%
-  set_width(5000)
+  mutate(width = 5000)
 ```
 
 Finally, the overlap inner join is used to restrict the chromosome 10
