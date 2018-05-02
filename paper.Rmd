@@ -40,13 +40,39 @@ library(plyranges)
 
 # -- Data from the Human Epigenomics RoadMap consortium
 # retrieving a BigWigFile from AnnotationHub
+
+if (!dir.exists("./data")) dir.create("./data")
+
 library(AnnotationHub)
 q <- AnnotationHub()
 # T-cell BW file
 bw_file <- q[["AH33458"]] 
 
 # a BamFile from the H1 cell line
-h1_bam <- "data/GSM433167_BI.H3K27me3.bam"
+h1_bam <- "./data/GSM433167_BI.H3K27me3.bam"
+if (!file.exists(h1_bam))
+  download.file(
+    url = "ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM433nnn/GSM433167/suppl/GSM433167%5FBI%2EH3K27me3%2Ebam",
+    destfile = h1_bam
+  )
+
+# array data for h1 cell line
+# illumina annotations
+array_info <- "data/GPL18952_HumanOmni25M-8v1-1_B.annotated.txt.gz"
+if (!file.exists(array_info)) 
+  download.file(
+    url = "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GPL18952&format=file&file=GPL18952%5FHumanOmni2%2D5%2D8%2Dv1%2D1%2DC%2Ecsv%2Egz",
+    destfile = array_info
+  )
+
+snp_info <- "data/GSM1463263_JS-ESCH1.txt.gz"
+if (!file.exists(snp_info))
+  download.file(
+    url = "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSM1463263&format=file&file=GSM1463263%5FJS%2DESCH1%2Etxt%2Egz",
+    destfile = snp_info
+  )
+
+
 ```
 # Introduction
 
@@ -134,6 +160,18 @@ representations and sophisticated statistical methods.
 
 ## Data model
 
+\begin{figure}
+{\centering \includegraphics[width=400pt]{diagrams/diagrams-001}}
+\caption{An illustration of the GRanges data model for a
+sample from an RNA-seq experiment. The core components of the data model
+inlcude a seqnames column (representing the chromosome), a ranges column
+which consists of start and end coordinates for a genomic region, and a
+strand identifier (either positive, negative, or unstranded). Metadata
+are included as columns to the right of the dotted line as annotations
+(gene\_id) or range level covariates (GC score and count).}
+\label{fig:GRanges} 
+\end{figure}
+
 The `plyranges` DSL is built on the core Bioconductor data structure
 GRanges, which is capable of
 representing all types of genomic data at a semantic level that
@@ -143,12 +181,7 @@ and the strand, along with an arbitrary set of additional columns,
 consisting of measurements or metadata specific to the data type or
 experiment (figure \ref{fig:GRanges}).
 
-```{r GRanges, echo = FALSE, out.width="400pt", fig.cap="An illustration of the GRanges data model for a sample from an RNA-seq experiment. The core components of the data model inlcude a seqnames column (representing the chromosome), a ranges column which consists of start and end coordinates for a genomic region, and a strand identifier (either positive, negative, or unstranded). Metadata are included as columns to the right of the dotted line as annotations (gene_id) or range level covariates (GC score and count)."}
-knitr::include_graphics("diagrams/diagrams.001.png")
-```
-
-\begin{table}[ht]
-\label{tab:grammar}
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|l|l|p{4cm}|}
   \hline
@@ -156,7 +189,7 @@ knitr::include_graphics("diagrams/diagrams.001.png")
   \hline
    & \textbf{\emph{summarise()}} & aggregate over column(s) \\ 
    Aggregation & \emph{disjoin\_ranges()} & aggregate column(s) over the union of end coordinates \\
-   &  \emph{\reduce\_ranges()} & aggregate column(s) by merging overlapping and neighbouring ranges \\
+   &  \emph{reduce\_ranges()} & aggregate column(s) by merging overlapping and neighbouring ranges \\
    \hline
    &  \textbf{\emph{mutate()}} & modifies any column \\
    & \textbf{\emph{select()}} & select columns \\
@@ -166,7 +199,8 @@ knitr::include_graphics("diagrams/diagrams.001.png")
    & \emph{flank\_(direction)} & generate flanking regions \\
    & \emph{\%intersection\% } & row-wise intersection \\
    & \emph{\%union\%} & row-wise union \\
-  Arithmetic (Binary) & { \tt \%setdiff\% } & row-wise set difference \\
+   & \emph{compute\_coverage} & coverage over all ranges \\
+  Arithmetic (Binary) &  \emph{\%setdiff\%} & row-wise set difference \\
    & \emph{between()} & row-wise gap range \\
    & \emph{span()} & row-wise spanning range \\
    \hline
@@ -174,14 +208,14 @@ knitr::include_graphics("diagrams/diagrams.001.png")
     & \emph{join\_nearest} & merge by nearest neighbour ranges \\
     & \emph{join\_follow} & merge by following ranges \\
     Merging & \emph{join\_precedes} & merge by preceding ranges \\
-    & \emph{union_ranges} & range-wise union \\
-    & \emph{intersect_ranges} & range-wise intersect \\
-    & \emph{setdiff_ranges} & range-wise set difference \\
-    & \emph{complement_ranges} & range-wise union \\
+    & \emph{union\_ranges} & range-wise union \\
+    & \emph{intersect\_ranges} & range-wise intersect \\
+    & \emph{setdiff\_ranges} & range-wise set difference \\
+    & \emph{complement\_ranges} & range-wise union \\
   \hline
    & \textbf{\emph{anchor\_direction()}} & fix coordinates at direction \\
   Modifier & \textbf{\emph{group\_by()}} & partition by column(s)  \\ 
-   & \emph{group\_by\_overlaps()} & partition by overlaps \\\
+   & \emph{group\_by\_overlaps()} & partition by overlaps \\
    \hline
    & \textbf{\emph{filter()}} & subset rows \\
   Restriction & \emph{filter\_by\_overlaps()} & subset by overlap \\
@@ -191,7 +225,7 @@ knitr::include_graphics("diagrams/diagrams.001.png")
 \caption{Overview of the \texttt{plyranges} grammar. The core verbs are
 briefly described and categorised into one of: aggregation, unary or binary
 arithmetic, merging, modifier, or restriction. A verb is given bold text if
-its origin is from the \texttt{dplyr} grammar.}
+its origin is from the \texttt{dplyr} grammar.}\label{tab:grammar}
 \end{table}
 
 By definition GRanges follows the tidy data pattern: it is a rectangular 
@@ -208,22 +242,23 @@ our design to the existing Bioconductor infrastructure.
 
 The `plyranges` DSL defines an expressive algebra for performing
 genomic operations with and between GRanges objects (see table
-\ref{tab:grammar}). [ML: add a couple overview sentences indicating the
-classes of operations like arithmetic, merging, aggregation]
+\ref{tab:grammar}). The grammar includes several classes of operation
+that cover most use cases in genomics data analysis. There are 
+operators for performing arithmetic such as modifying width or performing
+set operations, merging such as finding overlaps between GRanges, 
+subsetting by genomic regions, and aggregating over columns within in a GRanges
+object.
 
 GRanges describes the within-sequence coordinates of a range by its
 _start_, _end_ and _width_. Those three variables are mutually
 dependent and partially redundant, so direct manipulation of them is
 problematic. For example, changing the _width_ column needs to change
 either the _start_, _end_ or both to preserve integrity of the
-object. We introduce the _anchor_ combinator to disambiguate these
+object. We introduce the _anchor_ modifier to disambiguate these
 adjustments. Supported anchor points include the start, end and
 midpoint, as well as the 3' and 5' ends for strand-directed
 ranges. For example, if we anchor the start, then setting the width
 will adjust the end while leaving the start stationary.
-
-[ML: where does the word 'combinator' come from here? maybe 'modifier'
- is better? that's what the table uses]
 
 The algebra also defines conveniences for relative coordinate
 adjustments: _shift_ (unanchored adjustment to both start and end) and
@@ -285,11 +320,15 @@ join in Cobb's relational algebra: it performs an overlap inner join
 but also returns all query ranges that are not hit by the subject.
 
 ```{r olaps-fig, echo = FALSE, out.width="400pt", fig.cap="Illustration of the three overlap join operators. Each join takes query and subject range as input (black and light gray rectangles, respectively). An index for the join is computed, returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query ranges by where it was 'hit' by the subject ranges. The join semantics alter what is returned: for an *inner* join the query range is returned for each match, for an intersect *join* the intersection is taken between overlapping ranges, and for a *left* join all query ranges are returned even if the subject range does not overlap them. This principle is gnerally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations."}
-knitr::include_graphics("diagrams/diagrams.002.png")
+knitr::include_graphics("diagrams/diagrams-002.png")
 ```
 
-[ add a simple paragraph about how we can filter, sort, group and
-  aggregate just like other tabular structures ]
+Since the GRanges object is a tabular data structure our grammar includes
+operators to filter, sort and aggregate by columns in a GRanges. These 
+operations can be performed over partitions within GRanges object
+using the *group_by* modifier. Together with our algebra for arithmetic and
+merging, these operations enable flexible and reproducible analysis using
+the desgin principles of the `dplyr` grammar.
 
 ## Cohesion
 
@@ -398,10 +437,11 @@ naturally extended to the SummarizedExperiment.
 
 # Results 
 
-(change this)
-Here we provide examples on how to use the `plyranges` DSL to construct
-genomic data workflows and highlight its interoperability with existing
-Bionconductor packages.
+Here we provide illustrative examples by using the `plyranges` DSL to show
+how our grammar could be integrated into genomic data workflows. We also
+highlight how interoperability with existing Bioconductor infrastructure, 
+enables easy access to public datasets and methods for analysis and 
+visualisation.
 
 ## Peak Finding
 
@@ -474,6 +514,43 @@ ggbio::autoplot(peak_region,
   geom_area(aes(x = start))
 ```
 
+
+## Computing Windowed Statistics
+
+Another common operation in genomics data analysis is to compute data
+summaries over genomic windows. In `plyranges` this can be achieved via
+the `group_by_overlaps` operator. Continuing with the data from the 
+Human Epigenome Roadmap Consortium data, we can count the number of reads
+that fall into a fixed bins of size 10000bp over a BAM file of H3K27Me3 methylation
+marks from the H1 cell line. We extract reads that have a mapping quality
+score greater than 20:
+
+```{r, eval = FALSE}
+alignments <- read_bam(h1_bam) %>%
+  filter(mapq > 20) 
+```
+
+Note that the BAM file is only read into memory once we perform an operation
+on it. Because of interoperability over Bioconductor, we can generate
+genomic bins using the `tile` function from `GenomicRanges`:
+
+```{r, eval = FALSE}
+bins <- tile(h1_bam, width = 10000)
+```
+
+Finally, we can use `group_by_overlaps` with `summarise` to compute the
+total number of reads within each window.
+
+```{r, eval = FALSE}
+h1_bam_read_summary <- h1_bam %>%
+  group_by_overlaps(bins) %>%
+  summarise(n_reads = n())
+```
+
+<!-- 
+https://support.bioconductor.org/p/71601/ also useful example?
+-->
+
 ## Quality Control Metrics
 
 ```{r, echo = FALSE, warning = FALSE, cache = TRUE}
@@ -482,14 +559,14 @@ library(readr)
 # annotation information available here
 # https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL18952
 # chromosome zero are 'problem' probes and should be filtered
-anno <- read_tsv("data/GPL18952_HumanOmni25M-8v1-1_B.annotated.txt.gz",
+anno <- read_tsv(array_info,
                  trim_ws = TRUE,
                  col_types = c("cccc----")) %>%
   dplyr::filter(Chr != "0")
 
 # genotypes for H1 cell line, data starts on line 10
 # data obtained from https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM1463263
-geno <- read_tsv("data/GSM1463263_JS-ESCH1.txt.gz", skip = 10) 
+geno <- read_tsv(snp_info, skip = 10) 
 
 # rename columns
 geno <- geno %>% 
@@ -556,40 +633,7 @@ Trivial example? Could do something with a smooth summarised over
 genomic coordinates? 
 -->
 
-## Computing Windowed Statistics
 
-Another common operation in genomics data analysis is to compute data
-summaries over genomic windows. In `plyranges` this can be achieved via
-the `group_by_overlaps` operator. Continuing with the data from the 
-Human Epigenome Roadmap Consortium data, we can count the number of reads
-that fall into a fixed bins of size 10000bp over a BAM file of H3K27Me3 methylation
-marks from the H1 cell line. We extract reads that have a mapping quality
-score greater than 20:
-
-```{r, eval = FALSE}
-alignments <- read_bam(h1_bam) %>%
-  filter(mapq > 20) 
-```
-
-Note that the BAM file is only read into memory once we perform an operation
-on it. Because of interoperability over Bioconductor, we can generate
-genomic bins using the `tile` function from `GenomicRanges`:
-
-```{r, eval = FALSE}
-bins <- tile(h1_bam, width = 10000)
-```
-
-Finally, we can use `group_by_overlaps` with `summarise` to compute the
-total number of reads within each window.
-
-```{r, eval = FALSE}
-h1_bam_read_summary <- h1_bam %>%
-  group_by_overlaps(bins) %>%
-  summarise(n_reads = n())
-```
-
-
-https://support.bioconductor.org/p/71601/ also useful example?
 
 
 # Availablilty and Future Work
