@@ -286,10 +286,10 @@ scalable data representations and sophisticated statistical methods.
 \subsection{Data model}\label{data-model}}
 
 \begin{figure}
-{\centering \includegraphics[width=400pt]{diagrams/diagrams-001}}
+{\centering \includegraphics[width=400pt]{diagrams/GRanges}}
 \caption{An illustration of the GRanges data model for a
 sample from an RNA-seq experiment. The core components of the data model
-inlcude a seqnames column (representing the chromosome), a ranges column
+inlcude a seqname column (representing the chromosome), a ranges column
 which consists of start and end coordinates for a genomic region, and a
 strand identifier (either positive, negative, or unstranded). Metadata
 are included as columns to the right of the dotted line as annotations
@@ -432,10 +432,20 @@ is retained in the joined range. All join operators in the
 \texttt{plyranges} DSL generate a set of hits based on overlap or
 proximity of ranges and use those hits to merge the two datasets in
 different ways. There are four supported matching algorithms:
-\emph{overlap}, \emph{nearest}, \emph{precede}, and \emph{follow}. We
-can further restrict the matching by whether the query is completely
-\emph{within} the subject, and adding the \emph{directed} suffix ensures
-that matching ranges have the same direction (strand).
+\emph{overlap}, \emph{nearest}, \emph{precede}, and \emph{follow}
+(figures \ref{fig:olaps-fig} and \ref{fig:nn-fig}). We can further
+restrict the matching by whether the query is completely \emph{within}
+the subject, and adding the \emph{directed} suffix ensures that matching
+ranges have the same direction (strand).
+
+\begin{figure}
+
+{\centering \includegraphics[width=400pt]{diagrams/diagrams-002} 
+
+}
+
+\caption{Illustration of the three overlap join operators. Each join takes query and subject range as input (black and light gray rectangles, respectively). An index for the join is computed, returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query ranges by where it was 'hit' by the subject ranges. The join semantics alter what is returned: for an     extbf{inner} join the query range is returned for each match, for an    extbf{intersect} the intersection is taken between overlapping ranges, and for a    extbf{left} join all query ranges are returned even if the subject range does not overlap them. This principle is gnerally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations.}\label{fig:olaps-fig}
+\end{figure}
 
 For merging based on the hits, we have three modes: \emph{inner},
 \emph{intersect} and \emph{left}. The \emph{inner} overlap join is
@@ -450,11 +460,11 @@ are not hit by the subject.
 
 \begin{figure}
 
-{\centering \includegraphics[width=400pt]{diagrams/diagrams-002} 
+{\centering \includegraphics[width=400pt]{diagrams/diagrams-003} 
 
 }
 
-\caption{Illustration of the three overlap join operators. Each join takes query and subject range as input (black and light gray rectangles, respectively). An index for the join is computed, returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query ranges by where it was 'hit' by the subject ranges. The join semantics alter what is returned: for an *inner* join the query range is returned for each match, for an intersect *join* the intersection is taken between overlapping ranges, and for a *left* join all query ranges are returned even if the subject range does not overlap them. This principle is gnerally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations.}\label{fig:olaps-fig}
+\caption{Illustration of neighbour finding joins. Each join takes a query and subject range and computes a 'Hits' object. For the   extbf{nearest} join all query ranges are returned as they are all nearest neighbours of the second subject range. For the   extbf{follow} join there is only one query range that follows any subject range. Likewise for the   extbf{precede} join, there is only one query range that precedes a subject range.}\label{fig:nn-fig}
 \end{figure}
 
 Since the GRanges object is a tabular data structure our grammar
@@ -504,7 +514,7 @@ packages, which produces surprising output by assuming the user is
 always interested in using strand in the majority of circumstances
 (unless a user is computing coverage or finding flanking ranges).
 
-Our use of suffixes in function names, also highlights are core tenet of
+Our use of suffixes in function names, also highlights a core tenet of
 the \texttt{plyranges} design: avoid complex generic functions with many
 arguments and instead use cohesive functions with a minimal number of
 arguments. As an example, we have written a consistent framework for

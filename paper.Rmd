@@ -161,10 +161,10 @@ representations and sophisticated statistical methods.
 ## Data model
 
 \begin{figure}
-{\centering \includegraphics[width=400pt]{diagrams/diagrams-001}}
+{\centering \includegraphics[width=400pt]{diagrams/GRanges}}
 \caption{An illustration of the GRanges data model for a
 sample from an RNA-seq experiment. The core components of the data model
-inlcude a seqnames column (representing the chromosome), a ranges column
+inlcude a seqname column (representing the chromosome), a ranges column
 which consists of start and end coordinates for a genomic region, and a
 strand identifier (either positive, negative, or unstranded). Metadata
 are included as columns to the right of the dotted line as annotations
@@ -304,10 +304,15 @@ ranges is retained in the joined range.  All join operators in the
 `plyranges` DSL generate a set of hits based on overlap or proximity
 of ranges and use those hits to merge the two datasets in different
 ways. There are four supported matching algorithms: _overlap_,
-_nearest_, _precede_, and _follow_. We can further restrict the
+_nearest_, _precede_, and _follow_ (figures 
+\ref{fig:olaps-fig} and \ref{fig:nn-fig}). We can further restrict the
 matching by whether the query is completely _within_ the subject, and
 adding the _directed_ suffix ensures that matching ranges have the
 same direction (strand).
+
+```{r olaps-fig, echo = FALSE, out.width="400pt", fig.cap="Illustration of the three overlap join operators. Each join takes query and subject range as input (black and light gray rectangles, respectively). An index for the join is computed, returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query ranges by where it was 'hit' by the subject ranges. The join semantics alter what is returned: for an \textbf{inner} join the query range is returned for each match, for an \textbf{intersect} the intersection is taken between overlapping ranges, and for a \textbf{left} join all query ranges are returned even if the subject range does not overlap them. This principle is gnerally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations."}
+knitr::include_graphics("diagrams/diagrams-002.png")
+```
 
 For merging based on the hits, we have three modes: _inner_,
 _intersect_ and _left_. The _inner_ overlap join is similar to the
@@ -319,8 +324,8 @@ the left range. Finally, the overlap _left_ join is akin to left outer
 join in Cobb's relational algebra: it performs an overlap inner join
 but also returns all query ranges that are not hit by the subject.
 
-```{r olaps-fig, echo = FALSE, out.width="400pt", fig.cap="Illustration of the three overlap join operators. Each join takes query and subject range as input (black and light gray rectangles, respectively). An index for the join is computed, returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query ranges by where it was 'hit' by the subject ranges. The join semantics alter what is returned: for an *inner* join the query range is returned for each match, for an intersect *join* the intersection is taken between overlapping ranges, and for a *left* join all query ranges are returned even if the subject range does not overlap them. This principle is gnerally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations."}
-knitr::include_graphics("diagrams/diagrams-002.png")
+```{r nn-fig, echo = FALSE, out.width = "400pt", fig.cap="Illustration of neighbour finding joins. Each join takes a query and subject range and computes a 'Hits' object. For the \textbf{nearest} join all query ranges are returned as they are all nearest neighbours of the second subject range. For the \textbf{follow} join there is only one query range that follows any subject range. Likewise for the \textbf{precede} join, there is only one query range that precedes a subject range."}
+knitr::include_graphics("diagrams/diagrams-003.png")
 ```
 
 Since the GRanges object is a tabular data structure our grammar includes
@@ -364,7 +369,7 @@ the Bioconductor packages, which produces surprising output by assuming the
 user is always interested in using strand in the majority of circumstances 
 (unless a user is computing coverage or finding flanking ranges). 
 
-Our use of suffixes in function names, also highlights are core tenet of 
+Our use of suffixes in function names, also highlights a core tenet of 
 the `plyranges` design: avoid complex generic functions with many arguments
 and instead use cohesive functions with a minimal number of arguments. As an
 example, we have written a consistent framework for reading and writing 
