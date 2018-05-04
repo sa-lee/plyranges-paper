@@ -173,13 +173,28 @@ are included as columns to the right of the dotted line as annotations
 \end{figure}
 
 The `plyranges` DSL is built on the core Bioconductor data structure
-GRanges, which is capable of
-representing all types of genomic data at a semantic level that
-roughly matches the intuition of most users.  A GRanges is essentially
-a table, with columns for the chromosome, start and end coordinates,
-and the strand, along with an arbitrary set of additional columns,
-consisting of measurements or metadata specific to the data type or
-experiment (figure \ref{fig:GRanges}).
+GRanges, which is essentially a constrained table, with fixed columns
+for the chromosome, start and end coordinates, and the strand, along
+with an arbitrary set of additional columns, consisting of
+measurements or metadata specific to the data type or experiment
+(figure \ref{fig:GRanges}).  GRanges balances flexibility with formal
+constraints, so that it is applicable to virtually any genomic
+workflow, while also being semantically rich enough to support
+high-level operations on genomic ranges. As a core data structure,
+GRanges enables interoperability between plyranges and the rest of
+Bioconductor. Adhering to a single data structure simplifies the API
+and makes it easier to learn and understand, in part because
+operations become endomorphic, i.e., they return the same type as
+their input.
+
+GRanges follows the intuitive tidy data pattern: it is a rectangular
+table corresponding to a single biological context. Each row contains
+a single observation and each column is a variable describing the
+observations.  GRanges specializes the tidy pattern in that the
+observations always pertain to some genomic feature, but it largely
+remains compatible with the general relational operations defined by
+dplyr. Thus, we define our algebra as an extension of the dplyr
+algebra, and borrow its syntax conventions and design principles.
 
 \begin{table}[!htbp]
 \centering
@@ -228,29 +243,18 @@ arithmetic, merging, modifier, or restriction. A verb is given bold text if
 its origin is from the \texttt{dplyr} grammar.}\label{tab:grammar}
 \end{table}
 
-By definition GRanges follows the tidy data pattern: it is a rectangular 
-table corresponding to a single biological context. Each row contains a
-single observation and each column is a variable about that
-observation. Hence, we have designed the `plyranges` DSL to extend the grammar
-and design principles of `dplyr`:  cohesion, consistency, endomorphism,
-and fluency. All of these principles are defined and discussed
-below in the context of the GRanges class and an overview of 
-the grammar is provided in table \ref{tab:grammar}. Where applicable we contrast
-our design to the existing Bioconductor infrastructure.
-
 ## Algebraic operations
 
 The `plyranges` DSL defines an expressive algebra for performing
 genomic operations with and between GRanges objects (see table
 \ref{tab:grammar}). The grammar includes several classes of operation
-that cover most use cases in genomics data analysis. There are 
-operators for performing arithmetic such as modifying width or performing
-set operations, merging such as finding overlaps between GRanges, 
-subsetting by genomic regions, and aggregating over columns within in a GRanges
-object.
+that cover most use cases in genomics data analysis. There are
+range arithmetic operators, such as for resizing ranges or finding their
+intersection, and operators for merging, filtering and aggregating by
+range-specific notions like overlap and proximity.
 
-GRanges describes the within-sequence coordinates of a range by its
-_start_, _end_ and _width_. Those three variables are mutually
+Arithmetic operations transform range coordinates, as defined by their
+_start_, _end_ and _width_. The three dimensions are mutually
 dependent and partially redundant, so direct manipulation of them is
 problematic. For example, changing the _width_ column needs to change
 either the _start_, _end_ or both to preserve integrity of the
