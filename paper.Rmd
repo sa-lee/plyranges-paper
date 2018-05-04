@@ -283,7 +283,7 @@ As with other genomic grammars, we define set operations that treat
 ranges as sets of integers, including _intersect_, _union_,
 _difference_, and _complement_. There are two sets of these: parallel
 and merging. The parallel operations map to infix operators, which we
-surround with _%_ symbols in accordance with R syntax rules.  For
+surround with _%_ symbols, a convention borrowed from R syntax.  For
 example, the parallel intersection (_x %intersect% y_) finds the
 intersecting range between _xi_ and _yi_ for _i_ in _1...n_, where _n_
 is the length of both _x_ and _y_. In constrast, the merging
@@ -297,10 +297,11 @@ while filling any gap. The _complement_ operation is unique in that it
 is unary. It finds the regions not covered by any of the ranges in a
 single set. Closely related is the _between_ parallel operation, which
 finds the gap separating _xi_ and _yi_. The binary operations are
-callable from within the arithmetic, restriction and aggregation
+callable from within arithmetic, restriction and aggregation
 expressions.
 
-Our algebra recasts finding overlaps or nearest neighbours between two
+To support merging, our algebra recasts finding overlaps or 
+nearest neighbours between two
 genomic regions as variants of the relational join operator. A join
 acts on two GRanges objects, a query and a subject. The join operator
 is relational in the sense that metadata from the query and subject
