@@ -457,6 +457,12 @@ methylation mark over chromosome 10.
 First, we gather the BigWig file and extract its annotation information and 
 filter it to chromosome 10.
 
+[ML: please explain why we are doing this. Something like: we need to
+     get the range for chromosome 10, so that we can use it as a
+     filter when reading. The first time I read this, I was not sure what
+     'annotation information' and 'gather' meant here. Why say
+     "annotation information" when the API uses "genome information"?]
+
 ```{r load-bw, cache = TRUE}
 library(plyranges)
 chr10_ranges <- bw_file %>% 
@@ -468,6 +474,9 @@ Then we read the BigWig file only extracting scores if they overlap chromosome
 10. The annotation information from the file is automatically included (in this
 case the hg19 genome build).
 
+[ML: getting the genome info does not look automatic, because we are calling
+	`set_genome_info()`; is that supposed to be here?]
+	
 ```{r}
 chr10_scores <- bw_file %>%
   read_bigwig(overlap_ranges = chr10_ranges) %>%
@@ -479,6 +488,11 @@ across chromosome 10. We can manually set a threshold to restrict genomic
 regions to have a coverage score of greater than 8, and
 then merge nearby regions. The maximum coverage is computed over all the
 coverage scores in the regions that were reduced. 
+
+[ML: I think the above text could do a better job of describing what
+	`reduce_ranges()` does generally. You could say something like, after
+	filtering for regions with a score greater than 8, we can reduce the
+	individual runs to ranges representing the islands of coverage.]
 
 ```{r}
 all_peaks <- chr10_scores %>% 
