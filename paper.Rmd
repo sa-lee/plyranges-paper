@@ -534,16 +534,20 @@ ggbio::autoplot(peak_region,
 ## Computing Windowed Statistics
 
 Another common operation in genomics data analysis is to compute data
-summaries over genomic windows. In `plyranges` this can be achieved via
-the `group_by_overlaps` operator. Continuing with the data from the 
-Human Epigenome Roadmap Consortium data, we can count the number of reads
-that fall into a fixed bins of size 10000bp over a sorted and indexed 
-BAM file of H3K27Me3 methylation marks from the H1 cell line. 
+summaries over genomic windows. In `plyranges` this can be achieved
+via the `group_by_overlaps` operator.  We bin and count reads from a
+H3K27Me3 ChIP-seq experiment by the Human Epigenome Roadmap
+Consortium. The bins have a fixed width of 10000bp.
 
-We can resuse the annotation information from our BigWig file example, as the
+[ML: why not get the seqinfo from the BAM itself?]
+
+We reuse the genome information from our BigWig file, as the
 BAM file was aligned to the hg19 genome build. Alignments over
 the mitochondrial genome are dropped using the `dropSeqlevels` function
 from the Bioconductor package `GenomeInfoDb` @R-gdb.
+[ML: seems like we should have a `select_seqlevels()` or something, so
+     that we could do `select_seqlevels(-chrM)`.. somehow we have to
+     explain to the reader why we are doing all of this seqlevel munging.]
 ```{r locations, eval = FALSE}
 locations <- bw_file %>%
   get_genome_info() %>% 
@@ -551,7 +555,7 @@ locations <- bw_file %>%
   set_genome_info(genome = "hg19") 
 ```
 
-To generate bins of width 10000bp we can use the `tile` function from 
+To generate bins of width 10000bp we use the `tile` function from 
 `GenomicRanges`:
 
 ```{r, eval = FALSE}
@@ -565,13 +569,17 @@ alignments <- read_bam(h1_bam_sorted) %>%
     filter(mapq > 20) 
 ```
 
-Finally, we can use `group_by_overlaps` with `summarise` to compute the
+[ML: seems like a great opportunity to point out the deferred reading]
+
+Finally, we use `group_by_overlaps` with `summarize` to compute the
 total number of reads within each window.
+
+[ML: there was a typo in the code: have you actually run this?]
 
 ```{r, eval = FALSE}
 alignments_summary <- bins %>%
-  group_by_overlaps(alginments) %>%
-  summarise(n_reads = n())
+  group_by_overlaps(alignments) %>%
+  summarize(n_reads = n())
 ```
 
 <!-- 
@@ -616,15 +624,15 @@ h1_snp_array <- h1_snp_array %>%
 
 We have created a GRanges object from genotyping performed on the
 H1 cell line, consisting of approximately two million single nucleotide
-polymorphisms (SNP) and short insertion/deletions (indel). The GRanges object consists
+polymorphisms (SNPs) and short insertion/deletions (indels). The GRanges object consists
 of 7 columns, relating to the alleles of a SNP or indel, the B-allele frequency,
 log relative intensity of the probes, GC content score over a probe, and the
 name of the probe. We can use this information to compute the transition-transversion
 ratio, a quality control metric, within each chromosome in GRanges object.
 
-First we filter out any insertion or deletion alleles and 
-the SNPs present on the mitochondria then create a logical vector corresponding
-to whether there is a transition event. 
+First we filter out the indels and mitochondrial variants. Then we
+create a logical vector corresponding to whether there is a transition
+event.
 
 ```{r}
 h1_snp_array <- h1_snp_array %>%
@@ -633,15 +641,13 @@ h1_snp_array <- h1_snp_array %>%
                       (ref %in% c("C","T") & alt %in% c("T", "C")))
 ```
 
-We can then compute the transition-transversion ratio using the `group_by`
-and `summarise` pattern, it is computed as the total number of transition
-SNPs divided by the total number of transversion SNPs within each chromosome
-(figure \ref{fig:titv-viz}).
+We compute the per-chromosome transition-transversion ratio using the
+`group_by` and `summarize` pattern (figure \ref{fig:titv-viz}).
 
 ```{r}
 ti_tv_results <- h1_snp_array %>% 
   group_by(seqnames) %>%
-  summarise(n_snps = n(),
+  summarize(n_snps = n(),
             ti_tv = sum(transition) / sum(!transition)) 
 ```
 
@@ -661,38 +667,41 @@ genomic coordinates?
 -->
 
 
-# Discussion 
+# Discussion and conclusion
 
-A caveat to constructing a compatible interface with `dplyr` is that 
-`plyranges` makes extensive use of non-standard evaluation in R
-(achieved via the `rlang` package @R-rlang). Simply, this
-means that computations are performed and evaluated in the context of the 
-GRanges objects; emphasising the interactive nature of our API.
-Consequently, when programming with `plyranges` a user needs to be aware of
-how non-standard evaluation in R works and how to adapt their code 
-accordingly. However, with the rise of R packages like `rlang` this process
-is becoming less difficult.
+[ ML: there should be some quick summary paragraph here ]
 
-While GRanges are an intuitive representation for data measured on genomic regions,
-more flexible data structures are required to represent data from multiple sample
-experiments. The Bionconductor class SummarizedExperiment is the canonical 
-data structure for representing data for combining multiomic measurements 
-from multiple samples. The grammar and design of the `plryanges` DSL can be
-naturally extended to the SummarizedExperiment. 
+A caveat to constructing a compatible interface with `dplyr` is that
+`plyranges` makes extensive use of non-standard evaluation in R via
+the `rlang` package @R-rlang. Simply, this means that computations are
+evaluated in the context of the GRanges objects. Both dplyr and
+plyranges are based on the `rlang` language, because it allows for more
+expressive code that is free of repeated references to the
+container. Implicitly referencing the container is particularly
+convenient when programming interactively.  Consequently, when
+programming with `plyranges`, a user needs to generally understand
+the `rlang` language and how to adapt their code accordingly. Users
+familiar with the tidyverse should already have such knowledge.
 
+We aim to continue developing the `plyranges` package and to extend it
+for use with more complex data structures, such as the
+SummarizedExperiment class, the core Bioconductor data structure for
+representing experimental results (e.g., counts) from multiple sample
+experiments in conjunction with feature and sample metadata. The
+grammar and design of the `plryanges` DSL are naturally extensible to
+SummarizedExperiment.
 
-# Availablilty and Future Work
+As the `plyranges` interface encourages tidy data practices, it
+integrates well with the grammar of graphics [cite ggplot2].  To
+achieve responsive performance, interactive graphics rely on lazy data
+access and computing patterns, so the deferred mechanisms within
+plyranges should help support interactive genomics applications.
 
-The `plyranges` package is available on the Bioconductor project website 
-[https://bioconductor.org](https://bioconductor.org) or can be accessed
-via Github [https://github.com/sa-lee/plyranges](https://github.com/sa-lee/plyranges).
-We aim to continue developing the `plyranges` package and extend it for use
-with more complex data structures  such as the 
-SummarizedExperiment class, which can be used for analysing transcriptomic
-and variant data. As the `plyranges` interface encourages tidy data 
-practices it integrates well with the principles of the grammar of graphics, 
-we aim to use it to prepare data for the visualisation of multimodal biological 
-datasets.
+The `plyranges` package is available on the Bioconductor project
+website [https://bioconductor.org](https://bioconductor.org) or can be
+accessed via
+Github
+[https://github.com/sa-lee/plyranges](https://github.com/sa-lee/plyranges).
 
 # Acknowledgements
 
