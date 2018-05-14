@@ -454,14 +454,12 @@ T CD8+ memory cells from peripheral blood. Using `plyranges` we will read the
 BigWig file  corresponding to the H3 lysine 27 trimethylation (H3K27Me3) 
 methylation mark over chromosome 10. 
 
-First, we gather the BigWig file and extract its annotation information and 
-filter it to chromosome 10.
+First, we extract the genome information from the BigWig file and filter
+to get the range for chromosome 10. 
 
-[ML: please explain why we are doing this. Something like: we need to
-     get the range for chromosome 10, so that we can use it as a
-     filter when reading. The first time I read this, I was not sure what
-     'annotation information' and 'gather' meant here. Why say
-     "annotation information" when the API uses "genome information"?]
+First, we gather the BigWig file and extract its annotation information and 
+filter it to chromosome 10. This range will be used as  a filter when reading
+the file.
 
 ```{r load-bw, cache = TRUE}
 library(plyranges)
@@ -471,28 +469,19 @@ chr10_ranges <- bw_file %>%
 ```
 
 Then we read the BigWig file only extracting scores if they overlap chromosome
-10. The annotation information from the file is automatically included (in this
-case the hg19 genome build).
+10. We also add the genome build information to the resulting ranges.
 
-[ML: getting the genome info does not look automatic, because we are calling
-	`set_genome_info()`; is that supposed to be here?]
-	
 ```{r}
 chr10_scores <- bw_file %>%
   read_bigwig(overlap_ranges = chr10_ranges) %>%
   set_genome_info(genome = "hg19")
 ```
 
-The `reduce_ranges()` operation is used to find coverage peaks 
-across chromosome 10. We can manually set a threshold to restrict genomic
-regions to have a coverage score of greater than 8, and
-then merge nearby regions. The maximum coverage is computed over all the
-coverage scores in the regions that were reduced. 
-
-[ML: I think the above text could do a better job of describing what
-	`reduce_ranges()` does generally. You could say something like, after
-	filtering for regions with a score greater than 8, we can reduce the
-	individual runs to ranges representing the islands of coverage.]
+After filtering for regions with a coverage score greater than 8, we can
+reduce individual runs to ranges representing the islands of coverage,
+using the `reduce_ranges()` function. This function allows a summary
+to be computer over each island: in this case we take the maximum of 
+the scores to find the coverage peaks over chromosome 10.
 
 ```{r}
 all_peaks <- chr10_scores %>% 
@@ -535,50 +524,45 @@ ggbio::autoplot(peak_region,
 
 Another common operation in genomics data analysis is to compute data
 summaries over genomic windows. In `plyranges` this can be achieved
-via the `group_by_overlaps` operator.  We bin and count reads from a
+via the `group_by_overlaps()` operator.  We bin and count reads from a
 H3K27Me3 ChIP-seq experiment by the Human Epigenome Roadmap
 Consortium. The bins have a fixed width of 10000bp.
 
-[ML: why not get the seqinfo from the BAM itself?]
+We can directly obtain the genome information from the header of the
+BAM file: in this case the reads were aligned to the hg19 genome build
+and there are no reads overlapping the mitochondrial genome. To generate 
+bins of width 10000bp we apply `tile` function from `GenomicRanges`
+to the genomic coordinates:
+```{r bins, eval = TRUE}
+locations <- h1_bam_sorted %>%
+  read_bam() %>% 
+  get_genome_info() 
 
-We reuse the genome information from our BigWig file, as the
-BAM file was aligned to the hg19 genome build. Alignments over
-the mitochondrial genome are dropped using the `dropSeqlevels` function
-from the Bioconductor package `GenomeInfoDb` @R-gdb.
-[ML: seems like we should have a `select_seqlevels()` or something, so
-     that we could do `select_seqlevels(-chrM)`.. somehow we have to
-     explain to the reader why we are doing all of this seqlevel munging.]
-```{r locations, eval = FALSE}
-locations <- bw_file %>%
-  get_genome_info() %>% 
-  dropSeqlevels("chrM", pruning.mode = "coarse") %>%
-  set_genome_info(genome = "hg19") 
+bins <- locations %>% 
+  tile(width = 10000L)
 ```
 
-To generate bins of width 10000bp we use the `tile` function from 
-`GenomicRanges`:
+In this case using `read_bam()` in conjunction with `get_genome_info()`
+only loads the genome information and nothing else.
 
-```{r, eval = FALSE}
-bins <- tile(locations, width = 10000)
+Next we only read in alginments that overlap the genomic locations
+we are interested in. The reading is deferred until after the filter is 
+constructed: that is only alignments that pass the filter are loaded into memory.
+
+```{r, eval = TRUE, cache = TRUE}
+alignments <- h1_bam_sorted %>% 
+    read_bam() %>%
+    select(qwidth) %>% 
+
+    filter_by_overlaps(locations) %>%
 ```
-
-Next we only read in alignments if they have a map quality score
-greater than 20.
-```{r, eval = FALSE}
-alignments <- read_bam(h1_bam_sorted) %>%
-    filter(mapq > 20) 
-```
-
-[ML: seems like a great opportunity to point out the deferred reading]
 
 Finally, we use `group_by_overlaps` with `summarize` to compute the
 total number of reads within each window.
 
-[ML: there was a typo in the code: have you actually run this?]
-
 ```{r, eval = FALSE}
 alignments_summary <- bins %>%
-  group_by_overlaps(alignments) %>%
+  join_ %>%
   summarize(n_reads = n())
 ```
 
@@ -669,7 +653,12 @@ genomic coordinates?
 
 # Discussion and conclusion
 
-[ ML: there should be some quick summary paragraph here ]
+We have shown how to create expressive and 
+reproducible genomic workflows using the `plyranges` DSL. By
+realising that the GRanges data model is tidy we have highlighted how to 
+implement a grammar for performing genomic arithemtic, aggregation, restriction 
+and merging. Our examples show that `plyranges` code is succinct and human
+readable.
 
 A caveat to constructing a compatible interface with `dplyr` is that
 `plyranges` makes extensive use of non-standard evaluation in R via
