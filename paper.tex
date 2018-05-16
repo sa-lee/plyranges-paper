@@ -313,7 +313,7 @@ scalable data representations and sophisticated statistical methods.
 \includegraphics[width=\textwidth]{diagrams/GRanges}
 \caption{An illustration of the GRanges data model for a
 sample from an RNA-seq experiment. The core components of the data model
-inlcude a seqname column (representing the chromosome), a ranges column
+include a seqname column (representing the chromosome), a ranges column
 which consists of start and end coordinates for a genomic region, and a
 strand identifier (either positive, negative, or unstranded). Metadata
 are included as columns to the right of the dotted line as annotations
@@ -436,9 +436,9 @@ which we surround with \emph{\%} symbols, a convention borrowed from R
 syntax. For example, the parallel intersection (\emph{x \%intersect\%
 y}) finds the intersecting range between \emph{xi} and \emph{yi} for
 \emph{i} in \emph{1\ldots{}n}, where \emph{n} is the length of both
-\emph{x} and \emph{y}. In constrast, the merging intersection
+\emph{x} and \emph{y}. In contrast, the merging intersection
 (\emph{intersect\_ranges(x, y)}) returns a new set of disjoint ranges
-representing whereever there was overlap between a range in \emph{x} and
+representing wherever there was overlap between a range in \emph{x} and
 a range in \emph{y}. We use the infix syntax for the parallel
 operations, since it is the conventional syntax for parallel, binary
 operations in R. Finding the parallel union will fail when two ranges
@@ -502,11 +502,11 @@ and merging, these operations conform to the semantics and syntax of the
 
 \subsection{Design principles}\label{design-principles}
 
-The design of plyranges adheres to well understood principles of
-language and API design: cognitive consistency, cohesion, expressiveness
-and endomorphism \cite{Green1996-qg}. To varying degrees, these
-principles also underly the design of dplyr and the Bioconductor
-infrastructure.
+The design of \texttt{plyranges} adheres to well understood principles
+of language and API design: cognitive consistency, cohesion,
+expressiveness and endomorphism \cite{Green1996-qg}. To varying degrees,
+these principles also underlie the design of \texttt{dplyr} and the
+Bioconductor infrastructure.
 
 \subsubsection{Cognitive consistency and
 fluency}\label{cognitive-consistency-and-fluency}
@@ -516,24 +516,25 @@ user's cognitive model, i.e., how the user thinks about the data. This
 requires careful selection of the level of abstraction so that the user
 can express workflows in the language of genomics. This motivates the
 adoption of the tidy GRanges object as our central data structure. The
-basic data.frame and dplyr tibble lack any notion of genomic ranges and
-so could not easily support our genomic grammar, with its specific verbs
-for range-oriented data manipulation. Another example of cognitive
-consistency is how plyranges is insensitive to direction/strand by
-default when, e.g., detecting overlaps. GenomicRanges has the opposite
-behavior. We believe that defaulting to purely spatial overlap is most
-intuitive to most users.
+basic data.frame and \texttt{dplyr} tibble lack any notion of genomic
+ranges and so could not easily support our genomic grammar, with its
+specific verbs for range-oriented data manipulation. Another example of
+cognitive consistency is how \texttt{plyranges} is insensitive to
+direction/strand by default when, e.g., detecting overlaps.
+\texttt{GenomicRanges} has the opposite behavior. We believe that
+defaulting to purely spatial overlap is most intuitive to most users.
 
-Like dplyr, plyranges verbs are functional: they are free of side
-effects and return their result. This enables chaining of verbs through
-syntax like the forward pipe operator (\texttt{\%\textgreater{}\%}, read
-as ``then'') of the magrittr package \cite{R-magrittr}. This has syntax
-has a direct cognitive mapping to natural language and the intuitive
-notion of pipelines. The low-level object-oriented APIs of Bioconductor
-tend to manipulate data via subreplacement functions, like
-\texttt{start(gr)\ \textless{}-\ x}. These ultimately produce the side
-effect of replacing a symbol mapping in the current environment and thus
-are not amenable to so-called fluent syntax.
+Like \texttt{dplyr}, \texttt{plyranges} verbs are functional: they are
+free of side effects and return their result. This enables chaining of
+verbs through syntax like the forward pipe operator
+(\texttt{\%\textgreater{}\%}, read as ``then'') of the \texttt{magrittr}
+package \cite{R-magrittr}. This has syntax has a direct cognitive
+mapping to natural language and the intuitive notion of pipelines. The
+low-level object-oriented APIs of Bioconductor tend to manipulate data
+via sub-replacement functions, like \texttt{start(gr)\ \textless{}-\ x}.
+These ultimately produce the side effect of replacing a symbol mapping
+in the current environment and thus are not amenable to so-called fluent
+syntax.
 
 \subsubsection{Cohesion}\label{cohesion}
 
@@ -542,7 +543,7 @@ any side-effects. Singular tasks are not necessarily atomic; they can
 always be broken down further at lower levels of abstraction. For
 example, to resize a range, the user needs to specify which position
 (start, end, midpoint) should be invariant over the transformation. The
-\texttt{resize()} function from the GenomicRanges package has a
+\texttt{resize()} function from the \texttt{GenomicRanges} package has a
 \texttt{fix} argument that sets the anchor, so calling \texttt{resize()}
 coalesces anchoring and width modification. The coupling at the function
 call level is justified since the effect of setting the width depends on
@@ -567,22 +568,22 @@ Expressiveness relates to the information content in code: the
 programmer should be able to clarify intent without unnecessary
 verbosity. For example, our overlap-based join operations are more
 concise than the multiple steps necessary to achieve the same effect in
-the original GenomicRanges API. In other cases, the plyranges API
-increases verbosity for the sake of clarity and cohesion. Explicitly
-calling \texttt{anchor()} can require more typing, but the code is
-easier to comprehend. Another example is the set of routines for
-importing genomic annotations, including
+the original \texttt{GenomicRanges} API. In other cases, the
+\texttt{plyranges} API increases verbosity for the sake of clarity and
+cohesion. Explicitly calling \texttt{anchor()} can require more typing,
+but the code is easier to comprehend. Another example is the set of
+routines for importing genomic annotations, including
 \texttt{read\textbackslash{}\_gff()},
 \texttt{read\textbackslash{}\_bed()}, and \texttt{read\_bam()}. Compared
-to the generic \texttt{import()} in rtracklayer, the explicit
+to the generic \texttt{import()} in \texttt{rtracklayer}, the explicit
 format-based naming in plyranges clarifies intent and the type of data
 being returned. Similarly, every plyranges function that computes with
 strand information indicates its intentions by including suffixes such
 as \texttt{directed}, \texttt{upstream} or \texttt{downstream} in its
-name, otherwise strand is ignored. The GenomicRanges API does not make
-this distinction explicit in its function naming, instead relying on a
-parameter that defaults to strand sensitivity, an arguably unintuitive
-behavior.
+name, otherwise strand is ignored. The \texttt{GenomicRanges} API does
+not make this distinction explicit in its function naming, instead
+relying on a parameter that defaults to strand sensitivity, an arguably
+unintuitive behavior.
 
 \section{Results}\label{results}
 
@@ -594,13 +595,18 @@ methods for analysis and visualisation.
 
 \subsection{Peak Finding}\label{peak-finding}
 
-The Bioconductor package \texttt{AnnotationHub} \cite{R-ahub} can be
-used to search for BigWig files from ChIP-Seq experiments from the Human
-Epigenome Roadmap project \cite{Roadmap-Epigenomics-Consortium2015-pr}.
-Here we focus on assays for primary T CD8+ memory cells from peripheral
-blood. Using \texttt{plyranges} we will read the BigWig file
-corresponding to the H3 lysine 27 trimethylation (H3K27Me3) methylation
-mark over chromosome 10.
+In the workflow of ChIP-seq data analysis, we are interested in finding
+peaks from islands of coverage over chromosome. Here we will use
+\texttt{plyranges} to call peaks from islands of coverage above 8 then
+plot the region surrounding the tallest peak.
+
+Using \texttt{plyranges} and the the Bioconductor package
+\texttt{AnnotationHub} \cite{R-ahub} we can download and read BigWig
+files from ChIP-Seq experiments from the Human Epigenome Roadmap project
+\cite{Roadmap-Epigenomics-Consortium2015-pr}. Here we analyse a BigWig
+file corresponding to H3 lysine 27 trimethylation (H3K27Me3) of primary
+T CD8+ memory cells from peripheral blood, focussing on coverage islands
+over chromosome 10.
 
 First, we extract the genome information from the BigWig file and filter
 to get the range for chromosome 10. This range will be used as a filter
@@ -617,7 +623,8 @@ when reading the file.
 
 Then we read the BigWig file only extracting scores if they overlap
 chromosome 10. We also add the genome build information to the resulting
-ranges.
+ranges. This book-keeping is good practice as it ensures the integrity
+of any downstream operations such as finding overlaps.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -628,7 +635,7 @@ ranges.
 \end{Shaded}
 
 After filtering for regions with a coverage score greater than 8, we can
-reduce individual runs to ranges representing the islands of coverage,
+reduce individual runs to ranges representing the islands of coverage by
 using the \texttt{reduce\_ranges()} function. This function allows a
 summary to be computer over each island: in this case we take the
 maximum of the scores to find the coverage peaks over chromosome 10.
@@ -687,9 +694,8 @@ experiment by the Human Epigenome Roadmap Consortium.
 We can directly obtain the genome information from the header of the BAM
 file: in this case the reads were aligned to the hg19 genome build and
 there are no reads overlapping the mitochondrial genome. To generate
-bins of fixed width 10000bp we apply \texttt{tile()} function from
-\texttt{GenomicRanges} to the genomic coordinates (with \texttt{unlist}
-to return a GRanges object)
+bins of fixed width 10000nt we apply the \texttt{tile\_ranges()}
+function to the genomic coordinates in locations.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -698,13 +704,12 @@ to return a GRanges object)
 \StringTok{  }\KeywordTok{get_genome_info}\NormalTok{() }
 
 \NormalTok{bins <-}\StringTok{ }\NormalTok{locations }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{tile}\NormalTok{(}\DataTypeTok{width =}\NormalTok{ 10000L) }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{unlist}\NormalTok{(}\DataTypeTok{use.names =} \OtherTok{FALSE}\NormalTok{)}
+\StringTok{  }\KeywordTok{tile_ranges}\NormalTok{(}\DataTypeTok{width =}\NormalTok{ 10000L)}
 \end{Highlighting}
 \end{Shaded}
 
-Next we only read in alginments that overlap the genomic locations we
-are interested in and select the query seqeunce. Note that the reading
+Next we only read in alignments that overlap the genomic locations we
+are interested in and select the query sequence. Note that the reading
 of the BAM file is deferred: only alignments that pass the filter are
 loaded into memory. We can add another column representing the GC
 proportion for each alignment using the \texttt{letterFrequency()}
@@ -720,9 +725,10 @@ function from the \texttt{Biostrings} package \cite{R-biostrings}.
 \end{Highlighting}
 \end{Shaded}
 
-Finally, we use \texttt{group\_by\_overlaps()} with \texttt{summarize()}
-to compute the total number of reads and averge GC content within each
-genomic window.
+Finally, we use \texttt{group\_by\_overlaps()} to see where the
+alignments overlap the genomic windows and then apply
+\texttt{summarize()} to compute the total number of reads and average GC
+content within each window.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -756,9 +762,9 @@ event.
 \end{Highlighting}
 \end{Shaded}
 
-We can then compute the per-chromosome transition-transversion ratio
-using the \texttt{group\_by} and \texttt{summarize} pattern (figure
-\ref{fig:titv-viz}).
+We then compute the transition-transversion ratio over each chromosome
+using \texttt{group\_by()} in combination with \texttt{summarize()}
+(figure \ref{fig:titv-viz}).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -783,10 +789,10 @@ using the \texttt{group\_by} and \texttt{summarize} pattern (figure
 We have shown how to create expressive and reproducible genomic
 workflows using the \texttt{plyranges} DSL. By realising that the
 GRanges data model is tidy we have highlighted how to implement a
-grammar for performing genomic arithemtic, aggregation, restriction and
+grammar for performing genomic arithmetic, aggregation, restriction and
 merging. Our examples show that \texttt{plyranges} code is succinct,
 human readable and can take advantage of the interoperability provided
-by the Bioconductor ecosytem and the R language.
+by the Bioconductor ecosystem and the R language.
 
 A caveat to constructing a compatible interface with \texttt{dplyr} is
 that \texttt{plyranges} makes extensive use of non-standard evaluation
