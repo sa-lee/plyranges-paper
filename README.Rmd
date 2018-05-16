@@ -22,9 +22,18 @@ library(Biostrings)
 library(AnnotationHub)
 ```
 # plyranges-paper
+
 The setup chunk in the [paper](paper.Rmd) shows how to download the data with R.
 
-Requires the following packages (and versions) to reproduce the paper:
+The paper uses the current development version of `plyranges` which
+you can install from github using:
+
+```{r, eval = FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite("sa-lee/plyranges")
+```
+
+The following packages (and versions) are required to reproduce the paper:
 
 ```{r, warning=FALSE}
 devtools::session_info()
