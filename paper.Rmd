@@ -1,16 +1,18 @@
 ---
-title: "plyranges: a grammar for transforming genomics data" 
+title: "plyranges: a grammar of genomic data transformation" 
 author:
   - name: Stuart Lee
     email: stuart.lee1@monash.edu
-    affiliation: Monash University
-  - name: Michael Lawrence
-    email: michael.lawrence@gene.com
-    affiliation: Genentech
+    affiliation: |
+     | Department of Econometrics and Business Statistics, Monash University
+     |                        Molecular Medicine Division, Walter and Eliza Hall Institute
   - name: Di Cook
     email: di.cook@monash.edu
-    affiliation: Monash University
-abstract: "The Bioconductor project has created many useful data abstractions for analysing high-throughput genomics experiments. However, there is a cognitive load placed on a user in learning a data abstraction and understanding its appropriate use. Throughout a standard workflow, a user must navigate and know many of these abstractions to perform an genomic analysis task, when a single data abstraction, a GRanges object will suffice. The GRanges class naturally represent genomic intervals and their associated measurements. By recognising that the GRanges class follows 'tidy' data principles we have created a grammar of genomic data transformation. The grammar defines verbs for performing actions on and between genomic interval data. It provides a principled way of performing common genomic data analysis tasks through a coherent interface to existing Bioconductor infrastructure, resulting in human readable analysis workflows. We have implemented this grammar as a Bioconductor/R package called plyranges."
+    affiliation: Department of Econometrics and Business Statistics, Monash University
+  - name: Michael Lawrence
+    email: michael.lawrence@gene.com
+    affiliation: Bioinformatics and Computational Biology, Genentech, Inc.
+abstract: "The Bioconductor project has created many useful data abstractions for analysing high-throughput genomics experiments. However, there is a cognitive load placed on a user in learning a data abstraction and understanding its appropriate use. Throughout a standard workflow, a user must navigate and know many of these abstractions to perform an genomic analysis task, when a single data abstraction, a GRanges object will suffice. The GRanges class naturally represent genomic intervals and their associated measurements. By recognising that the GRanges class follows 'tidy' data principles we have created a grammar of genomic data transformation. The grammar defines verbs for performing actions on and between genomic interval data. It provides a principled way of performing common genomic data analysis tasks through a coherent interface to existing Bioconductor infrastructure, resulting in human readable analysis workflows. We have implemented this grammar as a Bioconductor/R package called \\texttt{plyranges}."
 keywords: "Bioconductor, Grammar, Genomes, Data Analysis"
 bibliography: references.bib
 output: 
@@ -22,7 +24,6 @@ output:
     citation_package: biblatex
 fontfamily: mathpazo
 ---
-
 ```{r setup, include = FALSE}
 library(tibble)
 library(knitr)
