@@ -1,5 +1,5 @@
 ---
-title: "plyranges: a grammar of genomic data transformation" 
+title: "plyranges: A grammar of genomic data transformation" 
 author:
   - name: Stuart Lee
     email: stuart.lee1@monash.edu
@@ -13,7 +13,7 @@ author:
     email: michael.lawrence@gene.com
     affiliation: Bioinformatics and Computational Biology, Genentech, Inc.
 abstract: "The Bioconductor project has created many useful data abstractions for analysing high-throughput genomics experiments. However, there is a cognitive load placed on a user in learning a data abstraction and understanding its appropriate use. Throughout a standard workflow, a user must navigate and know many of these abstractions to perform an genomic analysis task, when a single data abstraction, a GRanges object will suffice. The GRanges class naturally represent genomic intervals and their associated measurements. By recognising that the GRanges class follows 'tidy' data principles we have created a grammar of genomic data transformation. The grammar defines verbs for performing actions on and between genomic interval data. It provides a principled way of performing common genomic data analysis tasks through a coherent interface to existing Bioconductor infrastructure, resulting in human readable analysis workflows. We have implemented this grammar as a Bioconductor/R package called \\texttt{plyranges}."
-keywords: "Bioconductor, Grammar, Genomes, Data Analysis"
+keywords: "bioconductor, grammar, genomes, data analysis"
 bibliography: references.bib
 output: 
   pdf_document:
@@ -325,7 +325,7 @@ matching by whether the query is completely _within_ the subject, and
 adding the _directed_ suffix ensures that matching ranges have the
 same direction (strand).
 
-```{r olaps-fig, echo = FALSE, out.width="\\textwidth", fig.cap="Illustration of the three overlap join operators. Each join takes query and subject range as input (black and light gray rectangles, respectively). An index for the join is computed, returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query ranges by where it was 'hit' by the subject ranges. The join semantics alter what is returned: for an \textbf{inner} join the query range is returned for each match, for an \textbf{intersect} the intersection is taken between overlapping ranges, and for a \textbf{left} join all query ranges are returned even if the subject range does not overlap them. This principle is gnerally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations."}
+```{r olaps-fig, echo = FALSE, out.width="\\textwidth", fig.cap="Illustration of the three overlap join operators. Each join takes query and subject range as input (black and light gray rectangles, respectively). An index for the join is computed, returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query ranges by where it was 'hit' by the subject ranges. The join semantics alter what is returned: for an \\textbf{inner} join the query range is returned for each match, for an \\textbf{intersect} the intersection is taken between overlapping ranges, and for a \\textbf{left} join all query ranges are returned even if the subject range does not overlap them. This principle is gnerally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations."}
 knitr::include_graphics("diagrams/diagrams-002.png")
 ```
 
@@ -339,7 +339,7 @@ the left range. Finally, the overlap _left_ join is akin to left outer
 join in Cobb's relational algebra: it performs an overlap inner join
 but also returns all query ranges that are not hit by the subject.
 
-```{r nn-fig, echo = FALSE, out.width = "\\textwidth", fig.cap="Illustration of neighbour finding joins. Each join takes a query and subject range and computes a 'Hits' object. For the \textbf{nearest} join all query ranges are returned as they are all nearest neighbours of the second subject range. For the \textbf{follow} join there is only one query range that follows any subject range. Likewise for the \textbf{precede} join, there is only one query range that precedes a subject range."}
+```{r nn-fig, echo = FALSE, out.width = "\\textwidth", fig.cap="Illustration of neighbour finding joins. Each join takes a query and subject range and computes a 'Hits' object. For the \\textbf{nearest} join all query ranges are returned as they are all nearest neighbours of the second subject range. For the \\textbf{follow} join there is only one query range that follows any subject range. Likewise for the \\textbf{precede} join, there is only one query range that precedes a subject range."}
 knitr::include_graphics("diagrams/diagrams-003.png")
 ```
 
@@ -508,8 +508,7 @@ chr10_max_score_region <- chr10_scores %>%
 ```
 
 Finally, the overlap inner join is used to restrict the chromosome 10
-normalised coverage scores that are within the 5000nt region that contain
-the max peak on chromosome 10 (figure \ref{fig:peak-viz}).
+coverage islands, to the islands that are contained in the 5000nt region that surrounds the max peak (figure \ref{fig:peak-viz}).
 
 ```{r peak_region}
 peak_region <- chr10_scores %>%
@@ -517,7 +516,7 @@ peak_region <- chr10_scores %>%
 
 ```
 
-```{r peak-viz, echo = FALSE, fig.cap = "Visualisation of normalised coverage scores accross a 5000nt region of chromosome 10 from H3K27Me3 ChIP-Seq assay from the Human Epigenome Roadmap project."}
+```{r peak-viz, echo = FALSE, fig.cap = "The final result of the \\texttt{plyranges} operations to find a 5000nt region surrounding the peak of normalised coverage scores over chromosome 10, displayed as a density plot."}
 ggbio::autoplot(peak_region, 
                 aes(y = score.x), 
                 geom = "blank") + 
@@ -552,7 +551,7 @@ Next we only read in alignments that overlap the genomic locations
 we are interested in and select the query sequence. Note that
 the reading of the BAM file is deferred: only alignments that pass the filter 
 are loaded into memory. We can add another column representing the GC proportion 
-for each alignment using the `letterFrequency()` function from the `Biostrings` 
+for each alignment using the `letterFrequency()` function from the `Biostrings`
 package \cite{R-biostrings}.
 
 ```{r, cache = TRUE}
@@ -642,13 +641,13 @@ ti_tv_results <- h1_snp_array %>%
             ti_tv = sum(transition) / sum(!transition)) 
 ```
 
-```{r titv-viz, echo = FALSE, fig.cap = "Dot plot of chromosomes ordered by estimated transition-transversion ratio. A white reference line is drawn at the expected ratio for a human exome."}
+```{r titv-viz, echo = FALSE, fig.cap = "The final result of computing quality control metrics over the SNP array data with \\texttt{plyranges}, displayed as a dot plot. Chromosomes are ordered by their estimated transition-transversion ratio. A white reference line is drawn at the expected ratio for a human exome."}
 ti_tv_results %>% 
   as.data.frame() %>% 
   ggplot(aes(forcats::fct_reorder(seqnames, ti_tv), ti_tv)) +
   geom_point() + 
   geom_hline(yintercept = 3, colour = "white", size = 4) +
-  labs(x = "Chromosome", y = "Transition Transverion Ratio") +
+  labs(x = "Chromosome", y = "Transition Transversion Ratio") +
   coord_flip() 
 ```
 
@@ -693,9 +692,9 @@ achieve responsive performance, interactive graphics rely on lazy data
 access and computing patterns, so the deferred mechanisms within
 plyranges should help support interactive genomics applications.
 
-The `plyranges` package is available on the Bioconductor project
-website [https://bioconductor.org](https://bioconductor.org) 
-or can be accessed via Github
+The `plyranges` package can be obtained via the Bioconductor project
+website [https://bioconductor.org](https://bioconductor.org) or
+accessed via Github
 [https://github.com/sa-lee/plyranges](https://github.com/sa-lee/plyranges).
 
 # Acknowledgements
@@ -703,9 +702,8 @@ or can be accessed via Github
 We would like to thank Dr Matthew Ritchie at the Walter and Eliza Hall 
 Institute and Dr Paul Harrison for their feedback on earlier drafts of
 this work. We would also like to thank Lori Shepherd and Hèrve Pages
-for the code review they performed. This report was written with
-`knitr` \cite{R-knitr} and the figures were made with `ggbio` \cite{R-ggbio}. All code
-required to reproduce this article is available at 
+for the code review they performed. This article was written with
+`knitr` \cite{R-knitr} and the figures were made with `ggbio` \cite{R-ggbio}. All code required to reproduce this article is available at 
 https://github.com/sa-lee/plyranges-paper.
 
 # References {#references .unnumbered}

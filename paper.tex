@@ -92,7 +92,7 @@
 % using explicit options in \includegraphics[width, height, ...]{}
 \setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
 
-\title{plyranges: a grammar of genomic data transformation  }
+\title{plyranges: A grammar of genomic data transformation  }
 
 
 
@@ -145,8 +145,8 @@ Medicine Division, Walter and Eliza Hall Institute}   \and \Large Di Cook\vspace
             pdfauthor={Stuart Lee (Department of Econometrics and Business Statistics, Monash University\\
 \hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}Molecular
 Medicine Division, Walter and Eliza Hall Institute) and Di Cook (Department of Econometrics and Business Statistics, Monash University) and Michael Lawrence (Bioinformatics and Computational Biology, Genentech, Inc.)},
-             pdfkeywords = {Bioconductor, Grammar, Genomes, Data Analysis},  
-            pdftitle={plyranges: a grammar of genomic data transformation},
+             pdfkeywords = {bioconductor, grammar, genomes, data analysis},  
+            pdftitle={plyranges: A grammar of genomic data transformation},
             colorlinks=true,
             citecolor=blue,
             urlcolor=blue,
@@ -219,7 +219,7 @@ readable analysis workflows. We have implemented this grammar as a
 Bioconductor/R package called \texttt{plyranges}.
 
 
-\vskip 8.5pt \noindent \emph{Keywords}: Bioconductor, Grammar, Genomes, Data Analysis \par
+\vskip 8.5pt \noindent \emph{Keywords}: bioconductor, grammar, genomes, data analysis \par
 
     \hbox{\vrule height .2pt width 39.14pc}
 
@@ -480,7 +480,7 @@ that matching ranges have the same direction (strand).
 
 }
 
-\caption{Illustration of the three overlap join operators. Each join takes query and subject range as input (black and light gray rectangles, respectively). An index for the join is computed, returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query ranges by where it was 'hit' by the subject ranges. The join semantics alter what is returned: for an     extbf{inner} join the query range is returned for each match, for an    extbf{intersect} the intersection is taken between overlapping ranges, and for a    extbf{left} join all query ranges are returned even if the subject range does not overlap them. This principle is gnerally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations.}\label{fig:olaps-fig}
+\caption{Illustration of the three overlap join operators. Each join takes query and subject range as input (black and light gray rectangles, respectively). An index for the join is computed, returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query ranges by where it was 'hit' by the subject ranges. The join semantics alter what is returned: for an \textbf{inner} join the query range is returned for each match, for an \textbf{intersect} the intersection is taken between overlapping ranges, and for a \textbf{left} join all query ranges are returned even if the subject range does not overlap them. This principle is gnerally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations.}\label{fig:olaps-fig}
 \end{figure}
 
 For merging based on the hits, we have three modes: \emph{inner},
@@ -500,7 +500,7 @@ are not hit by the subject.
 
 }
 
-\caption{Illustration of neighbour finding joins. Each join takes a query and subject range and computes a 'Hits' object. For the   extbf{nearest} join all query ranges are returned as they are all nearest neighbours of the second subject range. For the   extbf{follow} join there is only one query range that follows any subject range. Likewise for the   extbf{precede} join, there is only one query range that precedes a subject range.}\label{fig:nn-fig}
+\caption{Illustration of neighbour finding joins. Each join takes a query and subject range and computes a 'Hits' object. For the \textbf{nearest} join all query ranges are returned as they are all nearest neighbours of the second subject range. For the \textbf{follow} join there is only one query range that follows any subject range. Likewise for the \textbf{precede} join, there is only one query range that precedes a subject range.}\label{fig:nn-fig}
 \end{figure}
 
 Since the GRanges object is a tabular data structure, our grammar
@@ -679,8 +679,8 @@ maximum position by anchoring and modifying the width.
 \end{Shaded}
 
 Finally, the overlap inner join is used to restrict the chromosome 10
-normalised coverage scores that are within the 5000nt region that
-contain the max peak on chromosome 10 (figure \ref{fig:peak-viz}).
+coverage islands, to the islands that are contained in the 5000nt region
+that surrounds the max peak (figure \ref{fig:peak-viz}).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -695,7 +695,7 @@ contain the max peak on chromosome 10 (figure \ref{fig:peak-viz}).
 
 }
 
-\caption{Visualisation of normalised coverage scores accross a 5000nt region of chromosome 10 from H3K27Me3 ChIP-Seq assay from the Human Epigenome Roadmap project.}\label{fig:peak-viz}
+\caption{The final result of the \texttt{plyranges} operations to find a 5000nt region surrounding the peak of normalised coverage scores over chromosome 10, displayed as a density plot.}\label{fig:peak-viz}
 \end{figure}
 
 \hypertarget{computing-windowed-statistics}{%
@@ -799,7 +799,7 @@ using \texttt{group\_by()} in combination with \texttt{summarize()}
 
 }
 
-\caption{Dot plot of chromosomes ordered by estimated transition-transversion ratio. A white reference line is drawn at the expected ratio for a human exome.}\label{fig:titv-viz}
+\caption{The final result of computing quality control metrics over the SNP array data with \texttt{plyranges}, displayed as a dot plot. Chromosomes are ordered by their estimated transition-transversion ratio. A white reference line is drawn at the expected ratio for a human exome.}\label{fig:titv-viz}
 \end{figure}
 
 \hypertarget{discussion-and-conclusion}{%
@@ -840,8 +840,8 @@ achieve responsive performance, interactive graphics rely on lazy data
 access and computing patterns, so the deferred mechanisms within
 plyranges should help support interactive genomics applications.
 
-The \texttt{plyranges} package is available on the Bioconductor project
-website \url{https://bioconductor.org} or can be accessed via Github
+The \texttt{plyranges} package can be obtained via the Bioconductor
+project website \url{https://bioconductor.org} or accessed via Github
 \url{https://github.com/sa-lee/plyranges}.
 
 \hypertarget{acknowledgements}{%
@@ -850,7 +850,7 @@ website \url{https://bioconductor.org} or can be accessed via Github
 We would like to thank Dr Matthew Ritchie at the Walter and Eliza Hall
 Institute and Dr Paul Harrison for their feedback on earlier drafts of
 this work. We would also like to thank Lori Shepherd and Hèrve Pages for
-the code review they performed. This report was written with
+the code review they performed. This article was written with
 \texttt{knitr} \cite{R-knitr} and the figures were made with
 \texttt{ggbio} \cite{R-ggbio}. All code required to reproduce this
 article is available at \url{https://github.com/sa-lee/plyranges-paper}.
