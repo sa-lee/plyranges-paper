@@ -11,6 +11,8 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{1em}
 
+\renewcommand*{\thefootnote}{\fnsymbol{footnote}}
+
 \usepackage{abstract}
 \renewcommand{\abstractname}{}    % clear the title
 \renewcommand{\absnamepos}{empty} % originally center
@@ -96,9 +98,9 @@
 
 
 
-\author{\Large Stuart Lee\vspace{0.05in} \newline\normalsize\emph{Department of Econometrics and Business Statistics, Monash University\\
-\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}Molecular
-Medicine Division, Walter and Eliza Hall Institute}   \and \Large Di Cook\vspace{0.05in} \newline\normalsize\emph{Department of Econometrics and Business Statistics, Monash University}   \and \Large Michael Lawrence\vspace{0.05in} \newline\normalsize\emph{Bioinformatics and Computational Biology, Genentech, Inc.}  }
+\author{\Large Stuart Lee
+\footnote{\label{monash}Department of Econometrics and Business Statistics, Monash University, Clayton, Australia}\footnote{Molecular Medicine Division, Walter and Eliza Hall Institute, Parkville, Australia}\vspace{0.05in} \newline\normalsize\emph{}   \and \Large Dianne Cook \(^{\ref{monash}}\)\vspace{0.05in} \newline\normalsize\emph{}   \and \Large Michael Lawrence
+\footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author}\vspace{0.05in} \newline\normalsize\emph{}  }
 
 
 \date{}
@@ -142,10 +144,10 @@ Medicine Division, Walter and Eliza Hall Institute}   \and \Large Di Cook\vspace
 \makeatother
 \hypersetup{breaklinks=true,
             bookmarks=true,
-            pdfauthor={Stuart Lee (Department of Econometrics and Business Statistics, Monash University\\
-\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}Molecular
-Medicine Division, Walter and Eliza Hall Institute) and Di Cook (Department of Econometrics and Business Statistics, Monash University) and Michael Lawrence (Bioinformatics and Computational Biology, Genentech, Inc.)},
-             pdfkeywords = {bioconductor, grammar, genomes, data analysis},  
+            pdfauthor={Stuart Lee
+\footnote{\label{monash}Department of Econometrics and Business Statistics, Monash University, Clayton, Australia}\footnote{Molecular Medicine Division, Walter and Eliza Hall Institute, Parkville, Australia} () and Dianne Cook \(^{\ref{monash}}\) () and Michael Lawrence
+\footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author} ()},
+             pdfkeywords = {Bioconductor, Grammar, Genomes, Data Analysis},  
             pdftitle={plyranges: A grammar of genomic data transformation},
             colorlinks=true,
             citecolor=blue,
@@ -181,9 +183,9 @@ Medicine Division, Walter and Eliza Hall Institute) and Di Cook (Department of E
 
 {
    \vskip 13.5pt\relax \normalsize\fontsize{11}{12} 
-\textbf{\authorfont Stuart Lee} \hskip 15pt \emph{\small Department of Econometrics and Business Statistics, Monash University\\
-\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}\hspace*{0.333em}Molecular
-Medicine Division, Walter and Eliza Hall Institute}   \par \textbf{\authorfont Di Cook} \hskip 15pt \emph{\small Department of Econometrics and Business Statistics, Monash University}   \par \textbf{\authorfont Michael Lawrence} \hskip 15pt \emph{\small Bioinformatics and Computational Biology, Genentech, Inc.}   
+\textbf{\authorfont Stuart Lee
+\footnote{\label{monash}Department of Econometrics and Business Statistics, Monash University, Clayton, Australia}\footnote{Molecular Medicine Division, Walter and Eliza Hall Institute, Parkville, Australia}} \hskip 15pt \emph{\small }   \par \textbf{\authorfont Dianne Cook \(^{\ref{monash}}\)} \hskip 15pt \emph{\small }   \par \textbf{\authorfont Michael Lawrence
+\footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author}} \hskip 15pt \emph{\small }   
 
 }
 
@@ -219,7 +221,7 @@ readable analysis workflows. We have implemented this grammar as a
 Bioconductor/R package called \texttt{plyranges}.
 
 
-\vskip 8.5pt \noindent \emph{Keywords}: bioconductor, grammar, genomes, data analysis \par
+\vskip 8.5pt \noindent \emph{Keywords}: Bioconductor, Grammar, Genomes, Data Analysis \par
 
     \hbox{\vrule height .2pt width 39.14pc}
 
@@ -231,8 +233,8 @@ Bioconductor/R package called \texttt{plyranges}.
 \vskip 6.5pt
 
 
-\noindent  \hypertarget{introduction}{%
-\section{Introduction}\label{introduction}}
+\noindent  \hypertarget{background}{%
+\section{Background}\label{background}}
 
 High-throughput genomics promises to unlock new disease therapies, and
 strengthen our knowledge of basic biology. To deliver on those promises,
@@ -312,11 +314,14 @@ language on top of a key subset of Bioconductor data structures and thus
 fully integrates with the Bioconductor framework, gaining access to its
 scalable data representations and sophisticated statistical methods.
 
-\hypertarget{genomic-relational-algebra}{%
-\section{Genomic relational algebra}\label{genomic-relational-algebra}}
+\hypertarget{results}{%
+\section{Results}\label{results}}
+
+\hypertarget{genomic-relation-algebra}{%
+\subsection{Genomic Relation Algebra}\label{genomic-relation-algebra}}
 
 \hypertarget{data-model}{%
-\subsection{Data model}\label{data-model}}
+\subsubsection{Data Model}\label{data-model}}
 
 \begin{figure}
 \includegraphics[width=\textwidth]{diagrams/GRanges}
@@ -339,10 +344,10 @@ measurements or metadata specific to the data type or experiment (figure
 constraints, so that it is applicable to virtually any genomic workflow,
 while also being semantically rich enough to support high-level
 operations on genomic ranges. As a core data structure, GRanges enables
-interoperability between plyranges and the rest of Bioconductor.
-Adhering to a single data structure simplifies the API and makes it
-easier to learn and understand, in part because operations become
-endomorphic, i.e., they return the same type as their input.
+interoperability between \texttt{plyranges} and the rest of
+Bioconductor. Adhering to a single data structure simplifies the API and
+makes it easier to learn and understand, in part because operations
+become endomorphic, i.e., they return the same type as their input.
 
 GRanges follows the intuitive tidy data pattern: it is a rectangular
 table corresponding to a single biological context. Each row contains a
@@ -350,8 +355,8 @@ single observation and each column is a variable describing the
 observations. GRanges specializes the tidy pattern in that the
 observations always pertain to some genomic feature, but it largely
 remains compatible with the general relational operations defined by
-dplyr. Thus, we define our algebra as an extension of the dplyr algebra,
-and borrow its syntax conventions and design principles.
+dplyr. Thus, we define our algebra as an extension of the \texttt{dplyr}
+algebra, and borrow its syntax conventions and design principles.
 
 \begin{table}[!htbp]
 \centering
@@ -401,7 +406,7 @@ its origin is from the \texttt{dplyr} grammar.}\label{tab:grammar}
 \end{table}
 
 \hypertarget{algebraic-operations}{%
-\subsection{Algebraic operations}\label{algebraic-operations}}
+\subsubsection{Algebraic operations}\label{algebraic-operations}}
 
 The \texttt{plyranges} DSL defines an expressive algebra for performing
 genomic operations with and between GRanges objects (see table
@@ -441,24 +446,20 @@ indicates the side of the input range to flank.
 As with other genomic grammars, we define set operations that treat
 ranges as sets of integers, including \emph{intersect}, \emph{union},
 \emph{difference}, and \emph{complement}. There are two sets of these:
-parallel and merging. The parallel operations map to infix operators,
-which we surround with \emph{\%} symbols, a convention borrowed from R
-syntax. For example, the parallel intersection (\emph{x \%intersect\%
-y}) finds the intersecting range between \emph{xi} and \emph{yi} for
-\emph{i} in \emph{1\ldots{}n}, where \emph{n} is the length of both
-\emph{x} and \emph{y}. In contrast, the merging intersection
-(\emph{intersect\_ranges(x, y)}) returns a new set of disjoint ranges
-representing wherever there was overlap between a range in \emph{x} and
-a range in \emph{y}. We use the infix syntax for the parallel
-operations, since it is the conventional syntax for parallel, binary
-operations in R. Finding the parallel union will fail when two ranges
-have a gap, so we introduce a \emph{span} operator that takes the union
-while filling any gap. The \emph{complement} operation is unique in that
-it is unary. It finds the regions not covered by any of the ranges in a
-single set. Closely related is the \emph{between} parallel operation,
-which finds the gap separating \emph{xi} and \emph{yi}. The binary
-operations are callable from within arithmetic, restriction and
-aggregation expressions.
+parallel and merging. For example, the parallel intersection (\emph{x
+\%intersect\% y}) finds the intersecting range between \emph{xi} and
+\emph{yi} for \emph{i} in \emph{1\ldots{}n}, where \emph{n} is the
+length of both \emph{x} and \emph{y}. In contrast, the merging
+intersection (\emph{intersect\_ranges(x, y)}) returns a new set of
+disjoint ranges representing wherever there was overlap between a range
+in \emph{x} and a range in \emph{y}. Finding the parallel union will
+fail when two ranges have a gap, so we introduce a \emph{span} operator
+that takes the union while filling any gap. The \emph{complement}
+operation is unique in that it is unary. It finds the regions not
+covered by any of the ranges in a single set. Closely related is the
+\emph{between} parallel operation, which finds the gap separating
+\emph{xi} and \emph{yi}. The binary operations are callable from within
+arithmetic, restriction and aggregation expressions.
 
 To support merging, our algebra recasts finding overlaps or nearest
 neighbours between two genomic regions as variants of the relational
@@ -510,97 +511,9 @@ the \emph{group\_by} modifier. Together with our algebra for arithmetic
 and merging, these operations conform to the semantics and syntax of the
 \texttt{dplyr} grammar.
 
-\hypertarget{design-principles}{%
-\subsection{Design principles}\label{design-principles}}
-
-The design of \texttt{plyranges} adheres to well understood principles
-of language and API design: cognitive consistency, cohesion,
-expressiveness and endomorphism \cite{Green1996-qg}. To varying degrees,
-these principles also underlie the design of \texttt{dplyr} and the
-Bioconductor infrastructure.
-
-\hypertarget{cognitive-consistency-and-fluency}{%
-\subsubsection{Cognitive consistency and
-fluency}\label{cognitive-consistency-and-fluency}}
-
-We aim for our interfaces to have a simple and direct mapping to the
-user's cognitive model, i.e., how the user thinks about the data. This
-requires careful selection of the level of abstraction so that the user
-can express workflows in the language of genomics. This motivates the
-adoption of the tidy GRanges object as our central data structure. The
-basic data.frame and \texttt{dplyr} tibble lack any notion of genomic
-ranges and so could not easily support our genomic grammar, with its
-specific verbs for range-oriented data manipulation. Another example of
-cognitive consistency is how \texttt{plyranges} is insensitive to
-direction/strand by default when, e.g., detecting overlaps.
-\texttt{GenomicRanges} has the opposite behavior. We believe that
-defaulting to purely spatial overlap is most intuitive to most users.
-
-Like \texttt{dplyr}, \texttt{plyranges} verbs are functional: they are
-free of side effects and return their result. This enables chaining of
-verbs through syntax like the forward pipe operator
-(\texttt{\%\textgreater{}\%}, read as ``then'') of the \texttt{magrittr}
-package \cite{R-magrittr}. This has syntax has a direct cognitive
-mapping to natural language and the intuitive notion of pipelines. The
-low-level object-oriented APIs of Bioconductor tend to manipulate data
-via sub-replacement functions, like \texttt{start(gr)\ \textless{}-\ x}.
-These ultimately produce the side effect of replacing a symbol mapping
-in the current environment and thus are not amenable to so-called fluent
-syntax.
-
-\hypertarget{cohesion}{%
-\subsubsection{Cohesion}\label{cohesion}}
-
-A function is cohesive if it performs a singular task without producing
-any side-effects. Singular tasks are not necessarily atomic; they can
-always be broken down further at lower levels of abstraction. For
-example, to resize a range, the user needs to specify which position
-(start, end, midpoint) should be invariant over the transformation. The
-\texttt{resize()} function from the \texttt{GenomicRanges} package has a
-\texttt{fix} argument that sets the anchor, so calling \texttt{resize()}
-coalesces anchoring and width modification. The coupling at the function
-call level is justified since the effect of setting the width depends on
-the anchor. However, plyranges increases cohesion and decouples the
-anchoring into its own function call.
-
-Increasing cohesion simplifies the interface to each operation, makes
-the meaning of arguments more intuitive, and relies on function names as
-the primary means of expression, instead of a more complex mixture of
-function and argument names. Since functions are superordinate to their
-arguments, flattening the API at the function level enables the user to
-conceptualize the API as a catalog of functions, without having to
-descend further. A flat function catalog also enhances API
-discoverability, particularly through auto-completion in IDEs. One
-downside of pushing cohesion to this extreme is that function calls
-become coupled, and care is necessary to treat them as a group when
-modifying code.
-
-\hypertarget{expressiveness}{%
-\subsubsection{Expressiveness}\label{expressiveness}}
-
-Expressiveness relates to the information content in code: the
-programmer should be able to clarify intent without unnecessary
-verbosity. For example, our overlap-based join operations are more
-concise than the multiple steps necessary to achieve the same effect in
-the original \texttt{GenomicRanges} API. In other cases, the
-\texttt{plyranges} API increases verbosity for the sake of clarity and
-cohesion. Explicitly calling \texttt{anchor()} can require more typing,
-but the code is easier to comprehend. Another example is the set of
-routines for importing genomic annotations, including
-\texttt{read\textbackslash{}\_gff()},
-\texttt{read\textbackslash{}\_bed()}, and \texttt{read\_bam()}. Compared
-to the generic \texttt{import()} in \texttt{rtracklayer}, the explicit
-format-based naming in plyranges clarifies intent and the type of data
-being returned. Similarly, every plyranges function that computes with
-strand information indicates its intentions by including suffixes such
-as \texttt{directed}, \texttt{upstream} or \texttt{downstream} in its
-name, otherwise strand is ignored. The \texttt{GenomicRanges} API does
-not make this distinction explicit in its function naming, instead
-relying on a parameter that defaults to strand sensitivity, an arguably
-unintuitive behavior.
-
-\hypertarget{results}{%
-\section{Results}\label{results}}
+\hypertarget{developing-workflows-with-plyranges}{%
+\subsection{\texorpdfstring{Developing workflows with
+\texttt{plyranges}}{Developing workflows with plyranges}}\label{developing-workflows-with-plyranges}}
 
 Here we provide illustrative examples of using the \texttt{plyranges}
 DSL to show how our grammar could be integrated into genomic data
@@ -609,7 +522,7 @@ Bioconductor infrastructure, enables easy access to public datasets and
 methods for analysis and visualisation.
 
 \hypertarget{peak-finding}{%
-\subsection{Peak Finding}\label{peak-finding}}
+\subsubsection{Peak Finding}\label{peak-finding}}
 
 In the workflow of ChIP-seq data analysis, we are interested in finding
 peaks from islands of coverage over chromosome. Here we will use
@@ -699,7 +612,7 @@ that surrounds the max peak (figure \ref{fig:peak-viz}).
 \end{figure}
 
 \hypertarget{computing-windowed-statistics}{%
-\subsection{Computing Windowed
+\subsubsection{Computing Windowed
 Statistics}\label{computing-windowed-statistics}}
 
 Another common operation in genomics data analysis is to compute data
@@ -756,7 +669,7 @@ content within each window.
 \end{Shaded}
 
 \hypertarget{quality-control-metrics}{%
-\subsection{Quality Control Metrics}\label{quality-control-metrics}}
+\subsubsection{Quality Control Metrics}\label{quality-control-metrics}}
 
 We have created a GRanges object from genotyping performed on the H1
 cell line, consisting of approximately two million single nucleotide
@@ -802,8 +715,99 @@ using \texttt{group\_by()} in combination with \texttt{summarize()}
 \caption{The final result of computing quality control metrics over the SNP array data with \texttt{plyranges}, displayed as a dot plot. Chromosomes are ordered by their estimated transition-transversion ratio. A white reference line is drawn at the expected ratio for a human exome.}\label{fig:titv-viz}
 \end{figure}
 
-\hypertarget{discussion-and-conclusion}{%
-\section{Discussion and conclusion}\label{discussion-and-conclusion}}
+\hypertarget{discussion}{%
+\section{Discussion}\label{discussion}}
+
+The design of \texttt{plyranges} adheres to well understood principles
+of language and API design: cognitive consistency, cohesion,
+expressiveness and endomorphism \cite{Green1996-qg}. To varying degrees,
+these principles also underlie the design of \texttt{dplyr} and the
+Bioconductor infrastructure.
+
+We have aimed for \texttt{plyranges} to have a simple and direct mapping
+to the user's cognitive model, i.e., how the user thinks about the data.
+This requires careful selection of the level of abstraction so that the
+user can express workflows in the language of genomics. This motivates
+the adoption of the tidy GRanges object as our central data structure.
+The basic data.frame and \texttt{dplyr} tibble lack any notion of
+genomic ranges and so could not easily support our genomic grammar, with
+its specific verbs for range-oriented data manipulation. Another example
+of cognitive consistency is how \texttt{plyranges} is insensitive to
+direction/strand by default when, e.g., detecting overlaps.
+\texttt{GenomicRanges} has the opposite behavior. We believe that
+defaulting to purely spatial overlap is most intuitive to most users.
+
+Like \texttt{dplyr}, \texttt{plyranges} verbs are functional: they are
+free of side effects and return their result. This enables chaining of
+verbs through syntax like the forward pipe operator
+(\texttt{\%\textgreater{}\%}, read as ``then'') of the \texttt{magrittr}
+package \cite{R-magrittr}. This has syntax has a direct cognitive
+mapping to natural language and the intuitive notion of pipelines. The
+low-level object-oriented APIs of Bioconductor tend to manipulate data
+via sub-replacement functions, like \texttt{start(gr)\ \textless{}-\ x}.
+These ultimately produce the side effect of replacing a symbol mapping
+in the current environment and thus are not amenable to so-called fluent
+syntax.
+
+A function is cohesive if it performs a singular task without producing
+any side-effects. Singular tasks can always be broken down further at
+lower levels of abstraction. For example, to resize a range, the user
+needs to specify which position (start, end, midpoint) should be
+invariant over the transformation. The \texttt{resize()} function from
+the \texttt{GenomicRanges} package has a \texttt{fix} argument that sets
+the anchor, so calling \texttt{resize()} coalesces anchoring and width
+modification. The coupling at the function call level is justified since
+the effect of setting the width depends on the anchor. However,
+\texttt{plyranges} increases cohesion and decouples the anchoring into
+its own function call.
+
+Increasing cohesion simplifies the interface to each operation, makes
+the meaning of arguments more intuitive, and relies on function names as
+the primary means of expression, instead of a more complex mixture of
+function and argument names. This results in the user being able to
+conceptualize the \texttt{plyranges} DSL as a flat catalog of functions,
+without having to descend further into documentation to understand a
+function's arguments. A flat function catalog also enhances API
+discoverability, particularly through auto-completion in IDEs. One
+downside of pushing cohesion to this extreme is that function calls
+become coupled, and care is necessary to treat them as a group when
+modifying code.
+
+Expressiveness relates to the information content in code: the
+programmer should be able to clarify intent without unnecessary
+verbosity. For example, our overlap-based join operations are more
+concise than the multiple steps necessary to achieve the same effect in
+the original \texttt{GenomicRanges} API. In other cases, the
+\texttt{plyranges} API increases verbosity for the sake of clarity and
+cohesion. Explicitly calling \emph{anchor()} can require more typing,
+but the code is easier to comprehend. Another example is the set of
+routines for importing genomic annotations, including
+\emph{read\_gff()}, \emph{read\_bed()}, and \emph{read\_bam()}. Compared
+to the generic \emph{import()} in \texttt{rtracklayer}, the explicit
+format-based naming in \texttt{plyranges} clarifies intent and the type
+of data being returned. Similarly, every \texttt{plyranges} function
+that computes with strand information indicates its intentions by
+including suffixes such as \emph{directed}, \emph{upstream} or
+\emph{downstream} in its name, otherwise strand is ignored. The
+\texttt{GenomicRanges} API does not make this distinction explicit in
+its function naming, instead relying on a parameter that defaults to
+strand sensitivity, an arguably unintuitive behavior.
+
+A caveat to constructing a compatible interface with \texttt{dplyr} is
+that \texttt{plyranges} makes extensive use of non-standard evaluation
+in R via the \texttt{rlang} package \cite{R-rlang}. Simply, this means
+that computations are evaluated in the context of the GRanges objects.
+Both \texttt{dplyr} and \texttt{plyranges} are based on the
+\texttt{rlang} language, because it allows for more expressive code that
+is free of repeated references to the container. Implicitly referencing
+the container is particularly convenient when programming interactively.
+Consequently, when programming with \texttt{plyranges}, a user needs to
+generally understand the \texttt{rlang} language and how to adapt their
+code accordingly. Users familiar with the tidyverse should already have
+such knowledge.
+
+\hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
 
 We have shown how to create expressive and reproducible genomic
 workflows using the \texttt{plyranges} DSL. By realising that the
@@ -812,19 +816,6 @@ grammar for performing genomic arithmetic, aggregation, restriction and
 merging. Our examples show that \texttt{plyranges} code is succinct,
 human readable and can take advantage of the interoperability provided
 by the Bioconductor ecosystem and the R language.
-
-A caveat to constructing a compatible interface with \texttt{dplyr} is
-that \texttt{plyranges} makes extensive use of non-standard evaluation
-in R via the \texttt{rlang} package \cite{R-rlang}. Simply, this means
-that computations are evaluated in the context of the GRanges objects.
-Both dplyr and plyranges are based on the \texttt{rlang} language,
-because it allows for more expressive code that is free of repeated
-references to the container. Implicitly referencing the container is
-particularly convenient when programming interactively. Consequently,
-when programming with \texttt{plyranges}, a user needs to generally
-understand the \texttt{rlang} language and how to adapt their code
-accordingly. Users familiar with the tidyverse should already have such
-knowledge.
 
 We aim to continue developing the \texttt{plyranges} package and to
 extend it for use with more complex data structures, such as the
@@ -838,11 +829,35 @@ As the \texttt{plyranges} interface encourages tidy data practices, it
 integrates well with the grammar of graphics \cite{Wickham2016-gz}. To
 achieve responsive performance, interactive graphics rely on lazy data
 access and computing patterns, so the deferred mechanisms within
-plyranges should help support interactive genomics applications.
+\texttt{plyranges} should help support interactive genomics
+applications.
 
 The \texttt{plyranges} package can be obtained via the Bioconductor
 project website \url{https://bioconductor.org} or accessed via Github
 \url{https://github.com/sa-lee/plyranges}.
+
+\hypertarget{methods}{%
+\section{Methods}\label{methods}}
+
+\hypertarget{data-availability}{%
+\subsection{Data Availability}\label{data-availability}}
+
+The BigWig file for the H3K27Me3 primary T CD8+ memory cells from
+peripheral blood ChIP-seq data was downloaded from the
+\texttt{AnnotationHub} package (2.12.0) under accession AH33458. The BAM
+file corresponding to the H1 cell line ChIP-seq data is available at GEO
+under accession GSM433167. The SNP array data for the H1 cell line data
+is available at GEO under accession GSM1463263.
+
+\hypertarget{software-versions}{%
+\subsection{Software Versions}\label{software-versions}}
+
+To produce the workflows as described in results section we used R
+version 3.5 with the development version of \texttt{plyranges} (1.1.4)
+and the \texttt{BioStrings} package (2.48.0) installed.
+
+All code required to reproduce this article is available at
+\url{https://github.com/sa-lee/plyranges-paper}.
 
 \hypertarget{acknowledgements}{%
 \section{Acknowledgements}\label{acknowledgements}}
@@ -852,8 +867,7 @@ Institute and Dr Paul Harrison for their feedback on earlier drafts of
 this work. We would also like to thank Lori Shepherd and Hèrve Pages for
 the code review they performed. This article was written with
 \texttt{knitr} \cite{R-knitr} and the figures were made with
-\texttt{ggbio} \cite{R-ggbio}. All code required to reproduce this
-article is available at \url{https://github.com/sa-lee/plyranges-paper}.
+\texttt{ggbio} \cite{R-ggbio}.
 
 
 
