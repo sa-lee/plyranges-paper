@@ -5,18 +5,23 @@ author:
     email: stuart.lee1@monash.edu
   - name: Dianne Cook $^{\ref{monash}}$
     email: di.cook@monash.edu 
-  - name: Michael Lawrence \footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author}
-    email: michael.lawrence@gene.com
-abstract: "The Bioconductor project has created many useful data abstractions for analysing high-throughput genomics experiments. However, there is a cognitive load placed on a user in learning a data abstraction and understanding its appropriate use. Throughout a standard workflow, a user must navigate and know many of these abstractions to perform an genomic analysis task, when a single data abstraction, a GRanges object will suffice. The GRanges class naturally represent genomic intervals and their associated measurements. By recognising that the GRanges class follows 'tidy' data principles we have created a grammar of genomic data transformation. The grammar defines verbs for performing actions on and between genomic interval data. It provides a principled way of performing common genomic data analysis tasks through a coherent interface to existing Bioconductor infrastructure, resulting in human readable analysis workflows. We have implemented this grammar as a Bioconductor/R package called \\texttt{plyranges}."
-keywords: "Bioconductor, Grammar, Genomes, Data Analysis"
-bibliography: references.bib
+  - name: Michael Lawrence \footnote{Bioinformatics and Computational
+    Biology, Genentech Research and Early Development, South San
+    Francisco, United States of America}\footnote{corresponding
+    author} 
+	email: michael.lawrence@gene.com 
+	
+abstract: "The Bioconductor project provides a host of interoperable data abstractions for analysing high-throughput genomics experiments. Implementing a typical genomic workflow with Bioconductor requires learning the abstractions and understanding them at an integrative level.  This places a large cognitive burden on the user. We have created a grammar of genomic data transformation that operates on single, central Bioconductor data structure, GRanges, which naturally represents genomic intervals and their associated measurements. The grammar defines verbs for performing actions on and between genomic interval data through a simplified, coherent interface to existing Bioconductor infrastructure, resulting in fluent analysis workflows. We have implemented this grammar as an R/Bioconductor package called \\texttt{plyranges}."
+	
+keywords: "Bioconductor, Grammar, Genomes, Data Analysis" 
+bibliography: references.bib 
 output: 
   pdf_document:
-    template: svm-latex-ms.tex
-    keep_tex: true
+    template: svm-latex-ms.tex 
+    keep_tex: true 
     fig_caption: true
-    latex_engine: pdflatex
-    citation_package: biblatex
+    latex_engine: pdflatex 
+    citation_package: biblatex 
 fontfamily: mathpazo
 ---
 
@@ -104,7 +109,7 @@ operations, such as range manipulation and overlap-based joins, using
 the vocabulary of genomics. Their implementations either delegate
 computations to a database, or operate over collections of files in
 standard formats like BED. An example of the former is the Genome Query 
-Language (GQL) and its distributed implementation GenAp which use an 
+Language (GQL) and its distributed implementation GenAp which use a 
 SQL-like syntax for fast retrieval of information of unprocessed 
 sequencing data [@Kozanitis2014-va; @Kozanitis2016-bm]. Similarly, the Genometric 
 Query Language (GMQL) implements a relational algebra for combining genomic datasets 
