@@ -67,7 +67,7 @@ if (!file.exists(h1_bam_sorted)) {
 array_info <- "data/GPL18952_HumanOmni25M-8v1-1_B.annotated.txt.gz"
 if (!file.exists(array_info)) 
   download.file(
-    url = "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GPL18952&format=file&file=GPL18952%5FHumanOmni2%2D5%2D8%2Dv1%2D1%2DC%2Ecsv%2Egz",
+    url = "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GPL18952&format=file&file=GPL18952%5FHumanOmni25M%2D8v1%2D1%5FB%2Eannotated%2Etxt%2Egz",
     destfile = array_info
   )
 
