@@ -215,43 +215,43 @@ algebra, and borrow its syntax conventions and design principles.
   & Verb &  Description \\ 
   \hline
    & \textbf{\emph{summarise()}} & aggregate over column(s) \\ 
-   Aggregation & \emph{disjoin\_ranges()} & aggregate column(s) over the union of end coordinates \\
+   Aggregate & \emph{disjoin\_ranges()} & aggregate column(s) over the union of end coordinates \\
    &  \emph{reduce\_ranges()} & aggregate column(s) by merging overlapping and neighbouring ranges \\
    \hline
    &  \textbf{\emph{mutate()}} & modifies any column \\
    & \textbf{\emph{select()}} & select columns \\
-  Arithmetic (Unary) & \textbf{\emph{arrange()}} & sort by columns \\
+  Modify (Unary) & \textbf{\emph{arrange()}} & sort by columns \\
    & \emph{stretch()} & extend range by fixed amount \\
    &  \emph{shift\_(direction)} & shift coordinates \\
    & \emph{flank\_(direction)} & generate flanking regions \\
    & \emph{\%intersection\% } & row-wise intersection \\
    & \emph{\%union\%} & row-wise union \\
    & \emph{compute\_coverage} & coverage over all ranges \\
-  Arithmetic (Binary) &  \emph{\%setdiff\%} & row-wise set difference \\
+  Modify (Binary) &  \emph{\%setdiff\%} & row-wise set difference \\
    & \emph{between()} & row-wise gap range \\
    & \emph{span()} & row-wise spanning range \\
    \hline
     & \emph{join\_overlap\_*()} & merge by overlapping ranges \\
     & \emph{join\_nearest} & merge by nearest neighbour ranges \\
     & \emph{join\_follow} & merge by following ranges \\
-    Merging & \emph{join\_precedes} & merge by preceding ranges \\
+    Merge & \emph{join\_precedes} & merge by preceding ranges \\
     & \emph{union\_ranges} & range-wise union \\
     & \emph{intersect\_ranges} & range-wise intersect \\
     & \emph{setdiff\_ranges} & range-wise set difference \\
     & \emph{complement\_ranges} & range-wise union \\
   \hline
    & \emph{anchor\_direction()} & fix coordinates at direction \\
-  Modifier & \textbf{\emph{group\_by()}} & partition by column(s)  \\ 
+  Operate & \textbf{\emph{group\_by()}} & partition by column(s)  \\ 
    & \emph{group\_by\_overlaps()} & partition by overlaps \\
    \hline
    & \textbf{\emph{filter()}} & subset rows \\
-  Restriction & \emph{filter\_by\_overlaps()} & subset by overlap \\
+  Restrict & \emph{filter\_by\_overlaps()} & subset by overlap \\
     & \emph{filter\_by\_non\_overlaps()} & subset by no overlap \\
    \hline
 \end{tabular}
 \caption{Overview of the \texttt{plyranges} grammar. The core verbs are
-briefly described and categorised into one of: aggregation, unary or binary
-arithmetic, merging, modifier, or restriction. A verb is given bold text if
+briefly described and categorised into one of the following higher level 
+catgeories: aggregate, modify, merge, operate, or restrict. A verb is given bold text if
 its origin is from the \texttt{dplyr} grammar.}\label{tab:grammar}
 \end{table}
 
@@ -309,7 +309,7 @@ callable from within arithmetic, restriction and aggregation
 expressions.
 
 To support merging, our algebra recasts finding overlaps or 
-nearest neighbours between two
+nearest neighbors between two
 genomic regions as variants of the relational join operator. A join
 acts on two GRanges objects, a query and a subject. The join operator
 is relational in the sense that metadata from the query and subject
@@ -323,7 +323,7 @@ matching by whether the query is completely _within_ the subject, and
 adding the _directed_ suffix ensures that matching ranges have the
 same direction (strand).
 
-```{r olaps-fig, echo = FALSE, out.width="\\textwidth", fig.cap="Illustration of the three overlap join operators. Each join takes query and subject range as input (black and light gray rectangles, respectively). An index for the join is computed, returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query ranges by where it was 'hit' by the subject ranges. The join semantics alter what is returned: for an \\textbf{inner} join the query range is returned for each match, for an \\textbf{intersect} the intersection is taken between overlapping ranges, and for a \\textbf{left} join all query ranges are returned even if the subject range does not overlap them. This principle is gnerally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations."}
+```{r olaps-fig, echo = FALSE, out.width="\\textwidth", fig.cap="Illustration of the three overlap join operators. Each join takes query and subject range as input (black and light gray rectangles, respectively). An index for the join is computed, returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query ranges by where it was 'hit' by the subject ranges. The join semantics alter what is returned: for an \\textbf{inner} join the query range is returned for each match, for an \\textbf{intersect} the intersection is taken between overlapping ranges, and for a \\textbf{left} join all query ranges are returned even if the subject range does not overlap them. This principle is generally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations."}
 knitr::include_graphics("diagrams/diagrams-002.png")
 ```
 
@@ -354,7 +354,7 @@ Here we provide illustrative examples of using the `plyranges` DSL to show
 how our grammar could be integrated into genomic data workflows. We also
 highlight how interoperability with existing Bioconductor infrastructure, 
 enables easy access to public datasets and methods for analysis and 
-visualisation.
+visualization.
 
 ### Peak Finding
 
@@ -404,7 +404,7 @@ all_peaks <- chr10_scores %>%
   reduce_ranges(score = max(score))
 ```
 
-Returning to the GRanges object containing normalised coverage scores, 
+Returning to the GRanges object containing normalized coverage scores, 
 we filter to find the coordinates of the peak containing the maximum coverage 
 score. We can then find a 5000 nt region centered around the maximum position 
 by anchoring and modifying the width. 
@@ -643,7 +643,7 @@ computes with strand information indicates its intentions by including
 suffixes such as _directed_, _upstream_ or _downstream_ in its name,
 otherwise strand is ignored. The `GenomicRanges` API does not make this
 distinction explicit in its function naming, instead relying on a
-parameter that defaults to strand sensitivity, an arguably unintuitive
+parameter that defaults to strand sensitivity, an arguably confusing
 behavior.
 
 A caveat to constructing a compatible interface with `dplyr` is that
