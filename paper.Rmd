@@ -147,10 +147,11 @@ and all measurements pertain to a single observational unit.
 The tidy data pattern is useful because it allows 
 us to see how the data relate to the design of an experiment
 and the variables measured. The `dplyr` package \cite{Wickham2017-dplyr} 
-defines an API that maps notions from the general relational algebra to 
-operations on tidy data. It expresses each operation as a cohesive, endomorphic
-verb. Taken together these features enable a user to write human
-readable analysis workflows.
+defines an application programming interface (API) that maps notions from 
+database languages such as SQL to verbs that act on tidy data. These verbs
+can be composed together on one or more tidy datasets with the pipe operator 
+from the `magrittr` package \cite{R-magrittr}. Taken together these features 
+enable a user to write human readable analysis workflows.
 
 We have created a genomic DSL called `plyranges` that reformulates
 notions from existing genomic algebras and embeds them in R as a
