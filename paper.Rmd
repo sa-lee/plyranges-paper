@@ -148,7 +148,7 @@ The tidy data pattern is useful because it allows
 us to see how the data relate to the design of an experiment
 and the variables measured. The `dplyr` package \cite{Wickham2017-dplyr} 
 defines an application programming interface (API) that maps notions from 
-database languages such as SQL to verbs that act on tidy data. These verbs
+the general relational algebra to verbs that act on tidy data. These verbs
 can be composed together on one or more tidy datasets with the pipe operator 
 from the `magrittr` package \cite{R-magrittr}. Taken together these features 
 enable a user to write human readable analysis workflows.
@@ -181,7 +181,7 @@ are included as columns to the right of the dotted line as annotations
 \end{figure}
 
 The `plyranges` DSL is built on the core Bioconductor data structure
-GRanges, which is essentially a constrained table, with fixed columns
+GRanges, which is a constrained table, with fixed columns
 for the chromosome, start and end coordinates, and the strand, along
 with an arbitrary set of additional columns, consisting of
 measurements or metadata specific to the data type or experiment
