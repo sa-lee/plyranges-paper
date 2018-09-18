@@ -195,13 +195,13 @@ and makes it easier to learn and understand, in part because
 operations become endomorphic, i.e., they return the same type as
 their input.
 
-GRanges follows the intuitive tidy data pattern: it is a rectangular
+GRanges follow the intuitive tidy data pattern: it is a rectangular
 table corresponding to a single biological context. Each row contains
 a single observation and each column is a variable describing the
 observations.  GRanges specializes the tidy pattern in that the
 observations always pertain to some genomic feature, but it largely
 remains compatible with the general relational operations defined by
-dplyr. Thus, we define our algebra as an extension of the `dplyr`
+`dplyr`. Thus, we define our algebra as an extension of the `dplyr`
 algebra, and borrow its syntax conventions and design principles.
 
 \begin{table}[!htbp]
@@ -307,17 +307,16 @@ expressions.
 To support merging, our algebra recasts finding overlaps or 
 nearest neighbors between two
 genomic regions as variants of the relational join operator. A join
-acts on two GRanges objects, a query and a subject. The join operator
-is relational in the sense that metadata from the query and subject
-ranges is retained in the joined range.  All join operators in the
+acts on two GRanges objects: _x_ and _y_. The join operator
+is relational in the sense that metadata from the _x_ and _y_
+ranges are retained in the joined range.  All join operators in the
 `plyranges` DSL generate a set of hits based on overlap or proximity
 of ranges and use those hits to merge the two datasets in different
 ways. There are four supported matching algorithms: _overlap_,
 _nearest_, _precede_, and _follow_ (figures 
 \ref{fig:olaps-fig} and \ref{fig:nn-fig}). We can further restrict the
-matching by whether the query is completely _within_ the subject, and
-adding the _directed_ suffix ensures that matching ranges have the
-same direction (strand).
+matching by whether _y_ is completely _within_ the _x_, and ensure that 
+matching ranges have the same direction (strand) using the _directed_ suffix.
 
 ```{r olaps-fig, echo = FALSE, out.width="\\textwidth", fig.cap="Illustration of the three overlap join operators. Each join takes query and subject range as input (black and light gray rectangles, respectively). An index for the join is computed, returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query ranges by where it was 'hit' by the subject ranges. The join semantics alter what is returned: for an \\textbf{inner} join the query range is returned for each match, for an \\textbf{intersect} the intersection is taken between overlapping ranges, and for a \\textbf{left} join all query ranges are returned even if the subject range does not overlap them. This principle is generally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations."}
 knitr::include_graphics("diagrams/diagrams-002.png")
