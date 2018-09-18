@@ -107,7 +107,7 @@ standard formats like BED. An example of the former is the Genome Query
 Language (GQL) and its distributed implementation GenAp which use a 
 SQL-like syntax for fast retrieval of information of unprocessed 
 sequencing data [@Kozanitis2014-va; @Kozanitis2016-bm]. Similarly, the Genometric 
-Query Language (GMQL) implements a relational algebra for combining genomic datasets 
+Query Language (GMQL) implements a DSL for combining genomic datasets 
 \cite{Kaitoua2017-pw}.  The command line application BEDtools develops an extensive 
 algebra for performing arithmetic between two or more sets of genomic regions 
 \cite{Quinlan2010-gc}. All of the aforementioned DSLs are designed to be evaluated
