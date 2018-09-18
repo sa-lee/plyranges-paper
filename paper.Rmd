@@ -164,7 +164,7 @@ representations and sophisticated statistical methods.
 
 # Results
 
-## Genomic Relation Algebra
+## Genomic Relational Algebra
 
 ### Data Model
 
@@ -330,7 +330,7 @@ we have to choose one of the ranges from each pair. We always choose
 the left range. The _intersect_ join uses the intersection instead of
 the left range. Finally, the overlap _left_ join is akin to left outer
 join in Codd's relational algebra: it performs an overlap inner join
-but also returns all query ranges that are not hit by the subject.
+but also returns all _x_ ranges that are not hit by the _y_ ranges.
 
 ```{r nn-fig, echo = FALSE, out.width = "\\textwidth", fig.cap="Illustration of neighbour finding joins. Each join takes a query and subject range and computes a 'Hits' object. For the \\textbf{nearest} join all query ranges are returned as they are all nearest neighbours of the second subject range. For the \\textbf{follow} join there is only one query range that follows any subject range. Likewise for the \\textbf{precede} join, there is only one query range that precedes a subject range."}
 knitr::include_graphics("diagrams/diagrams-003.png")
@@ -587,18 +587,8 @@ decides what to do, there is an obvious way of doing it. I'm not ready
 to claim that the user should start from our grammar.
 -->
 
-Like `dplyr`, `plyranges` verbs are functional: they are free of side
-effects and return their result. This enables chaining of verbs
-through syntax like the forward pipe operator (`%>%`, read as "then")
-of the `magrittr` package \cite{R-magrittr}. This has syntax has a direct
-cognitive mapping to natural language and the intuitive notion of
-pipelines. The low-level object-oriented APIs of Bioconductor tend to
-manipulate data via sub-replacement functions, like `start(gr) <-
-x`. These ultimately produce the side effect of replacing a symbol
-mapping in the current environment and thus are not amenable to
-so-called fluent syntax.
-
-A function is cohesive if it performs a singular task without
+To further enable cognitive consistency, `plyranges` functions are cohesive. 
+A function is defined to be cohesive if it performs a singular task without
 producing any side-effects. Singular tasks can always be broken 
 down further at lower levels of abstraction.
 For example, to resize a range, the user needs to specify which
@@ -617,10 +607,23 @@ of function and argument names. This results in the
 user being able to conceptualize the `plyranges` DSL as a flat catalog of 
 functions, without having to descend further into documentation to understand
 a function's arguments. A flat function catalog also enhances API
-discoverability, particularly through auto-completion in IDEs. One
-downside of pushing cohesion to this extreme is that function calls
-become coupled, and care is necessary to treat them as a group when
-modifying code.
+discoverability, particularly through auto-completion in 
+integrated developer environments (IDEs). One downside of pushing cohesion to 
+this extreme is that function calls become coupled, and care is 
+necessary to treat them as a group when modifying code.
+
+
+Like `dplyr`, `plyranges` verbs are functional: they are free of side
+effects and are generally endomorphic, meaning that when the input is a GRanges
+object they return a GRanges object. This enables chaining of verbs
+through syntax like the forward pipe operator from the `magrittr` package. 
+This syntax has a direct cognitive mapping to natural language and the intuitive notion of
+pipelines. The low-level object-oriented APIs of Bioconductor tend to
+manipulate data via sub-replacement functions, like `start(gr) <-
+x`. These ultimately produce the side effect of replacing a symbol
+mapping in the current environment and thus are not amenable to so-called 
+fluent syntax.
+
 
 Expressiveness relates to the information content in code: the
 programmer should be able to clarify intent without unnecessary
@@ -640,6 +643,15 @@ otherwise strand is ignored. The `GenomicRanges` API does not make this
 distinction explicit in its function naming, instead relying on a
 parameter that defaults to strand sensitivity, an arguably confusing
 behavior.
+
+The implementation of `plyranges` is built on top of 
+Bioconductor infrastructure, meaning most functions are constructed
+by composing generic functions from core Bioconductor packages. As a result, any 
+Bioconductor packages that uses data structures that inherit from GRanges will
+be able to use `plyranges`  for free. Another consequence of building on top of
+Bioconductor generics is that the speed and memory usage of `plyranges` 
+functions are similar to the highly optimised methods implemented in Bioconductor
+for GRanges objects.
 
 A caveat to constructing a compatible interface with `dplyr` is that
 `plyranges` makes extensive use of non-standard evaluation in R via
@@ -674,9 +686,11 @@ We aim to continue developing the `plyranges` package and to extend it
 for use with more complex data structures, such as the
 SummarizedExperiment class, the core Bioconductor data structure for
 representing experimental results (e.g., counts) from multiple sample
-experiments in conjunction with feature and sample metadata. The
-grammar and design of the `plryanges` DSL are naturally extensible to
-SummarizedExperiment.
+experiments in conjunction with feature and sample metadata. Although,
+the SummarizedExperiment is not strictly tidy, it does consist of 
+three tidy data structures that are related by feature and sample identifiers. 
+Thererfore, the grammar and design of the `plryanges` DSL is naturally 
+extensible to the SummarizedExperiment.
 
 As the `plyranges` interface encourages tidy data practices, it
 integrates well with the grammar of graphics \cite{Wickham2016-gz}.  To
