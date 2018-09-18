@@ -329,7 +329,7 @@ match. A major difference is that the matching is not by identity, so
 we have to choose one of the ranges from each pair. We always choose
 the left range. The _intersect_ join uses the intersection instead of
 the left range. Finally, the overlap _left_ join is akin to left outer
-join in Cobb's relational algebra: it performs an overlap inner join
+join in Codd's relational algebra: it performs an overlap inner join
 but also returns all query ranges that are not hit by the subject.
 
 ```{r nn-fig, echo = FALSE, out.width = "\\textwidth", fig.cap="Illustration of neighbour finding joins. Each join takes a query and subject range and computes a 'Hits' object. For the \\textbf{nearest} join all query ranges are returned as they are all nearest neighbours of the second subject range. For the \\textbf{follow} join there is only one query range that follows any subject range. Likewise for the \\textbf{precede} join, there is only one query range that precedes a subject range."}
