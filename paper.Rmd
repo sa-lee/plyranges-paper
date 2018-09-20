@@ -304,6 +304,34 @@ finds the gap separating _xi_ and _yi_. The binary operations are
 callable from within arithmetic, restriction and aggregation
 expressions.
 
+\begin{figure}
+\includegraphics[width=\textwidth]{diagrams/olap-fig}
+\caption{Illustration of the three overlap join operators. Each join takes two 
+GRanges objects, \\textit{x} and \\textit{y} as input. A 'Hits' object for the 
+join is computed which consists of two components. The first component contains 
+the indices of the ranges in \\textit{x} that have been overlapped 
+(the rectangles of \\textit{x} that cross the orange lines). The second 
+component consists of the indices of the ranges in \\textit{y} that overlap 
+the ranges in \\textit{x}. In this case a range in \\textit{y} overlaps the 
+ranges in \\textit{x} three times, so the index is repeated three times. The 
+resulting 'Hits' object is used to modify \\textit{x} by where it was 'hit' by
+\\textit{y} and merge all metadata columns from \\textit{x} and \\textit{y} 
+based on the indices contained in the 'Hits' object. This procedure is applied 
+generally in the \\texttt{plyranges} DSL for both overlap and nearest neighbour
+operations. The join semantics alter what is returned: \\textbf{A}: for an 
+\\textbf{inner} join the \\textit{x} ranges that are overlapped by \\textit{y} 
+are returned. The returned ranges also include the metadata from the \\textit{y}
+range that overlapped the three \\textit{x} ranges. \\textbf{B} An 
+\\textbf{intersect} join is identical to an inner join except that the 
+intersection is taken between the overlapped \\textit{x} ranges and the 
+\\textit{y} ranges. \\textbf{C} For the left join \\textbf{left} join all 
+\\textit{x} ranges are returned regardless of whether they are overlapped by 
+\\textit{y}. In this case the resulting third range  of the join would have 
+missing values on metadata columns that came from \\textit{y}.}
+\label{fig:olaps-fig}
+\end{figure}
+
+
 To support merging, our algebra recasts finding overlaps or 
 nearest neighbors between two
 genomic regions as variants of the relational join operator. A join
@@ -319,9 +347,6 @@ matching by whether the query is completely _within_ the subject, and
 adding the _directed_ suffix ensures that matching ranges have the
 same direction (strand).
 
-```{r olaps-fig, echo = FALSE, out.width="\\textwidth", fig.cap="Illustration of the three overlap join operators. Each join takes two GRanges objects, \\textit{x} and \\textit{y} as input. A 'Hits' object for the join is computed which consists of two components. The first component contains the indices of the ranges in \\textit{x} that have been overlapped (the rectangles of \\textit{x} that cross the orange lines). The second component consists of the indices of the ranges in \\textit{y} that overlap the ranges in \\textit{x}. In this case a range in \\textit{y} overlaps the ranges in \\textit{x} three times, so the index is repeated three times. The resulting 'Hits' object is used to modify \\textit{x} by where it was 'hit' by \\textit{y} and merge all metadata columns from \\textit{x} and \\textit{y} based on the indices contained in the 'Hits' object. This procedure is applied generally in the \\texttt{plyranges} DSL for both overlap and nearest neighbour operations. The join semantics alter what is returned: \\textbf{A}: for an \\textbf{inner} join the \\textit{x} ranges that are overlapped by \\textit{y} are returned. The returned ranges also include the metadata from the \\textit{y] range that overlapped the three \\textit{x} ranges. \\textbf{B} An \\textbf{intersect} join is identical to an inner join except that the intersection is taken between the overlapped \\textit{x} ranges and the \\textit{y} ranges. \\textbf{C} For the left join \\textbf{left} join all \\textit{x} ranges are returned regardless of whether they are overlapped by \\textit{y}. In this case the resulting third range  of the join would have missing values on metadata columns that came from \\textit{y}."}
-knitr::include_graphics("diagrams/olap-fig.png")
-```
 
 For merging based on the hits, we have three modes: _inner_,
 _intersect_ and _left_. The _inner_ overlap join is similar to the
@@ -342,12 +367,15 @@ operators to filter, sort and aggregate by columns in a GRanges. These
 operations can be performed over partitions formed
 using the *group_by* modifier. Together with our algebra for arithmetic and
 merging, these operations conform to the semantics and syntax of the 
-`dplyr` grammar. Consequently, this results
+`dplyr` grammar. Consequently, `plyranges` code is generally more compact
+than the equivalent `GenomicRanges` code (figure \ref{code-fig}).
 
 ## Developing workflows with `plyranges`
 
 Here we provide illustrative examples of using the `plyranges` DSL to show
-how our grammar could be integrated into genomic data workflows. We also
+how our grammar could be integrated into genomic data workflows. As we
+construct the workflows we show the data output intermittantly to assist
+the reader in understanding the pipeline steps. The workflows
 highlight how interoperability with existing Bioconductor infrastructure, 
 enables easy access to public datasets and methods for analysis and 
 visualization.
@@ -386,7 +414,9 @@ downstream operations such as finding overlaps.
 chr10_scores <- bw_file %>%
   read_bigwig(overlap_ranges = chr10_ranges) %>%
   set_genome_info(genome = "hg19")
+chr10_scores
 ```
+
 
 After filtering for regions with a coverage score greater than 8, we can
 reduce individual runs to ranges representing the islands of coverage by
@@ -398,7 +428,9 @@ the scores to find the coverage peaks over chromosome 10.
 all_peaks <- chr10_scores %>% 
   filter(score > 8) %>% 
   reduce_ranges(score = max(score))
+all_peaks
 ```
+
 
 Returning to the GRanges object containing normalized coverage scores, 
 we filter to find the coordinates of the peak containing the maximum coverage 
@@ -418,7 +450,7 @@ coverage islands, to the islands that are contained in the 5000nt region that su
 ```{r peak_region}
 peak_region <- chr10_scores %>%
   join_overlap_inner(chr10_max_score_region)
-
+peak_region
 ```
 
 ```{r peak-viz, echo = FALSE, fig.cap = "The final result of the \\texttt{plyranges} operations to find a 5000nt region surrounding the peak of normalised coverage scores over chromosome 10, displayed as a density plot.", cache = TRUE}
@@ -465,6 +497,7 @@ alignments <- h1_bam_sorted %>%
   filter_by_overlaps(locations) %>%
   select(seq) %>%
   mutate(score = as.numeric(letterFrequency(seq, "GC", as.prob = TRUE)))
+alignments
 ```
 
 Finally, we use `group_by_overlaps()` to see where the alignments overlap the 
