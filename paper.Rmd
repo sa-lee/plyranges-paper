@@ -324,7 +324,7 @@ are returned. The returned ranges also include the metadata from the \textit{y}
 range that overlapped the three \textit{x} ranges. \textbf{B} An 
 \textbf{intersect} join is identical to an inner join except that the 
 intersection is taken between the overlapped \textit{x} ranges and the 
-\textit{y} ranges. \\textbf{C} For the left join \textbf{left} join all 
+\textit{y} ranges. \textbf{C} For the left join \textbf{left} join all 
 \textit{x} ranges are returned regardless of whether they are overlapped by 
 \textit{y}. In this case the resulting third range  of the join would have 
 missing values on metadata columns that came from \textit{y}.}
@@ -360,22 +360,18 @@ but also returns all _x_ ranges that are not hit by the _y_ ranges.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{diagrams/code-comparison.pdf}
-\caption{Idiomatic code examples for \texttt{plyranges} (\textbf(A)) and 
-\texttt{GenomicRanges} (\textbf(B)) illustrating an overlap and aggregate 
+\caption{Idiomatic code examples for \texttt{plyranges} (\textbf{A}) and 
+\texttt{GenomicRanges} (\textbf{B}) illustrating an overlap and aggregate 
 operation that returns the same result. 
 In each example, we have two BED files consisting of SNPs that are
 genome-wide association study (GWAS) hits and reference exons. Each code block
 counts for each SNP the number of distinct exons it overlaps. The 
-\texttt(plyranges) code achieves this with an overlap join followed by partitioning
+\texttt{plyranges}code achieves this with an overlap join followed by partitioning
 and aggregation. Strand is ignored by default here. 
-The \texttt(GenomicRanges) code achieves this using the 'Hits' and 'List' 
+The \texttt{GenomicRanges} code achieves this using the 'Hits' and 'List' 
 classes and their methods.}
 \label{fig:code}
 \end{figure}
-
-```{r nn-fig, echo = FALSE, out.width = "\\textwidth", fig.cap="Illustration of neighbour finding joins. Each join takes a query and subject range and computes a 'Hits' object. For the \\textbf{nearest} join all query ranges are returned as they are all nearest neighbours of the second subject range. For the \\textbf{follow} join there is only one query range that follows any subject range. Likewise for the \\textbf{precede} join, there is only one query range that precedes a subject range."}
-knitr::include_graphics("diagrams/diagrams-003.png")
-```
 
 Since the GRanges object is a tabular data structure, our grammar includes
 operators to filter, sort and aggregate by columns in a GRanges. These 
@@ -487,16 +483,12 @@ Consortium.
 
 We can directly obtain the genome information from the header of the
 BAM file: in this case the reads were aligned to the hg19 genome build
-and there are no reads overlapping the mitochondrial genome. To generate 
-bins of fixed width 10000nt we apply the `tile_ranges()` function
-to the genomic coordinates in locations.
+and there are no reads overlapping the mitochondrial genome. 
+
 ```{r bins}
 locations <- h1_bam_sorted %>%
   read_bam() %>% 
   get_genome_info() 
-
-bins <- locations %>% 
-  tile_ranges(width = 10000L)
 ```
 
 Next we only read in alignments that overlap the genomic locations
@@ -504,25 +496,31 @@ we are interested in and select the query sequence. Note that
 the reading of the BAM file is deferred: only alignments that pass the filter 
 are loaded into memory. We can add another column representing the GC proportion 
 for each alignment using the `letterFrequency()` function from the `Biostrings`
-package \cite{R-biostrings}.
+package \cite{R-biostrings}. After computing the GC proportion as the score
+column, we drop  all other columns in the GRanges object.
 
 ```{r, cache = TRUE}
 alignments <- h1_bam_sorted %>% 
   read_bam() %>%
   filter_by_overlaps(locations) %>%
   select(seq) %>%
-  mutate(score = as.numeric(letterFrequency(seq, "GC", as.prob = TRUE)))
+  mutate(score = as.numeric(letterFrequency(seq, "GC", as.prob = TRUE))) %>% 
+  select(score)
 alignments
 ```
 
-Finally, we use `group_by_overlaps()` to see where the alignments overlap the 
-genomic windows and then apply `summarize()` to compute the
-total number of reads and average GC content within each window.
+Finally, we create 10000nt tiles over the genome and compute the number
+of reads and average GC content over all reads that fall within
+each tile using an overlap join and merging endpoints.
 
 ```{r, cache = TRUE}
+bins <- locations %>% 
+  tile_ranges(width = 10000L)
+
 alignments_summary <- bins %>%
-  group_by_overlaps(alignments %>% select(score)) %>% 
-  summarize(n_reads = n(), avg_gc = mean(score))
+  join_overlap_inner(alignments) %>% 
+  disjoin_ranges(n = n(), avg_gc = mean(score))
+alignments_summary
 ```
 <!-- 
 https://support.bioconductor.org/p/71601/ also useful example?
@@ -764,7 +762,7 @@ GSM1463263.
 
 ## Software Versions
 To produce the workflows as described in results section we used 
-R version 3.5 with the development version of `plyranges` (1.1.4) 
+R version 3.5 with the development version of `plyranges` (1.1.10) 
 and the  `BioStrings` package (2.48.0) installed. 
 
 All code required to reproduce this article is available at https://github.com/sa-lee/plyranges-paper.
