@@ -7,7 +7,7 @@ author:
     email: di.cook@monash.edu 
   - name: Michael Lawrence \footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author} 
     email: lawrence.michael@gene.com
-abstract: "The Bioconductor project provides many interoperable data abstractions for analysing high-throughput genomics experiments; however implementing a typical genomic workflow with Bioconductor requires learning these abstractions and understanding them at an integrative level. This places a large cognitive burden on the user, especially for non-programmers. To reduce this burden we have created a grammar of genomic data transformation that operates on a single, central Bioconductor data structure, GRanges, which naturally represents genomic intervals and their associated measurements. The grammar defines verbs for performing actions on and between genomic interval data through a simplified, coherent interface to existing Bioconductor infrastructure, resulting in fluent analysis workflows. We have implemented this grammar as an R/Bioconductor package called \\texttt{plyranges}."
+abstract: "The Bioconductor project provides many interoperable data abstractions for analyzing high-throughput genomics experiments; however implementing a typical genomic workflow with Bioconductor requires learning these abstractions and understanding them at an integrative level. This places a large cognitive burden on the user, especially for non-programmers. To reduce this burden we have created a grammar of genomic data transformation that operates on a single, central Bioconductor data structure, GRanges, which naturally represents genomic intervals and their associated measurements. The grammar defines verbs for performing actions on and between genomic interval data through a simplified, coherent interface to existing Bioconductor infrastructure, resulting in fluent analysis workflows. We have implemented this grammar as an R/Bioconductor package called \\texttt{plyranges}."
 keywords: "Bioconductor, Grammar, Genomes, Data Analysis" 
 bibliography: references.bib 
 output: 
@@ -118,7 +118,7 @@ database tables.
 
 The Bioconductor/R packages `IRanges` and `GenomicRanges` 
 [@r-core; @Lawrence2013-wg; @Huber2015-ei] define a DSL for 
-analysing genomics data with R, an interactive data analysis environment that 
+analyzing genomics data with R, an interactive data analysis environment that 
 encourages reproducibility and provides high-level abstractions for manipulating,
 modelling and plotting data, through state of the art methods in
 statistical computing. The packages define object-oriented (OO)
@@ -210,9 +210,9 @@ algebra, and borrow its syntax conventions and design principles.
   \hline
   & Verb &  Description \\ 
   \hline
-   & \textbf{\emph{summarise()}} & aggregate over column(s) \\ 
+   & \textbf{\emph{summarize()}} & aggregate over column(s) \\ 
    Aggregate & \emph{disjoin\_ranges()} & aggregate column(s) over the union of end coordinates \\
-   &  \emph{reduce\_ranges()} & aggregate column(s) by merging overlapping and neighbouring ranges \\
+   &  \emph{reduce\_ranges()} & aggregate column(s) by merging overlapping and neighboring ranges \\
    \hline
    &  \textbf{\emph{mutate()}} & modifies any column \\
    & \textbf{\emph{select()}} & select columns \\
@@ -228,7 +228,7 @@ algebra, and borrow its syntax conventions and design principles.
    & \emph{span()} & row-wise spanning range \\
    \hline
     & \emph{join\_overlap\_*()} & merge by overlapping ranges \\
-    & \emph{join\_nearest} & merge by nearest neighbour ranges \\
+    & \emph{join\_nearest} & merge by nearest neighbor ranges \\
     & \emph{join\_follow} & merge by following ranges \\
     Merge & \emph{join\_precedes} & merge by preceding ranges \\
     & \emph{union\_ranges} & range-wise union \\
@@ -246,7 +246,7 @@ algebra, and borrow its syntax conventions and design principles.
    \hline
 \end{tabular}
 \caption{Overview of the \texttt{plyranges} grammar. The core verbs are
-briefly described and categorised into one of the following higher level 
+briefly described and categorized into one of the following higher level 
 catgeories: aggregate, modify, merge, operate, or restrict. A verb is given bold text if
 its origin is from the \texttt{dplyr} grammar.}\label{tab:grammar}
 \end{table}
@@ -317,17 +317,17 @@ ranges in \textit{x} three times, so the index is repeated three times. The
 resulting 'Hits' object is used to modify \textit{x} by where it was 'hit' by
 \textit{y} and merge all metadata columns from \textit{x} and \textit{y} 
 based on the indices contained in the 'Hits' object. This procedure is applied 
-generally in the \texttt{plyranges} DSL for both overlap and nearest neighbour
+generally in the \texttt{plyranges} DSL for both overlap and nearest neighbor
 operations. The join semantics alter what is returned: \textbf{A}: for an 
 \textbf{inner} join the \textit{x} ranges that are overlapped by \textit{y} 
 are returned. The returned ranges also include the metadata from the \textit{y}
 range that overlapped the three \textit{x} ranges. \textbf{B} An 
 \textbf{intersect} join is identical to an inner join except that the 
 intersection is taken between the overlapped \textit{x} ranges and the 
-\textit{y} ranges. \textbf{C} For the left join \textbf{left} join all 
+\textit{y} ranges. \textbf{C} For the \textbf{left} join all 
 \textit{x} ranges are returned regardless of whether they are overlapped by 
-\textit{y}. In this case the resulting third range  of the join would have 
-missing values on metadata columns that came from \textit{y}.}
+\textit{y}. In this case the third range (rectangle with the asterisk next to it)
+of the join would have missing values on metadata columns that came from \textit{y}.}
 \label{fig:olaps-fig}
 \end{figure}
 
@@ -385,7 +385,7 @@ than the equivalent `GenomicRanges` code (figure \ref{fig:code}).
 
 Here we provide illustrative examples of using the `plyranges` DSL to show
 how our grammar could be integrated into genomic data workflows. As we
-construct the workflows we show the data output intermittantly to assist
+construct the workflows we show the data output intermittently to assist
 the reader in understanding the pipeline steps. The workflows
 highlight how interoperability with existing Bioconductor infrastructure, 
 enables easy access to public datasets and methods for analysis and 
@@ -700,7 +700,7 @@ by composing generic functions from core Bioconductor packages. As a result, any
 Bioconductor packages that uses data structures that inherit from GRanges will
 be able to use `plyranges`  for free. Another consequence of building on top of
 Bioconductor generics is that the speed and memory usage of `plyranges` 
-functions are similar to the highly optimised methods implemented in Bioconductor
+functions are similar to the highly optimized methods implemented in Bioconductor
 for GRanges objects.
 
 A caveat to constructing a compatible interface with `dplyr` is that
@@ -739,7 +739,7 @@ representing experimental results (e.g., counts) from multiple sample
 experiments in conjunction with feature and sample metadata. Although,
 the SummarizedExperiment is not strictly tidy, it does consist of 
 three tidy data structures that are related by feature and sample identifiers. 
-Thererfore, the grammar and design of the `plryanges` DSL is naturally 
+Therefore, the grammar and design of the `plryanges` DSL is naturally 
 extensible to the SummarizedExperiment.
 
 As the `plyranges` interface encourages tidy data practices, it
