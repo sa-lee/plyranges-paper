@@ -429,10 +429,10 @@ chr10_scores
 ```
 
 
-After filtering for regions with a coverage score greater than 8, we can
-reduce individual runs to ranges representing the islands of coverage by
-using the `reduce_ranges()` function. This function allows a summary
-to be computer over each island: in this case we take the maximum of 
+We then filter for regions with a coverage score greater than 8, and following
+this reduce individual runs to ranges representing the islands of coverage.
+This is achieved with the `reduce_ranges()` function, which allows a summary
+to be computed over each island: in this case we take the maximum of 
 the scores to find the coverage peaks over chromosome 10.
 
 ```{r}
@@ -504,7 +504,9 @@ alignments <- h1_bam_sorted %>%
   read_bam() %>%
   filter_by_overlaps(locations) %>%
   select(seq) %>%
-  mutate(score = as.numeric(letterFrequency(seq, "GC", as.prob = TRUE))) %>% 
+  mutate(
+    score = as.numeric(letterFrequency(seq, "GC", as.prob = TRUE))
+  ) %>% 
   select(score)
 alignments
 ```
@@ -588,6 +590,7 @@ ti_tv_results <- h1_snp_array %>%
   group_by(seqnames) %>%
   summarize(n_snps = n(),
             ti_tv = sum(transition) / sum(!transition)) 
+ti_tv_results
 ```
 
 ```{r titv-viz, echo = FALSE, fig.cap = "The final result of computing quality control metrics over the SNP array data with \\texttt{plyranges}, displayed as a dot plot. Chromosomes are ordered by their estimated transition-transversion ratio. A white reference line is drawn at the expected ratio for a human exome."}
