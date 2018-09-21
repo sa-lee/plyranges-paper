@@ -247,7 +247,7 @@ algebra, and borrow its syntax conventions and design principles.
 \end{tabular}
 \caption{Overview of the \texttt{plyranges} grammar. The core verbs are
 briefly described and categorized into one of the following higher level 
-catgeories: aggregate, modify, merge, operate, or restrict. A verb is given bold text if
+categories: aggregate, modify, merge, operate, or restrict. A verb is given bold text if
 its origin is from the \texttt{dplyr} grammar.}\label{tab:grammar}
 \end{table}
 
@@ -366,7 +366,7 @@ operation that returns the same result.
 In each example, we have two BED files consisting of SNPs that are
 genome-wide association study (GWAS) hits and reference exons. Each code block
 counts for each SNP the number of distinct exons it overlaps. The 
-\texttt{plyranges}code achieves this with an overlap join followed by partitioning
+\texttt{plyranges} code achieves this with an overlap join followed by partitioning
 and aggregation. Strand is ignored by default here. 
 The \texttt{GenomicRanges} code achieves this using the 'Hits' and 'List' 
 classes and their methods.}
