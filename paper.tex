@@ -13,6 +13,9 @@
 
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 
+% highlight changes
+\usepackage{soul}
+
 \usepackage{abstract}
 \renewcommand{\abstractname}{}    % clear the title
 \renewcommand{\absnamepos}{empty} % originally center
@@ -51,37 +54,37 @@
 \usepackage{framed}
 \definecolor{shadecolor}{RGB}{248,248,248}
 \newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
-\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
 \newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
 \newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\ImportTok}[1]{#1}
-\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
 \newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
-\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
-\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
-\newcommand{\BuiltInTok}[1]{#1}
-\newcommand{\ExtensionTok}[1]{#1}
-\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
-\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
-\newcommand{\RegionMarkerTok}[1]{#1}
-\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
 \newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
 \newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 
 \usepackage{graphicx,grffile}
 \usepackage[labelfont=bf]{caption}
@@ -231,7 +234,8 @@ R/Bioconductor package called \texttt{plyranges}.
 \vskip 6.5pt
 
 
-\noindent  \section{Background}\label{background}
+\noindent  \hypertarget{background}{%
+\section{Background}\label{background}}
 
 High-throughput genomics promises to unlock new disease therapies, and
 strengthen our knowledge of basic biology. To deliver on those promises,
@@ -298,7 +302,7 @@ all measurements pertain to a single observational unit. The tidy data
 pattern is useful because it allows us to see how the data relate to the
 design of an experiment and the variables measured. The \texttt{dplyr}
 package \cite{Wickham2017-dplyr} defines an application programming
-interface (API) that maps notions from the general relational algebra to
+interface (API) that maps notions from query languages such as SQL to
 verbs that act on tidy data. These verbs can be composed together on one
 or more tidy datasets with the pipe operator from the \texttt{magrittr}
 package \cite{R-magrittr}. Taken together these features enable a user
@@ -313,12 +317,15 @@ language on top of a key subset of Bioconductor data structures and thus
 fully integrates with the Bioconductor framework, gaining access to its
 scalable data representations and sophisticated statistical methods.
 
-\section{Results}\label{results}
+\hypertarget{results}{%
+\section{Results}\label{results}}
 
+\hypertarget{genomic-relational-algebra}{%
 \subsection{Genomic Relational
-Algebra}\label{genomic-relational-algebra}
+Algebra}\label{genomic-relational-algebra}}
 
-\subsubsection{Data Model}\label{data-model}
+\hypertarget{data-model}{%
+\subsubsection{Data Model}\label{data-model}}
 
 \begin{figure}
 \includegraphics[width=\textwidth]{diagrams/GRanges}
@@ -403,7 +410,8 @@ categories: aggregate, modify, merge, operate, or restrict. A verb is given bold
 its origin is from the \texttt{dplyr} grammar.}\label{tab:grammar}
 \end{table}
 
-\subsubsection{Algebraic operations}\label{algebraic-operations}
+\hypertarget{algebraic-operations}{%
+\subsubsection{Algebraic operations}\label{algebraic-operations}}
 
 The \texttt{plyranges} DSL defines an expressive algebra for performing
 genomic operations with and between GRanges objects (see table
@@ -534,8 +542,9 @@ and merging, these operations conform to the semantics and syntax of the
 generally more compact than the equivalent \texttt{GenomicRanges} code
 (figure \ref{fig:code}).
 
+\hypertarget{developing-workflows-with-plyranges}{%
 \subsection{\texorpdfstring{Developing workflows with
-\texttt{plyranges}}{Developing workflows with plyranges}}\label{developing-workflows-with-plyranges}
+\texttt{plyranges}}{Developing workflows with plyranges}}\label{developing-workflows-with-plyranges}}
 
 Here we provide illustrative examples of using the \texttt{plyranges}
 DSL to show how our grammar could be integrated into genomic data
@@ -545,7 +554,8 @@ The workflows highlight how interoperability with existing Bioconductor
 infrastructure, enables easy access to public datasets and methods for
 analysis and visualization.
 
-\subsubsection{Peak Finding}\label{peak-finding}
+\hypertarget{peak-finding}{%
+\subsubsection{Peak Finding}\label{peak-finding}}
 
 In the workflow of ChIP-seq data analysis, we are interested in finding
 peaks from islands of coverage over chromosome. Here we will use
@@ -708,8 +718,9 @@ that surrounds the max peak (figure \ref{fig:peak-viz}).
 \caption{The final result of the \texttt{plyranges} operations to find a 5000nt region surrounding the peak of normalised coverage scores over chromosome 10, displayed as a density plot.}\label{fig:peak-viz}
 \end{figure}
 
+\hypertarget{computing-windowed-statistics}{%
 \subsubsection{Computing Windowed
-Statistics}\label{computing-windowed-statistics}
+Statistics}\label{computing-windowed-statistics}}
 
 Another common operation in genomics data analysis is to compute data
 summaries over genomic windows. In \texttt{plyranges} this can be
@@ -806,7 +817,8 @@ tile using an overlap join and merging endpoints.
 #>   seqinfo: 24 sequences from an unspecified genome; no seqlengths
 \end{verbatim}
 
-\subsubsection{Quality Control Metrics}\label{quality-control-metrics}
+\hypertarget{quality-control-metrics}{%
+\subsubsection{Quality Control Metrics}\label{quality-control-metrics}}
 
 We have created a GRanges object from genotyping performed on the H1
 cell line, consisting of approximately two million single nucleotide
@@ -870,7 +882,8 @@ using \texttt{group\_by()} in combination with \texttt{summarize()}
 \caption{The final result of computing quality control metrics over the SNP array data with \texttt{plyranges}, displayed as a dot plot. Chromosomes are ordered by their estimated transition-transversion ratio. A white reference line is drawn at the expected ratio for a human exome.}\label{fig:titv-viz}
 \end{figure}
 
-\section{Discussion}\label{discussion}
+\hypertarget{discussion}{%
+\section{Discussion}\label{discussion}}
 
 The design of \texttt{plyranges} adheres to well understood principles
 of language and API design: cognitive consistency, cohesion,
@@ -971,7 +984,8 @@ generally understand the \texttt{rlang} language and how to adapt their
 code accordingly. Users familiar with the tidyverse should already have
 such knowledge.
 
-\section{Conclusion}\label{conclusion}
+\hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
 
 We have shown how to create expressive and reproducible genomic
 workflows using the \texttt{plyranges} DSL. By realising that the
@@ -1009,9 +1023,11 @@ The \texttt{plyranges} package can be obtained via the Bioconductor
 project website \url{https://bioconductor.org} or accessed via Github
 \url{https://github.com/sa-lee/plyranges}.
 
-\section{Methods}\label{methods}
+\hypertarget{methods}{%
+\section{Methods}\label{methods}}
 
-\subsection{Data Availability}\label{data-availability}
+\hypertarget{data-availability}{%
+\subsection{Data Availability}\label{data-availability}}
 
 The BigWig file for the H3K27Me3 primary T CD8+ memory cells from
 peripheral blood ChIP-seq data was downloaded from the
@@ -1020,7 +1036,8 @@ file corresponding to the H1 cell line ChIP-seq data is available at GEO
 under accession GSM433167. The SNP array data for the H1 cell line data
 is available at GEO under accession GSM1463263.
 
-\subsection{Software Versions}\label{software-versions}
+\hypertarget{software-versions}{%
+\subsection{Software Versions}\label{software-versions}}
 
 To produce the workflows as described in results section we used R
 version 3.5 with the development version of \texttt{plyranges} (1.1.10)
@@ -1029,7 +1046,8 @@ and the \texttt{BioStrings} package (2.48.0) installed.
 All code required to reproduce this article is available at
 \url{https://github.com/sa-lee/plyranges-paper}.
 
-\section{Acknowledgements}\label{acknowledgements}
+\hypertarget{acknowledgements}{%
+\section{Acknowledgements}\label{acknowledgements}}
 
 We would like to thank Dr Matthew Ritchie at the Walter and Eliza Hall
 Institute and Dr Paul Harrison for their feedback on earlier drafts of
