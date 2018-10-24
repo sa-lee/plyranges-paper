@@ -6,3 +6,7 @@ data/
 paper_cache/
 paper_files/
 PLOS-submission*
+_minted-response/
+auto/
+/response.pdf
+/response.tex

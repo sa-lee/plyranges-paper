@@ -1,0 +1,51 @@
+#+TITLE: Response to reviewer comments
+
+#+OPTIONS: toc:nil
+
+**** Figures 2 and 3 are confusing and difficult to grasp
+We agree and have changed figure 2 to be a three panelled figure that
+describes each overlap join. Within each panel we have aligned the
+figures vertically so it’s clear where the overlap is occurring and
+what the result of the join will be. We have also modified the caption
+to include more detail and changed the language so it will be more
+familiar to people who know SQL/dplyr joins. We have removed the
+nearest neighbors figure as the concept is too similar to the overlap
+joins and it is already discussed in the main text.
+
+**** Comparison to pre existing Bioconductor code
+Both reviewers suggested that the manuscript should include comparison
+to GenomicRanges in terms of syntax, speed and memory requirements. We
+have created a new figure 3, which provides a concise representation
+of the differences for a ‘read, overlap then aggregate’ between
+plyranges and GenomicRanges. The figure clearly shows the differences
+in styles and compactness between the two libraries.
+
+We have included a new paragraph in the discussion regarding the speed
+and memory requirements of plyranges. We have noted that since all of
+plyranges is constructed using pre-existing Bioconductor functionality
+its requirements are equivalent to those in core Bioconductor
+infrastructure.  As our paper is about language design, we feel that
+benchmarking would be a distraction for the reader.
+
+**** Illustrative examples
+We have updated the examples section to include the GRanges/DataFrame
+output at each pipeline step as requested by reviewer #1. We have
+clarified the language surrounding each code chunk to ensure the
+description guides the reader into what the code is doing.
+
+**** Programming with plyranges
+The discussion section touches on the use of non-standard evaluation
+as being a potential barrier to programming with plyranges, we feel
+the manuscript already addresses the concerns of reviewer
+#2. Programming with plyranges works the same way as programming with
+dplyr and the rest of the tidyverse, through the use of the rlang
+package which we mention in the manuscript.
+
+**** Other issues
+We have tried where possible to reduce the amount of technical
+language as suggested by reviewer #2. We have updated the manuscript
+to ensure technical terms are defined before they are used.  As a
+result we have reordered the paragraphs in the discussion to flow
+logically from the design terms we introduce in the mansuscript
+(consistency, cohesion, endomorphism, expressiveness). We also updated
+the table based on the suggestions of reviewer 2.

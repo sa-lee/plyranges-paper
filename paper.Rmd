@@ -1,29 +1,25 @@
 ---
-title: "plyranges: A grammar of genomic data transformation" 
+title: "plyranges: a grammar of genomic data transformation" 
 author:
-  - name: Stuart Lee
+  - name: Stuart Lee \footnote{\label{monash}Department of Econometrics and Business Statistics, Monash University, Clayton, Australia}\footnote{Molecular Medicine Division, Walter and Eliza Hall Institute, Parkville, Australia}
     email: stuart.lee1@monash.edu
-    affiliation: |
-     | Department of Econometrics and Business Statistics, Monash University
-     |                        Molecular Medicine Division, Walter and Eliza Hall Institute
-  - name: Di Cook
-    email: di.cook@monash.edu
-    affiliation: Department of Econometrics and Business Statistics, Monash University
-  - name: Michael Lawrence
-    email: michael.lawrence@gene.com
-    affiliation: Bioinformatics and Computational Biology, Genentech, Inc.
-abstract: "The Bioconductor project has created many useful data abstractions for analysing high-throughput genomics experiments. However, there is a cognitive load placed on a user in learning a data abstraction and understanding its appropriate use. Throughout a standard workflow, a user must navigate and know many of these abstractions to perform an genomic analysis task, when a single data abstraction, a GRanges object will suffice. The GRanges class naturally represent genomic intervals and their associated measurements. By recognising that the GRanges class follows 'tidy' data principles we have created a grammar of genomic data transformation. The grammar defines verbs for performing actions on and between genomic interval data. It provides a principled way of performing common genomic data analysis tasks through a coherent interface to existing Bioconductor infrastructure, resulting in human readable analysis workflows. We have implemented this grammar as a Bioconductor/R package called \\texttt{plyranges}."
-keywords: "bioconductor, grammar, genomes, data analysis"
-bibliography: references.bib
+  - name: Dianne Cook $^{\ref{monash}}$
+    email: di.cook@monash.edu 
+  - name: Michael Lawrence \footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author \href{mailto:michael.lawerence@gene.com}{michael.lawerence@gene.com} } 
+    email: lawrence.michael@gene.com
+abstract: "There is a cognitive load placed on users in learning a data abstraction from the Bioconductor project and understanding its appropriate use. Users must navigate these abstractions to perform a genomic analysis task, when a single data abstraction, a GRanges object will suffice. By recognizing that the GRanges class follows 'tidy' data principles, we create a grammar of genomic data transformation, defining verbs for performing actions on and between genomic interval data and providing a way of performing common data analysis tasks through a coherent interface to existing Bioconductor infrastructure. We implement this grammar as a Bioconductor/R package called \\texttt{plyranges}."
+keywords: "Bioconductor, Grammar, Genomes, Data Analysis" 
+bibliography: references.bib 
 output: 
   pdf_document:
-    template: svm-latex-ms.tex
-    keep_tex: true
+    template: svm-latex-ms.tex 
+    keep_tex: true 
     fig_caption: true
-    latex_engine: pdflatex
-    citation_package: biblatex
+    latex_engine: pdflatex 
+    citation_package: biblatex 
 fontfamily: mathpazo
 ---
+
 ```{r setup, include = FALSE}
 library(tibble)
 library(knitr)
@@ -32,7 +28,8 @@ opts_chunk$set(message = FALSE,
                comment = "#>", 
                fig.width = 5, 
                fig.height = 3, 
-               fig.align = "center")
+               fig.align = "center",
+               fig.path = "./diagrams/")
 # for peak figures
 library(ggbio)
 
@@ -71,7 +68,7 @@ if (!file.exists(h1_bam_sorted)) {
 array_info <- "data/GPL18952_HumanOmni25M-8v1-1_B.annotated.txt.gz"
 if (!file.exists(array_info)) 
   download.file(
-    url = "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GPL18952&format=file&file=GPL18952%5FHumanOmni2%2D5%2D8%2Dv1%2D1%2DC%2Ecsv%2Egz",
+    url = "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GPL18952&format=file&file=GPL18952%5FHumanOmni25M%2D8v1%2D1%5FB%2Eannotated%2Etxt%2Egz",
     destfile = array_info
   )
 
@@ -82,9 +79,8 @@ if (!file.exists(snp_info))
     destfile = snp_info
   )
 
-
 ```
-# Introduction
+# Background
 
 High-throughput genomics promises to unlock new disease therapies,
 and strengthen our knowledge of basic biology. To deliver on those promises, 
@@ -109,10 +105,10 @@ operations, such as range manipulation and overlap-based joins, using
 the vocabulary of genomics. Their implementations either delegate
 computations to a database, or operate over collections of files in
 standard formats like BED. An example of the former is the Genome Query 
-Language (GQL) and its distributed implementation GenAp which use an 
+Language (GQL) and its distributed implementation GenAp which use a 
 SQL-like syntax for fast retrieval of information of unprocessed 
 sequencing data [@Kozanitis2014-va; @Kozanitis2016-bm]. Similarly, the Genometric 
-Query Language (GMQL) implements a relational algebra for combining genomic datasets 
+Query Language (GMQL) implements a DSL for combining genomic datasets 
 \cite{Kaitoua2017-pw}.  The command line application BEDtools develops an extensive 
 algebra for performing arithmetic between two or more sets of genomic regions 
 \cite{Quinlan2010-gc}. All of the aforementioned DSLs are designed to be evaluated
@@ -123,7 +119,7 @@ database tables.
 
 The Bioconductor/R packages `IRanges` and `GenomicRanges` 
 [@r-core; @Lawrence2013-wg; @Huber2015-ei] define a DSL for 
-analysing genomics data with R, an interactive data analysis environment that 
+analyzing genomics data with R, an interactive data analysis environment that 
 encourages reproducibility and provides high-level abstractions for manipulating,
 modelling and plotting data, through state of the art methods in
 statistical computing. The packages define object-oriented (OO)
@@ -152,10 +148,11 @@ and all measurements pertain to a single observational unit.
 The tidy data pattern is useful because it allows 
 us to see how the data relate to the design of an experiment
 and the variables measured. The `dplyr` package \cite{Wickham2017-dplyr} 
-defines an API that maps notions from the general relational algebra to 
-operations on tidy data. It expresses each operation as a cohesive, endomorphic
-verb. Taken together these features enable a user to write human
-readable analysis workflows.
+defines an application programming interface (API) that maps notions from 
+the general relational algebra to verbs that act on tidy data. These verbs
+can be composed together on one or more tidy datasets with the pipe operator 
+from the `magrittr` package \cite{R-magrittr}. Taken together these features 
+enable a user to write human readable analysis workflows.
 
 We have created a genomic DSL called `plyranges` that reformulates
 notions from existing genomic algebras and embeds them in R as a
@@ -166,9 +163,11 @@ key subset of Bioconductor data structures and thus fully integrates
 with the Bioconductor framework, gaining access to its scalable data
 representations and sophisticated statistical methods.
 
-# Genomic relational algebra
+# Results
 
-## Data model
+## Genomic Relational Algebra
+
+### Data Model
 
 \begin{figure}
 \includegraphics[width=\textwidth]{diagrams/GRanges}
@@ -183,7 +182,7 @@ are included as columns to the right of the dotted line as annotations
 \end{figure}
 
 The `plyranges` DSL is built on the core Bioconductor data structure
-GRanges, which is essentially a constrained table, with fixed columns
+GRanges, which is a constrained table, with fixed columns
 for the chromosome, start and end coordinates, and the strand, along
 with an arbitrary set of additional columns, consisting of
 measurements or metadata specific to the data type or experiment
@@ -191,19 +190,19 @@ measurements or metadata specific to the data type or experiment
 constraints, so that it is applicable to virtually any genomic
 workflow, while also being semantically rich enough to support
 high-level operations on genomic ranges. As a core data structure,
-GRanges enables interoperability between plyranges and the rest of
+GRanges enables interoperability between `plyranges` and the rest of
 Bioconductor. Adhering to a single data structure simplifies the API
 and makes it easier to learn and understand, in part because
 operations become endomorphic, i.e., they return the same type as
 their input.
 
-GRanges follows the intuitive tidy data pattern: it is a rectangular
+GRanges follow the intuitive tidy data pattern: it is a rectangular
 table corresponding to a single biological context. Each row contains
 a single observation and each column is a variable describing the
 observations.  GRanges specializes the tidy pattern in that the
 observations always pertain to some genomic feature, but it largely
 remains compatible with the general relational operations defined by
-dplyr. Thus, we define our algebra as an extension of the dplyr
+`dplyr`. Thus, we define our algebra as an extension of the `dplyr`
 algebra, and borrow its syntax conventions and design principles.
 
 \begin{table}[!htbp]
@@ -212,48 +211,48 @@ algebra, and borrow its syntax conventions and design principles.
   \hline
   & Verb &  Description \\ 
   \hline
-   & \textbf{\emph{summarise()}} & aggregate over column(s) \\ 
-   Aggregation & \emph{disjoin\_ranges()} & aggregate column(s) over the union of end coordinates \\
-   &  \emph{reduce\_ranges()} & aggregate column(s) by merging overlapping and neighbouring ranges \\
+   & \textbf{\emph{summarize()}} & aggregate over column(s) \\ 
+   Aggregate & \emph{disjoin\_ranges()} & aggregate column(s) over the union of end coordinates \\
+   &  \emph{reduce\_ranges()} & aggregate column(s) by merging overlapping and neighboring ranges \\
    \hline
    &  \textbf{\emph{mutate()}} & modifies any column \\
    & \textbf{\emph{select()}} & select columns \\
-  Arithmetic (Unary) & \textbf{\emph{arrange()}} & sort by columns \\
+  Modify (Unary) & \textbf{\emph{arrange()}} & sort by columns \\
    & \emph{stretch()} & extend range by fixed amount \\
    &  \emph{shift\_(direction)} & shift coordinates \\
    & \emph{flank\_(direction)} & generate flanking regions \\
    & \emph{\%intersection\% } & row-wise intersection \\
    & \emph{\%union\%} & row-wise union \\
    & \emph{compute\_coverage} & coverage over all ranges \\
-  Arithmetic (Binary) &  \emph{\%setdiff\%} & row-wise set difference \\
+  Modify (Binary) &  \emph{\%setdiff\%} & row-wise set difference \\
    & \emph{between()} & row-wise gap range \\
    & \emph{span()} & row-wise spanning range \\
    \hline
     & \emph{join\_overlap\_*()} & merge by overlapping ranges \\
-    & \emph{join\_nearest} & merge by nearest neighbour ranges \\
+    & \emph{join\_nearest} & merge by nearest neighbor ranges \\
     & \emph{join\_follow} & merge by following ranges \\
-    Merging & \emph{join\_precedes} & merge by preceding ranges \\
+    Merge & \emph{join\_precedes} & merge by preceding ranges \\
     & \emph{union\_ranges} & range-wise union \\
     & \emph{intersect\_ranges} & range-wise intersect \\
     & \emph{setdiff\_ranges} & range-wise set difference \\
-    & \emph{complement\_ranges} & range-wise union \\
+    & \emph{complement\_ranges} & range-wise set complement \\
   \hline
    & \emph{anchor\_direction()} & fix coordinates at direction \\
-  Modifier & \textbf{\emph{group\_by()}} & partition by column(s)  \\ 
+  Operate & \textbf{\emph{group\_by()}} & partition by column(s)  \\ 
    & \emph{group\_by\_overlaps()} & partition by overlaps \\
    \hline
    & \textbf{\emph{filter()}} & subset rows \\
-  Restriction & \emph{filter\_by\_overlaps()} & subset by overlap \\
+  Restrict & \emph{filter\_by\_overlaps()} & subset by overlap \\
     & \emph{filter\_by\_non\_overlaps()} & subset by no overlap \\
    \hline
 \end{tabular}
 \caption{Overview of the \texttt{plyranges} grammar. The core verbs are
-briefly described and categorised into one of: aggregation, unary or binary
-arithmetic, merging, modifier, or restriction. A verb is given bold text if
+briefly described and categorized into one of the following higher level 
+categories: aggregate, modify, merge, operate, or restrict. A verb is given bold text if
 its origin is from the \texttt{dplyr} grammar.}\label{tab:grammar}
 \end{table}
 
-## Algebraic operations
+### Algebraic operations
 
 The `plyranges` DSL defines an expressive algebra for performing
 genomic operations with and between GRanges objects (see table
@@ -292,16 +291,12 @@ the side of the input range to flank.
 As with other genomic grammars, we define set operations that treat
 ranges as sets of integers, including _intersect_, _union_,
 _difference_, and _complement_. There are two sets of these: parallel
-and merging. The parallel operations map to infix operators, which we
-surround with _%_ symbols, a convention borrowed from R syntax.  For
-example, the parallel intersection (_x %intersect% y_) finds the
+and merging. For example, the parallel intersection (_x %intersect% y_) finds the
 intersecting range between _xi_ and _yi_ for _i_ in _1...n_, where _n_
 is the length of both _x_ and _y_. In contrast, the merging
 intersection (_intersect\_ranges(x, y)_) returns a new set of disjoint
 ranges representing wherever there was overlap between a range in _x_
-and a range in _y_. We use the infix syntax for the parallel
-operations, since it is the conventional syntax for parallel, binary
-operations in R. Finding the parallel union will fail when two ranges
+and a range in _y_. Finding the parallel union will fail when two ranges
 have a gap, so we introduce a _span_ operator that takes the union
 while filling any gap. The _complement_ operation is unique in that it
 is unary. It finds the regions not covered by any of the ranges in a
@@ -310,24 +305,49 @@ finds the gap separating _xi_ and _yi_. The binary operations are
 callable from within arithmetic, restriction and aggregation
 expressions.
 
+\begin{figure}
+\includegraphics[width=\textwidth]{diagrams/olap-fig}
+\caption{Illustration of the three overlap join operators. Each join takes two 
+GRanges objects, \textit{x} and \textit{y} as input. A 'Hits' object for the 
+join is computed which consists of two components. The first component contains 
+the indices of the ranges in \textit{x} that have been overlapped 
+(the rectangles of \textit{x} that cross the orange lines). The second 
+component consists of the indices of the ranges in \textit{y} that overlap 
+the ranges in \textit{x}. In this case a range in \textit{y} overlaps the 
+ranges in \textit{x} three times, so the index is repeated three times. The 
+resulting 'Hits' object is used to modify \textit{x} by where it was 'hit' by
+\textit{y} and merge all metadata columns from \textit{x} and \textit{y} 
+based on the indices contained in the 'Hits' object. This procedure is applied 
+generally in the \texttt{plyranges} DSL for both overlap and nearest neighbor
+operations. The join semantics alter what is returned: \textbf{A}: for an 
+\textbf{inner} join the \textit{x} ranges that are overlapped by \textit{y} 
+are returned. The returned ranges also include the metadata from the \textit{y}
+range that overlapped the three \textit{x} ranges. \textbf{B} An 
+\textbf{intersect} join is identical to an inner join except that the 
+intersection is taken between the overlapped \textit{x} ranges and the 
+\textit{y} ranges. \textbf{C} For the \textbf{left} join all 
+\textit{x} ranges are returned regardless of whether they are overlapped by 
+\textit{y}. In this case the third range (rectangle with the asterisk next to it)
+of the join would have missing values on metadata columns that came from \textit{y}.}
+\label{fig:olaps-fig}
+\end{figure}
+
+
 To support merging, our algebra recasts finding overlaps or 
-nearest neighbours between two
+nearest neighbors between two
 genomic regions as variants of the relational join operator. A join
-acts on two GRanges objects, a query and a subject. The join operator
-is relational in the sense that metadata from the query and subject
-ranges is retained in the joined range.  All join operators in the
+acts on two GRanges objects: _x_ and _y_. The join operator
+is relational in the sense that metadata from the _x_ and _y_
+ranges are retained in the joined range.  All join operators in the
 `plyranges` DSL generate a set of hits based on overlap or proximity
 of ranges and use those hits to merge the two datasets in different
 ways. There are four supported matching algorithms: _overlap_,
-_nearest_, _precede_, and _follow_ (figures 
-\ref{fig:olaps-fig} and \ref{fig:nn-fig}). We can further restrict the
+_nearest_, _precede_, and _follow_ (figure 
+\ref{fig:olaps-fig}). We can further restrict the
 matching by whether the query is completely _within_ the subject, and
 adding the _directed_ suffix ensures that matching ranges have the
 same direction (strand).
 
-```{r olaps-fig, echo = FALSE, out.width="\\textwidth", fig.cap="Illustration of the three overlap join operators. Each join takes query and subject range as input (black and light gray rectangles, respectively). An index for the join is computed, returning a Hits object, which contains the indices of where the subject overlaps the query range. This index is used to expand the query ranges by where it was 'hit' by the subject ranges. The join semantics alter what is returned: for an \\textbf{inner} join the query range is returned for each match, for an \\textbf{intersect} the intersection is taken between overlapping ranges, and for a \\textbf{left} join all query ranges are returned even if the subject range does not overlap them. This principle is gnerally applied through the `plyranges` DSL for both overlaps and nearest neighbour operations."}
-knitr::include_graphics("diagrams/diagrams-002.png")
-```
 
 For merging based on the hits, we have three modes: _inner_,
 _intersect_ and _left_. The _inner_ overlap join is similar to the
@@ -336,118 +356,43 @@ match. A major difference is that the matching is not by identity, so
 we have to choose one of the ranges from each pair. We always choose
 the left range. The _intersect_ join uses the intersection instead of
 the left range. Finally, the overlap _left_ join is akin to left outer
-join in Cobb's relational algebra: it performs an overlap inner join
-but also returns all query ranges that are not hit by the subject.
+join in Codd's relational algebra: it performs an overlap inner join
+but also returns all _x_ ranges that are not hit by the _y_ ranges.
 
-```{r nn-fig, echo = FALSE, out.width = "\\textwidth", fig.cap="Illustration of neighbour finding joins. Each join takes a query and subject range and computes a 'Hits' object. For the \\textbf{nearest} join all query ranges are returned as they are all nearest neighbours of the second subject range. For the \\textbf{follow} join there is only one query range that follows any subject range. Likewise for the \\textbf{precede} join, there is only one query range that precedes a subject range."}
-knitr::include_graphics("diagrams/diagrams-003.png")
-```
+\begin{figure}
+\includegraphics[width=\textwidth]{diagrams/code-comparison.pdf}
+\caption{Idiomatic code examples for \texttt{plyranges} (\textbf{A}) and 
+\texttt{GenomicRanges} (\textbf{B}) illustrating an overlap and aggregate 
+operation that returns the same result. 
+In each example, we have two BED files consisting of SNPs that are
+genome-wide association study (GWAS) hits and reference exons. Each code block
+counts for each SNP the number of distinct exons it overlaps. The 
+\texttt{plyranges} code achieves this with an overlap join followed by partitioning
+and aggregation. Strand is ignored by default here. 
+The \texttt{GenomicRanges} code achieves this using the 'Hits' and 'List' 
+classes and their methods.}
+\label{fig:code}
+\end{figure}
 
 Since the GRanges object is a tabular data structure, our grammar includes
 operators to filter, sort and aggregate by columns in a GRanges. These 
 operations can be performed over partitions formed
 using the *group_by* modifier. Together with our algebra for arithmetic and
 merging, these operations conform to the semantics and syntax of the 
-`dplyr` grammar.
+`dplyr` grammar. Consequently, `plyranges` code is generally more compact
+than the equivalent `GenomicRanges` code (figure \ref{fig:code}).
 
-## Design principles
-
-The design of `plyranges` adheres to well understood principles of
-language and API design: cognitive consistency, cohesion,
-expressiveness and endomorphism \cite{Green1996-qg}. 
-To varying degrees, these principles also underlie the
-design of `dplyr` and the Bioconductor infrastructure.
-
-### Cognitive consistency and fluency
-
-We aim for our interfaces to have a simple and direct mapping to the
-user's cognitive model, i.e., how the user thinks about the data. This
-requires careful selection of the level of abstraction so that the
-user can express workflows in the language of genomics. This motivates
-the adoption of the tidy GRanges object as our central data
-structure. The basic data.frame and `dplyr` tibble lack any notion of
-genomic ranges and so could not easily support our genomic grammar,
-with its specific verbs for range-oriented data manipulation. Another
-example of cognitive consistency is how `plyranges` is insensitive to
-direction/strand by default when, e.g., detecting
-overlaps. `GenomicRanges` has the opposite behavior. We believe that
-defaulting to purely spatial overlap is most intuitive to most users.
-
-<!--
-ML:
-Hadley actually presents dplyr as a 'cognitive tool', i.e., something
-that helps users think about the problem. In my opinion, the best we
-can do is attempt to match the intuition of the user, so when the user
-decides what to do, there is an obvious way of doing it. I'm not ready
-to claim that the user should start from our grammar.
--->
-Like `dplyr`, `plyranges` verbs are functional: they are free of side
-effects and return their result. This enables chaining of verbs
-through syntax like the forward pipe operator (`%>%`, read as "then")
-of the `magrittr` package \cite{R-magrittr}. This has syntax has a direct
-cognitive mapping to natural language and the intuitive notion of
-pipelines. The low-level object-oriented APIs of Bioconductor tend to
-manipulate data via sub-replacement functions, like `start(gr) <-
-x`. These ultimately produce the side effect of replacing a symbol
-mapping in the current environment and thus are not amenable to
-so-called fluent syntax.
-
-### Cohesion
-
-A function is cohesive if it performs a singular task without
-producing any side-effects. Singular tasks are not necessarily atomic;
-they can always be broken down further at lower levels of abstraction.
-For example, to resize a range, the user needs to specify which
-position (start, end, midpoint) should be invariant over the
-transformation. The `resize()` function from the `GenomicRanges` package
-has a `fix` argument that sets the anchor, so calling `resize()`
-coalesces anchoring and width modification. The coupling at the
-function call level is justified since the effect of setting the width
-depends on the anchor. However, plyranges increases cohesion and
-decouples the anchoring into its own function call. 
-
-Increasing cohesion simplifies the interface to each operation, makes
-the meaning of arguments more intuitive, and relies on function names
-as the primary means of expression, instead of a more complex mixture
-of function and argument names. Since functions are superordinate to
-their arguments, flattening the API at the function level enables the
-user to conceptualize the API as a catalog of functions, without
-having to descend further. A flat function catalog also enhances API
-discoverability, particularly through auto-completion in IDEs. One
-downside of pushing cohesion to this extreme is that function calls
-become coupled, and care is necessary to treat them as a group when
-modifying code.
-
-### Expressiveness
-
-Expressiveness relates to the information content in code: the
-programmer should be able to clarify intent without unnecessary
-verbosity. For example, our overlap-based join operations are more
-concise than the multiple steps necessary to achieve the same effect
-in the original `GenomicRanges` API. In other cases, the `plyranges` API
-increases verbosity for the sake of clarity and cohesion. Explicitly
-calling `anchor()` can require more typing, but the code is easier to
-comprehend. Another example is the set of routines for importing
-genomic annotations, including `read\_gff()`, `read\_bed()`, and
-`read_bam()`. Compared to the generic `import()` in `rtracklayer`, the
-explicit format-based naming in plyranges clarifies intent and the
-type of data being returned. Similarly, every plyranges function that
-computes with strand information indicates its intentions by including
-suffixes such as `directed`, `upstream` or `downstream` in its name,
-otherwise strand is ignored. The `GenomicRanges` API does not make this
-distinction explicit in its function naming, instead relying on a
-parameter that defaults to strand sensitivity, an arguably unintuitive
-behavior.
-
-# Results 
+## Developing workflows with `plyranges`
 
 Here we provide illustrative examples of using the `plyranges` DSL to show
-how our grammar could be integrated into genomic data workflows. We also
+how our grammar could be integrated into genomic data workflows. As we
+construct the workflows we show the data output intermittently to assist
+the reader in understanding the pipeline steps. The workflows
 highlight how interoperability with existing Bioconductor infrastructure, 
 enables easy access to public datasets and methods for analysis and 
-visualisation.
+visualization.
 
-## Peak Finding
+### Peak Finding
 
 In the workflow of ChIP-seq data analysis, we are interested in finding peaks 
 from islands of coverage over chromosome. Here we will use `plyranges`
@@ -481,21 +426,25 @@ downstream operations such as finding overlaps.
 chr10_scores <- bw_file %>%
   read_bigwig(overlap_ranges = chr10_ranges) %>%
   set_genome_info(genome = "hg19")
+chr10_scores
 ```
 
-After filtering for regions with a coverage score greater than 8, we can
-reduce individual runs to ranges representing the islands of coverage by
-using the `reduce_ranges()` function. This function allows a summary
-to be computer over each island: in this case we take the maximum of 
+
+We then filter for regions with a coverage score greater than 8, and following
+this reduce individual runs to ranges representing the islands of coverage.
+This is achieved with the `reduce_ranges()` function, which allows a summary
+to be computed over each island: in this case we take the maximum of 
 the scores to find the coverage peaks over chromosome 10.
 
 ```{r}
 all_peaks <- chr10_scores %>% 
   filter(score > 8) %>% 
   reduce_ranges(score = max(score))
+all_peaks
 ```
 
-Returning to the GRanges object containing normalised coverage scores, 
+
+Returning to the GRanges object containing normalized coverage scores, 
 we filter to find the coordinates of the peak containing the maximum coverage 
 score. We can then find a 5000 nt region centered around the maximum position 
 by anchoring and modifying the width. 
@@ -513,18 +462,18 @@ coverage islands, to the islands that are contained in the 5000nt region that su
 ```{r peak_region}
 peak_region <- chr10_scores %>%
   join_overlap_inner(chr10_max_score_region)
-
+peak_region
 ```
 
-```{r peak-viz, echo = FALSE, fig.cap = "The final result of the \\texttt{plyranges} operations to find a 5000nt region surrounding the peak of normalised coverage scores over chromosome 10, displayed as a density plot."}
+```{r peak-viz, echo = FALSE, fig.cap = "The final result of the \\texttt{plyranges} operations to find a 5000nt region surrounding the peak of normalised coverage scores over chromosome 10, displayed as a density plot.", cache = TRUE}
 ggbio::autoplot(peak_region, 
                 aes(y = score.x), 
                 geom = "blank") + 
-  geom_area(aes(x = start)) +
+  geom_area() +
   ylab("score")
 ```
 
-## Computing Windowed Statistics
+### Computing Windowed Statistics
 
 Another common operation in genomics data analysis is to compute data
 summaries over genomic windows. In `plyranges` this can be achieved
@@ -535,16 +484,12 @@ Consortium.
 
 We can directly obtain the genome information from the header of the
 BAM file: in this case the reads were aligned to the hg19 genome build
-and there are no reads overlapping the mitochondrial genome. To generate 
-bins of fixed width 10000nt we apply the `tile_ranges()` function
-to the genomic coordinates in locations.
+and there are no reads overlapping the mitochondrial genome. 
+
 ```{r bins}
 locations <- h1_bam_sorted %>%
   read_bam() %>% 
   get_genome_info() 
-
-bins <- locations %>% 
-  tile_ranges(width = 10000L)
 ```
 
 Next we only read in alignments that overlap the genomic locations
@@ -552,31 +497,38 @@ we are interested in and select the query sequence. Note that
 the reading of the BAM file is deferred: only alignments that pass the filter 
 are loaded into memory. We can add another column representing the GC proportion 
 for each alignment using the `letterFrequency()` function from the `Biostrings`
-package \cite{R-biostrings}.
+package \cite{R-biostrings}. After computing the GC proportion as the score
+column, we drop  all other columns in the GRanges object.
 
 ```{r, cache = TRUE}
 alignments <- h1_bam_sorted %>% 
   read_bam() %>%
   filter_by_overlaps(locations) %>%
   select(seq) %>%
-  mutate(score = as.numeric(letterFrequency(seq, "GC", as.prob = TRUE)))
+  mutate(
+    score = as.numeric(letterFrequency(seq, "GC", as.prob = TRUE))
+  ) %>% 
+  select(score)
+alignments
 ```
 
-Finally, we use `group_by_overlaps()` to see where the alignments overlap the 
-genomic windows and then apply `summarize()` to compute the
-total number of reads and average GC content within each window.
+Finally, we create 10000nt tiles over the genome and compute the number
+of reads and average GC content over all reads that fall within
+each tile using an overlap join and merging endpoints.
 
 ```{r, cache = TRUE}
-alignments_summary <- bins %>%
-  group_by_overlaps(alignments %>% select(score)) %>% 
-  summarize(n_reads = n(), avg_gc = mean(score))
-```
+bins <- locations %>% 
+  tile_ranges(width = 10000L)
 
+alignments_summary <- bins %>%
+  join_overlap_inner(alignments) %>% 
+  disjoin_ranges(n = n(), avg_gc = mean(score))
+alignments_summary
+```
 <!-- 
 https://support.bioconductor.org/p/71601/ also useful example?
 -->
-
-## Quality Control Metrics
+### Quality Control Metrics
 
 ```{r, echo = FALSE, warning = FALSE, cache = TRUE}
 # prepare a GRanges object from array data
@@ -639,6 +591,7 @@ ti_tv_results <- h1_snp_array %>%
   group_by(seqnames) %>%
   summarize(n_snps = n(),
             ti_tv = sum(transition) / sum(!transition)) 
+ti_tv_results
 ```
 
 ```{r titv-viz, echo = FALSE, fig.cap = "The final result of computing quality control metrics over the SNP array data with \\texttt{plyranges}, displayed as a dot plot. Chromosomes are ordered by their estimated transition-transversion ratio. A white reference line is drawn at the expected ratio for a human exome."}
@@ -650,13 +603,120 @@ ti_tv_results %>%
   labs(x = "Chromosome", y = "Transition Transversion Ratio") +
   coord_flip() 
 ```
-
 <!-- 
 Trivial example? Could do something with a smooth summarised over
 genomic coordinates? 
 -->
 
-# Discussion and conclusion
+# Discussion 
+
+The design of `plyranges` adheres to well understood principles of
+language and API design: cognitive consistency, cohesion,
+endomorphism and expressiveness \cite{Green1996-qg}. 
+To varying degrees, these principles also underlie the
+design of `dplyr` and the Bioconductor infrastructure.
+
+We have aimed for `plyranges` to have a simple and direct mapping to the
+user's cognitive model, i.e., how the user thinks about the data. This
+requires careful selection of the level of abstraction so that the
+user can express workflows in the language of genomics. This motivates
+the adoption of the tidy GRanges object as our central data
+structure. The basic data.frame and `dplyr` tibble lack any notion of
+genomic ranges and so could not easily support our genomic grammar,
+with its specific verbs for range-oriented data manipulation. Another
+example of cognitive consistency is how `plyranges` is insensitive to
+direction/strand by default when, e.g., detecting
+overlaps. `GenomicRanges` has the opposite behavior. We believe that
+defaulting to purely spatial overlap is most intuitive to most users.
+
+<!--
+ML:
+Hadley actually presents dplyr as a 'cognitive tool', i.e., something
+that helps users think about the problem. In my opinion, the best we
+can do is attempt to match the intuition of the user, so when the user
+decides what to do, there is an obvious way of doing it. I'm not ready
+to claim that the user should start from our grammar.
+-->
+
+To further enable cognitive consistency, `plyranges` functions are cohesive. 
+A function is defined to be cohesive if it performs a singular task without
+producing any side-effects. Singular tasks can always be broken 
+down further at lower levels of abstraction.
+For example, to resize a range, the user needs to specify which
+position (start, end, midpoint) should be invariant over the
+transformation. The `resize()` function from the `GenomicRanges` package
+has a `fix` argument that sets the anchor, so calling `resize()`
+coalesces anchoring and width modification. The coupling at the
+function call level is justified since the effect of setting the width
+depends on the anchor. However, `plyranges` increases cohesion and
+decouples the anchoring into its own function call. 
+
+Increasing cohesion simplifies the interface to each operation, makes
+the meaning of arguments more intuitive, and relies on function names
+as the primary means of expression, instead of a more complex mixture
+of function and argument names. This results in the
+user being able to conceptualize the `plyranges` DSL as a flat catalog of 
+functions, without having to descend further into documentation to understand
+a function's arguments. A flat function catalog also enhances API
+discoverability, particularly through auto-completion in 
+integrated developer environments (IDEs). One downside of pushing cohesion to 
+this extreme is that function calls become coupled, and care is 
+necessary to treat them as a group when modifying code.
+
+
+Like `dplyr`, `plyranges` verbs are functional: they are free of side
+effects and are generally endomorphic, meaning that when the input is a GRanges
+object they return a GRanges object. This enables chaining of verbs
+through syntax like the forward pipe operator from the `magrittr` package. 
+This syntax has a direct cognitive mapping to natural language and the intuitive notion of
+pipelines. The low-level object-oriented APIs of Bioconductor tend to
+manipulate data via sub-replacement functions, like `start(gr) <-
+x`. These ultimately produce the side effect of replacing a symbol
+mapping in the current environment and thus are not amenable to so-called 
+fluent syntax.
+
+
+Expressiveness relates to the information content in code: the
+programmer should be able to clarify intent without unnecessary
+verbosity. For example, our overlap-based join operations are more
+concise than the multiple steps necessary to achieve the same effect
+in the original `GenomicRanges` API. In other cases, the `plyranges` API
+increases verbosity for the sake of clarity and cohesion. Explicitly
+calling _anchor()_ can require more typing, but the code is easier to
+comprehend. Another example is the set of routines for importing
+genomic annotations, including _read\_gff()_, _read\_bed()_, and
+_read\_bam()_. Compared to the generic _import()_ in `rtracklayer`, the
+explicit format-based naming in `plyranges` clarifies intent and the
+type of data being returned. Similarly, every `plyranges` function that
+computes with strand information indicates its intentions by including
+suffixes such as _directed_, _upstream_ or _downstream_ in its name,
+otherwise strand is ignored. The `GenomicRanges` API does not make this
+distinction explicit in its function naming, instead relying on a
+parameter that defaults to strand sensitivity, an arguably confusing
+behavior.
+
+The implementation of `plyranges` is built on top of 
+Bioconductor infrastructure, meaning most functions are constructed
+by composing generic functions from core Bioconductor packages. As a result, any 
+Bioconductor packages that uses data structures that inherit from GRanges will
+be able to use `plyranges`  for free. Another consequence of building on top of
+Bioconductor generics is that the speed and memory usage of `plyranges` 
+functions are similar to the highly optimized methods implemented in Bioconductor
+for GRanges objects.
+
+A caveat to constructing a compatible interface with `dplyr` is that
+`plyranges` makes extensive use of non-standard evaluation in R via
+the `rlang` package \cite{R-rlang}. Simply, this means that computations are
+evaluated in the context of the GRanges objects. Both `dplyr` and
+`plyranges` are based on the `rlang` language, because it allows for more
+expressive code that is free of repeated references to the
+container. Implicitly referencing the container is particularly
+convenient when programming interactively.  Consequently, when
+programming with `plyranges`, a user needs to generally understand
+the `rlang` language and how to adapt their code accordingly. Users
+familiar with the tidyverse should already have such knowledge.
+
+# Conclusion
 
 We have shown how to create expressive and 
 reproducible genomic workflows using the `plyranges` DSL. By
@@ -666,44 +726,87 @@ and merging. Our examples show that `plyranges` code is succinct, human
 readable and can take advantage of the interoperability provided by
 the Bioconductor ecosystem and the R language.
 
-A caveat to constructing a compatible interface with `dplyr` is that
-`plyranges` makes extensive use of non-standard evaluation in R via
-the `rlang` package \cite{R-rlang}. Simply, this means that computations are
-evaluated in the context of the GRanges objects. Both dplyr and
-plyranges are based on the `rlang` language, because it allows for more
-expressive code that is free of repeated references to the
-container. Implicitly referencing the container is particularly
-convenient when programming interactively.  Consequently, when
-programming with `plyranges`, a user needs to generally understand
-the `rlang` language and how to adapt their code accordingly. Users
-familiar with the tidyverse should already have such knowledge.
+We also note that the grammar elements and design principles we have described
+are programming language agnostic and could be easily be implemented in another
+language where genomic information could be represented as a tabular data
+structure. We chose R because it is what we are familiar with and because
+the aforementioned Bioconductor packages have implemented the GRanges data
+structure.
 
 We aim to continue developing the `plyranges` package and to extend it
 for use with more complex data structures, such as the
 SummarizedExperiment class, the core Bioconductor data structure for
 representing experimental results (e.g., counts) from multiple sample
-experiments in conjunction with feature and sample metadata. The
-grammar and design of the `plryanges` DSL are naturally extensible to
-SummarizedExperiment.
+experiments in conjunction with feature and sample metadata. Although,
+the SummarizedExperiment is not strictly tidy, it does consist of 
+three tidy data structures that are related by feature and sample identifiers. 
+Therefore, the grammar and design of the `plryanges` DSL is naturally 
+extensible to the SummarizedExperiment.
 
 As the `plyranges` interface encourages tidy data practices, it
 integrates well with the grammar of graphics \cite{Wickham2016-gz}.  To
 achieve responsive performance, interactive graphics rely on lazy data
 access and computing patterns, so the deferred mechanisms within
-plyranges should help support interactive genomics applications.
+`plyranges` should help support interactive genomics applications.
 
-The `plyranges` package can be obtained via the Bioconductor project
-website [https://bioconductor.org](https://bioconductor.org) or
-accessed via Github
-[https://github.com/sa-lee/plyranges](https://github.com/sa-lee/plyranges).
 
-# Acknowledgements
+# Declarations
+
+## Acknowledgements
 
 We would like to thank Dr Matthew Ritchie at the Walter and Eliza Hall 
 Institute and Dr Paul Harrison for their feedback on earlier drafts of
 this work. We would also like to thank Lori Shepherd and Hèrve Pages
-for the code review they performed. This article was written with
-`knitr` \cite{R-knitr} and the figures were made with `ggbio` \cite{R-ggbio}. All code required to reproduce this article is available at 
-https://github.com/sa-lee/plyranges-paper.
+for the code review they performed and users who have submitted feedback
+and pull requests. 
+
+
+## Availabliity of data and Materials
+
+The BigWig file for the H3K27Me3 primary T CD8+ memory cells from peripheral 
+blood ChIP-seq data from the Human Roadmap Epigenomics project  
+was downloaded from the `AnnotationHub` package (2.13.1)
+under accession AH33458 \cite{R-ahub, Roadmap-Epigenomics-Consortium2015-pr}. 
+The BAM file corresponding to the H1 cell line ChIP-seq data is available at 
+NCBI GEO under accession [GSM433167](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM433167) \cite{ncbi-geo, Roadmap-Epigenomics-Consortium2015-pr}. 
+The SNP array data for the H1 cell line data is available at  NCBI GEO under accession
+[GPL18952](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL18952) 
+\cite{Roadmap-Epigenomics-Consortium2015-pr}.
+
+The `plyranges` package is open source under an Artistic 2.0 license 
+\cite{R-plyranges-z}. 
+The  version (1.1.10) used in the paper is archived under DOI: [10.5281/zenodo.1469841](https://doi.org/10.5281/zenodo.1469841). The software 
+can be obtained via the Bioconductor project website 
+[https://bioconductor.org](https://bioconductor.org) or accessed via Github 
+[https://github.com/sa-lee/plyranges](https://github.com/sa-lee/plyranges).
+
+To produce the workflows as described in results section we used 
+R version 3.5 with the development version of `plyranges` (1.1.10)   
+and the `BioStrings` package (2.49.0) installed \cite{r-core, R-plyranges-z, R-biostrings}.
+
+This article was written with `knitr` \cite{R-knitr} and 
+the figures were made with `ggbio` \cite{R-ggbio}. All code required to 
+reproduce this article is available at https://github.com/sa-lee/plyranges-paper.
+
+## Funding
+
+SL is funded by an Australian Government Research Training Program (RTP) 
+scholarship and receives an additional top up scholarship from CSL. Funding 
+bodies had no role in data collection, analysis, and interpretation.
+
+## Authors Contributions
+
+SL, DC, ML contributed ideas towards the software. SL wrote 
+the manuscript and analysed data. SL and ML wrote the software. 
+DC and ML supervised the research and revised the manuscript. 
+All authors have read and approved the final version of the manuscript.
+
+## Ethics approval and consent to participate
+
+Not applicable to the current manuscript.
+
+## Competing Interests
+
+Not applicable to the current manuscript.
 
 # References {#references .unnumbered}

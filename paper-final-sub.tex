@@ -322,18 +322,6 @@ Algebra}\label{genomic-relational-algebra}}
 \hypertarget{data-model}{%
 \subsubsection{Data Model}\label{data-model}}
 
-\begin{figure}
-\includegraphics[width=\textwidth]{diagrams/GRanges}
-\caption{An illustration of the GRanges data model for a
-sample from an RNA-seq experiment. The core components of the data model
-include a seqname column (representing the chromosome), a ranges column
-which consists of start and end coordinates for a genomic region, and a
-strand identifier (either positive, negative, or unstranded). Metadata
-are included as columns to the right of the dotted line as annotations
-(gene\_id) or range level covariates (score).}
-\label{fig:GRanges} 
-\end{figure}
-
 The \texttt{plyranges} DSL is built on the core Bioconductor data
 structure GRanges, which is a constrained table, with fixed columns for
 the chromosome, start and end coordinates, and the strand, along with an
@@ -358,52 +346,6 @@ remains compatible with the general relational operations defined by
 \texttt{dplyr} algebra, and borrow its syntax conventions and design
 principles.
 
-\begin{table}[!htbp]
-\centering
-\begin{tabular}{|l|l|p{6cm}|}
-  \hline
-  & Verb &  Description \\ 
-  \hline
-   & \textbf{\emph{summarize()}} & aggregate over column(s) \\ 
-   Aggregate & \emph{disjoin\_ranges()} & aggregate column(s) over the union of end coordinates \\
-   &  \emph{reduce\_ranges()} & aggregate column(s) by merging overlapping and neighboring ranges \\
-   \hline
-   &  \textbf{\emph{mutate()}} & modifies any column \\
-   & \textbf{\emph{select()}} & select columns \\
-  Modify (Unary) & \textbf{\emph{arrange()}} & sort by columns \\
-   & \emph{stretch()} & extend range by fixed amount \\
-   &  \emph{shift\_(direction)} & shift coordinates \\
-   & \emph{flank\_(direction)} & generate flanking regions \\
-   & \emph{\%intersection\% } & row-wise intersection \\
-   & \emph{\%union\%} & row-wise union \\
-   & \emph{compute\_coverage} & coverage over all ranges \\
-  Modify (Binary) &  \emph{\%setdiff\%} & row-wise set difference \\
-   & \emph{between()} & row-wise gap range \\
-   & \emph{span()} & row-wise spanning range \\
-   \hline
-    & \emph{join\_overlap\_*()} & merge by overlapping ranges \\
-    & \emph{join\_nearest} & merge by nearest neighbor ranges \\
-    & \emph{join\_follow} & merge by following ranges \\
-    Merge & \emph{join\_precedes} & merge by preceding ranges \\
-    & \emph{union\_ranges} & range-wise union \\
-    & \emph{intersect\_ranges} & range-wise intersect \\
-    & \emph{setdiff\_ranges} & range-wise set difference \\
-    & \emph{complement\_ranges} & range-wise set complement \\
-  \hline
-   & \emph{anchor\_direction()} & fix coordinates at direction \\
-  Operate & \textbf{\emph{group\_by()}} & partition by column(s)  \\ 
-   & \emph{group\_by\_overlaps()} & partition by overlaps \\
-   \hline
-   & \textbf{\emph{filter()}} & subset rows \\
-  Restrict & \emph{filter\_by\_overlaps()} & subset by overlap \\
-    & \emph{filter\_by\_non\_overlaps()} & subset by no overlap \\
-   \hline
-\end{tabular}
-\caption{Overview of the \texttt{plyranges} grammar. The core verbs are
-briefly described and categorized into one of the following higher level 
-categories: aggregate, modify, merge, operate, or restrict. A verb is given bold text if
-its origin is from the \texttt{dplyr} grammar.}\label{tab:grammar}
-\end{table}
 
 \hypertarget{algebraic-operations}{%
 \subsubsection{Algebraic operations}\label{algebraic-operations}}
@@ -461,33 +403,6 @@ covered by any of the ranges in a single set. Closely related is the
 \emph{xi} and \emph{yi}. The binary operations are callable from within
 arithmetic, restriction and aggregation expressions.
 
-\begin{figure}
-\includegraphics[width=\textwidth]{diagrams/olap-fig}
-\caption{Illustration of the three overlap join operators. Each join takes two 
-GRanges objects, \textit{x} and \textit{y} as input. A 'Hits' object for the 
-join is computed which consists of two components. The first component contains 
-the indices of the ranges in \textit{x} that have been overlapped 
-(the rectangles of \textit{x} that cross the orange lines). The second 
-component consists of the indices of the ranges in \textit{y} that overlap 
-the ranges in \textit{x}. In this case a range in \textit{y} overlaps the 
-ranges in \textit{x} three times, so the index is repeated three times. The 
-resulting 'Hits' object is used to modify \textit{x} by where it was 'hit' by
-\textit{y} and merge all metadata columns from \textit{x} and \textit{y} 
-based on the indices contained in the 'Hits' object. This procedure is applied 
-generally in the \texttt{plyranges} DSL for both overlap and nearest neighbor
-operations. The join semantics alter what is returned: \textbf{A}: for an 
-\textbf{inner} join the \textit{x} ranges that are overlapped by \textit{y} 
-are returned. The returned ranges also include the metadata from the \textit{y}
-range that overlapped the three \textit{x} ranges. \textbf{B} An 
-\textbf{intersect} join is identical to an inner join except that the 
-intersection is taken between the overlapped \textit{x} ranges and the 
-\textit{y} ranges. \textbf{C} For the \textbf{left} join all 
-\textit{x} ranges are returned regardless of whether they are overlapped by 
-\textit{y}. In this case the third range (rectangle with the asterisk next to it)
-of the join would have missing values on metadata columns that came from \textit{y}.}
-\label{fig:olaps-fig}
-\end{figure}
-
 To support merging, our algebra recasts finding overlaps or nearest
 neighbors between two genomic regions as variants of the relational join
 operator. A join acts on two GRanges objects: \emph{x} and \emph{y}. The
@@ -512,21 +427,6 @@ intersection instead of the left range. Finally, the overlap \emph{left}
 join is akin to left outer join in Codd's relational algebra: it
 performs an overlap inner join but also returns all \emph{x} ranges that
 are not hit by the \emph{y} ranges.
-
-\begin{figure}
-\includegraphics[width=\textwidth]{diagrams/code-comparison.pdf}
-\caption{Idiomatic code examples for \texttt{plyranges} (\textbf{A}) and 
-\texttt{GenomicRanges} (\textbf{B}) illustrating an overlap and aggregate 
-operation that returns the same result. 
-In each example, we have two BED files consisting of SNPs that are
-genome-wide association study (GWAS) hits and reference exons. Each code block
-counts for each SNP the number of distinct exons it overlaps. The 
-\texttt{plyranges} code achieves this with an overlap join followed by partitioning
-and aggregation. Strand is ignored by default here. 
-The \texttt{GenomicRanges} code achieves this using the 'Hits' and 'List' 
-classes and their methods.}
-\label{fig:code}
-\end{figure}
 
 Since the GRanges object is a tabular data structure, our grammar
 includes operators to filter, sort and aggregate by columns in a
@@ -704,14 +604,7 @@ that surrounds the max peak (figure \ref{fig:peak-viz}).
 #>   seqinfo: 25 sequences from hg19 genome
 \end{verbatim}
 
-\begin{figure}
 
-{\centering \includegraphics{./diagrams/peak-viz-1} 
-
-}
-
-\caption{The final result of the \texttt{plyranges} operations to find a 5000nt region surrounding the peak of normalised coverage scores over chromosome 10, displayed as a density plot.}\label{fig:peak-viz}
-\end{figure}
 
 \hypertarget{computing-windowed-statistics}{%
 \subsubsection{Computing Windowed
@@ -868,14 +761,7 @@ using \texttt{group\_by()} in combination with \texttt{summarize()}
 #> 24         X     55495 3.58219800181653
 \end{verbatim}
 
-\begin{figure}
 
-{\centering \includegraphics{./diagrams/titv-viz-1} 
-
-}
-
-\caption{The final result of computing quality control metrics over the SNP array data with \texttt{plyranges}, displayed as a dot plot. Chromosomes are ordered by their estimated transition-transversion ratio. A white reference line is drawn at the expected ratio for a human exome.}\label{fig:titv-viz}
-\end{figure}
 
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
@@ -1089,11 +975,130 @@ Not applicable to the current manuscript.
 
 Not applicable to the current manuscript.
 
-
-
-
 \newpage
 \singlespacing 
 \printbibliography[title=References]
 
+% table and figures
+\begin{table}[!htbp]
+\centering
+\begin{tabular}{|l|l|p{6cm}|}
+  \hline
+  & Verb &  Description \\ 
+  \hline
+   & \textbf{\emph{summarize()}} & aggregate over column(s) \\ 
+   Aggregate & \emph{disjoin\_ranges()} & aggregate column(s) over the union of end coordinates \\
+   &  \emph{reduce\_ranges()} & aggregate column(s) by merging overlapping and neighboring ranges \\
+   \hline
+   &  \textbf{\emph{mutate()}} & modifies any column \\
+   & \textbf{\emph{select()}} & select columns \\
+  Modify (Unary) & \textbf{\emph{arrange()}} & sort by columns \\
+   & \emph{stretch()} & extend range by fixed amount \\
+   &  \emph{shift\_(direction)} & shift coordinates \\
+   & \emph{flank\_(direction)} & generate flanking regions \\
+   & \emph{\%intersection\% } & row-wise intersection \\
+   & \emph{\%union\%} & row-wise union \\
+   & \emph{compute\_coverage} & coverage over all ranges \\
+  Modify (Binary) &  \emph{\%setdiff\%} & row-wise set difference \\
+   & \emph{between()} & row-wise gap range \\
+   & \emph{span()} & row-wise spanning range \\
+   \hline
+    & \emph{join\_overlap\_*()} & merge by overlapping ranges \\
+    & \emph{join\_nearest} & merge by nearest neighbor ranges \\
+    & \emph{join\_follow} & merge by following ranges \\
+    Merge & \emph{join\_precedes} & merge by preceding ranges \\
+    & \emph{union\_ranges} & range-wise union \\
+    & \emph{intersect\_ranges} & range-wise intersect \\
+    & \emph{setdiff\_ranges} & range-wise set difference \\
+    & \emph{complement\_ranges} & range-wise set complement \\
+  \hline
+   & \emph{anchor\_direction()} & fix coordinates at direction \\
+  Operate & \textbf{\emph{group\_by()}} & partition by column(s)  \\ 
+   & \emph{group\_by\_overlaps()} & partition by overlaps \\
+   \hline
+   & \textbf{\emph{filter()}} & subset rows \\
+  Restrict & \emph{filter\_by\_overlaps()} & subset by overlap \\
+    & \emph{filter\_by\_non\_overlaps()} & subset by no overlap \\
+   \hline
+\end{tabular}
+\caption{Overview of the \texttt{plyranges} grammar. The core verbs are
+briefly described and categorized into one of the following higher level 
+categories: aggregate, modify, merge, operate, or restrict. A verb is given bold text if
+its origin is from the \texttt{dplyr} grammar.}\label{tab:grammar}
+\end{table}
+
+
+
+\begin{figure}
+\includegraphics[width=\textwidth]{diagrams/GRanges}
+\caption{An illustration of the GRanges data model for a
+sample from an RNA-seq experiment. The core components of the data model
+include a seqname column (representing the chromosome), a ranges column
+which consists of start and end coordinates for a genomic region, and a
+strand identifier (either positive, negative, or unstranded). Metadata
+are included as columns to the right of the dotted line as annotations
+(gene\_id) or range level covariates (score).}
+\label{fig:GRanges} 
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{diagrams/olap-fig}
+\caption{Illustration of the three overlap join operators. Each join takes two 
+GRanges objects, \textit{x} and \textit{y} as input. A 'Hits' object for the 
+join is computed which consists of two components. The first component contains 
+the indices of the ranges in \textit{x} that have been overlapped 
+(the rectangles of \textit{x} that cross the orange lines). The second 
+component consists of the indices of the ranges in \textit{y} that overlap 
+the ranges in \textit{x}. In this case a range in \textit{y} overlaps the 
+ranges in \textit{x} three times, so the index is repeated three times. The 
+resulting 'Hits' object is used to modify \textit{x} by where it was 'hit' by
+\textit{y} and merge all metadata columns from \textit{x} and \textit{y} 
+based on the indices contained in the 'Hits' object. This procedure is applied 
+generally in the \texttt{plyranges} DSL for both overlap and nearest neighbor
+operations. The join semantics alter what is returned: \textbf{A}: for an 
+\textbf{inner} join the \textit{x} ranges that are overlapped by \textit{y} 
+are returned. The returned ranges also include the metadata from the \textit{y}
+range that overlapped the three \textit{x} ranges. \textbf{B} An 
+\textbf{intersect} join is identical to an inner join except that the 
+intersection is taken between the overlapped \textit{x} ranges and the 
+\textit{y} ranges. \textbf{C} For the \textbf{left} join all 
+\textit{x} ranges are returned regardless of whether they are overlapped by 
+\textit{y}. In this case the third range (rectangle with the asterisk next to it)
+of the join would have missing values on metadata columns that came from \textit{y}.}
+\label{fig:olaps-fig}
+\end{figure}
+
+
+\begin{figure}
+\includegraphics[width=\textwidth]{diagrams/code-comparison.pdf}
+\caption{Idiomatic code examples for \texttt{plyranges} (\textbf{A}) and 
+\texttt{GenomicRanges} (\textbf{B}) illustrating an overlap and aggregate 
+operation that returns the same result. 
+In each example, we have two BED files consisting of SNPs that are
+genome-wide association study (GWAS) hits and reference exons. Each code block
+counts for each SNP the number of distinct exons it overlaps. The 
+\texttt{plyranges} code achieves this with an overlap join followed by partitioning
+and aggregation. Strand is ignored by default here. 
+The \texttt{GenomicRanges} code achieves this using the 'Hits' and 'List' 
+classes and their methods.}
+\label{fig:code}
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics{./diagrams/peak-viz-1} 
+
+}
+
+\caption{The final result of the \texttt{plyranges} operations to find a 5000nt region surrounding the peak of normalised coverage scores over chromosome 10, displayed as a density plot.}\label{fig:peak-viz}
+\end{figure}
 \end{document}
+
+\begin{figure}
+
+{\centering \includegraphics{./diagrams/titv-viz-1} 
+
+}
+
+\caption{The final result of computing quality control metrics over the SNP array data with \texttt{plyranges}, displayed as a dot plot. Chromosomes are ordered by their estimated transition-transversion ratio. A white reference line is drawn at the expected ratio for a human exome.}\label{fig:titv-viz}
+\end{figure}
