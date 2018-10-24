@@ -1,0 +1,1104 @@
+% modified from https://github.com/svmiller/svm-r-markdown-templates
+\documentclass[]{article}
+\usepackage[top=0.85in,right=2in]{geometry}
+\newcommand*{\authorfont}{\fontfamily{phv}\selectfont}
+\usepackage[]{mathpazo}
+
+
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
+
+\renewcommand*{\thefootnote}{\fnsymbol{footnote}}
+
+
+\usepackage{abstract}
+\renewcommand{\abstractname}{}    % clear the title
+\renewcommand{\absnamepos}{empty} % originally center
+
+\renewenvironment{abstract}
+ {{%
+    \setlength{\leftmargin}{0mm}
+    \setlength{\rightmargin}{\leftmargin}%
+  }%
+  \relax}
+ {\endlist}
+
+\makeatletter
+\def\@maketitle{%
+  \newpage
+%  \null
+%  \vskip 2em%
+%  \begin{center}%
+  \let \footnote \thanks
+    {\fontsize{18}{20}\selectfont\raggedright  \setlength{\parindent}{0pt} \@title \par}%
+}
+%\fi
+\makeatother
+
+
+
+
+\setcounter{secnumdepth}{0}
+
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+
+\usepackage{graphicx,grffile}
+\usepackage[labelfont=bf]{caption}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+
+\title{plyranges: a grammar of genomic data transformation  }
+
+
+
+\author{\Large Stuart Lee
+\footnote{\label{monash}Department of Econometrics and Business Statistics, Monash University, Clayton, Australia}\footnote{Molecular Medicine Division, Walter and Eliza Hall Institute, Parkville, Australia}\vspace{0.05in} \newline\normalsize\emph{}   \and \Large Dianne Cook \(^{\ref{monash}}\)\vspace{0.05in} \newline\normalsize\emph{}   \and \Large Michael Lawrence
+\footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author \href{mailto:michael.lawerence@gene.com}{michael.lawerence@gene.com} }\vspace{0.05in} \newline\normalsize\emph{}  }
+
+
+\date{}
+
+\usepackage{titlesec}
+
+\titleformat*{\section}{\normalsize\bfseries}
+\titleformat*{\subsection}{\normalsize\itshape}
+\titleformat*{\subsubsection}{\normalsize\itshape}
+\titleformat*{\paragraph}{\normalsize\itshape}
+\titleformat*{\subparagraph}{\normalsize\itshape}
+
+
+
+% % 
+% % \usepackage{biblatex}
+% 
+\usepackage[backend=biber, style=numeric-comp, url=false, sorting=none]{biblatex}
+\addbibresource{references.bib}
+
+
+\newtheorem{hypothesis}{Hypothesis}
+\usepackage{setspace}
+
+\makeatletter
+\@ifpackageloaded{hyperref}{}{%
+\ifxetex
+  \PassOptionsToPackage{hyphens}{url}\usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \PassOptionsToPackage{hyphens}{url}\usepackage[unicode=true]{hyperref}
+\fi
+}
+
+\@ifpackageloaded{color}{
+    \PassOptionsToPackage{usenames,dvipsnames}{color}
+}{%
+    \usepackage[usenames,dvipsnames]{color}
+}
+\makeatother
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={Stuart Lee
+\footnote{\label{monash}Department of Econometrics and Business Statistics, Monash University, Clayton, Australia}\footnote{Molecular Medicine Division, Walter and Eliza Hall Institute, Parkville, Australia} () and Dianne Cook \(^{\ref{monash}}\) () and Michael Lawrence
+\footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author \href{mailto:michael.lawerence@gene.com}{michael.lawerence@gene.com} } ()},
+             pdfkeywords = {Bioconductor, Grammar, Genomes, Data Analysis},  
+            pdftitle={plyranges: a grammar of genomic data transformation},
+            colorlinks=true,
+            citecolor=blue,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+
+
+% add tightlist ----------
+\providecommand{\tightlist}{%
+\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\begin{document}
+	
+% \pagenumbering{arabic}% resets `page` counter to 1 
+%
+% \maketitle
+
+{% \usefont{T1}{pnc}{m}{n}
+\setlength{\parindent}{0pt}
+\thispagestyle{plain}
+{\fontsize{18}{20}\selectfont\raggedright 
+\maketitle  % title \par  
+
+}
+
+{
+   \vskip 13.5pt\relax \normalsize\fontsize{11}{12} 
+\textbf{\authorfont Stuart Lee
+\footnote{\label{monash}Department of Econometrics and Business Statistics, Monash University, Clayton, Australia}\footnote{Molecular Medicine Division, Walter and Eliza Hall Institute, Parkville, Australia}} \hskip 15pt \emph{\small }   \par \textbf{\authorfont Dianne Cook \(^{\ref{monash}}\)} \hskip 15pt \emph{\small }   \par \textbf{\authorfont Michael Lawrence
+\footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author \href{mailto:michael.lawerence@gene.com}{michael.lawerence@gene.com} }} \hskip 15pt \emph{\small }   
+
+}
+
+}
+
+
+
+
+
+
+
+
+\begin{abstract}
+
+    \hbox{\vrule height .2pt width 39.14pc}
+
+    \vskip 8.5pt % \small 
+
+\noindent There is a cognitive load placed on users in learning a data abstraction
+from the Bioconductor project and understanding its appropriate use.
+Users must navigate these abstractions to perform a genomic analysis
+task, when a single data abstraction, a GRanges object will suffice. By
+recognizing that the GRanges class follows `tidy' data principles, we
+create a grammar of genomic data transformation, defining verbs for
+performing actions on and between genomic interval data and providing a
+way of performing common data analysis tasks through a coherent
+interface to existing Bioconductor infrastructure. We implement this
+grammar as a Bioconductor/R package called \texttt{plyranges}.
+
+
+\vskip 8.5pt \noindent \emph{Keywords}: Bioconductor, Grammar, Genomes, Data Analysis \par
+
+    \hbox{\vrule height .2pt width 39.14pc}
+
+
+
+\end{abstract}
+
+
+\vskip 6.5pt
+
+
+\noindent  \hypertarget{background}{%
+\section{Background}\label{background}}
+
+High-throughput genomics promises to unlock new disease therapies, and
+strengthen our knowledge of basic biology. To deliver on those promises,
+scientists must derive a stream of knowledge from a deluge of data.
+Genomic data is challenging in both scale and complexity. Innovations in
+sequencing technology often outstrip our capacity to process the output.
+Beyond their common association with genomic coordinates, genomic data
+are heterogeneous, consisting of raw sequence read alignments, genomic
+feature annotations like genes and exons, and summaries like coverage
+vectors, ChIP-seq peak calls, variant calls, and per-feature read
+counts. Genomic scientists need software tools to wrangle the different
+types of data, process the data at scale, test hypotheses, and generate
+new ones, all while focusing on the biology, not the computation. For
+the tool developer, the challenge is to define ways to model and operate
+on the data that align with the mental model of scientists, and to
+provide an implementation that scales with their ambition.
+
+Several domain specific languages (DSLs) enable scientists to process
+and reason about heterogeneous genomics data by expressing common
+operations, such as range manipulation and overlap-based joins, using
+the vocabulary of genomics. Their implementations either delegate
+computations to a database, or operate over collections of files in
+standard formats like BED. An example of the former is the Genome Query
+Language (GQL) and its distributed implementation GenAp which use a
+SQL-like syntax for fast retrieval of information of unprocessed
+sequencing data \autocites{Kozanitis2014-va}{Kozanitis2016-bm}.
+Similarly, the Genometric Query Language (GMQL) implements a DSL for
+combining genomic datasets \cite{Kaitoua2017-pw}. The command line
+application BEDtools develops an extensive algebra for performing
+arithmetic between two or more sets of genomic regions
+\cite{Quinlan2010-gc}. All of the aforementioned DSLs are designed to be
+evaluated either at the command line or embedded in scripts for batch
+processing. They exist in a sparse ecosystem, mostly consisting of UNIX
+and database tools that lack biological semantics and operate at the
+level of files and database tables.
+
+The Bioconductor/R packages \texttt{IRanges} and \texttt{GenomicRanges}
+\autocites{r-core}{Lawrence2013-wg}{Huber2015-ei} define a DSL for
+analyzing genomics data with R, an interactive data analysis environment
+that encourages reproducibility and provides high-level abstractions for
+manipulating, modelling and plotting data, through state of the art
+methods in statistical computing. The packages define object-oriented
+(OO) abstractions for representing genomic data and enable
+interoperability by allowing users and developers to use these
+abstractions in their own code and packages. Other genomic DSLs that are
+embedded in programming languages include pybedtools and valr
+\autocites{Dale2011-js}{Kent2017}, however these packages lack the
+interoperability provided by the aforementioned Bioconductor packages
+and are not easily extended.
+
+The Bioconductor infrastructure models the genomic data and operations
+from the perspective of the power user, one who understands and wants to
+take advantage of the subtle differences in data types. This design has
+enabled the development of sophisticated tools, as evidenced by the
+hundreds of packages depending on the framework. Unfortunately, the
+myriad of data structures have overlapping purposes and important but
+obscure differences in behavior that often confuse the typical end user.
+
+Recently, there has been a concerted, community effort to standardize R
+data structures and workflows around the notion of tidy data
+\cite{Wickham2014-jc}. A tidy dataset is defined as a tabular data
+structure that has observations as rows and columns as variables, and
+all measurements pertain to a single observational unit. The tidy data
+pattern is useful because it allows us to see how the data relate to the
+design of an experiment and the variables measured. The \texttt{dplyr}
+package \cite{Wickham2017-dplyr} defines an application programming
+interface (API) that maps notions from the general relational algebra to
+verbs that act on tidy data. These verbs can be composed together on one
+or more tidy datasets with the pipe operator from the \texttt{magrittr}
+package \cite{R-magrittr}. Taken together these features enable a user
+to write human readable analysis workflows.
+
+We have created a genomic DSL called \texttt{plyranges} that
+reformulates notions from existing genomic algebras and embeds them in R
+as a genomic extension of \texttt{dplyr}. By analogy, \texttt{plyranges}
+is to the genomic algebra, as \texttt{dplyr} is to the relational
+algebra. The \texttt{plyranges} Bioconductor package implements the
+language on top of a key subset of Bioconductor data structures and thus
+fully integrates with the Bioconductor framework, gaining access to its
+scalable data representations and sophisticated statistical methods.
+
+\hypertarget{results}{%
+\section{Results}\label{results}}
+
+\hypertarget{genomic-relational-algebra}{%
+\subsection{Genomic Relational
+Algebra}\label{genomic-relational-algebra}}
+
+\hypertarget{data-model}{%
+\subsubsection{Data Model}\label{data-model}}
+
+The \texttt{plyranges} DSL is built on the core Bioconductor data
+structure GRanges, which is a constrained table, with fixed columns for
+the chromosome, start and end coordinates, and the strand, along with an
+arbitrary set of additional columns, consisting of measurements or
+metadata specific to the data type or experiment (figure
+\ref{fig:GRanges}). GRanges balances flexibility with formal
+constraints, so that it is applicable to virtually any genomic workflow,
+while also being semantically rich enough to support high-level
+operations on genomic ranges. As a core data structure, GRanges enables
+interoperability between \texttt{plyranges} and the rest of
+Bioconductor. Adhering to a single data structure simplifies the API and
+makes it easier to learn and understand, in part because operations
+become endomorphic, i.e., they return the same type as their input.
+
+GRanges follow the intuitive tidy data pattern: it is a rectangular
+table corresponding to a single biological context. Each row contains a
+single observation and each column is a variable describing the
+observations. GRanges specializes the tidy pattern in that the
+observations always pertain to some genomic feature, but it largely
+remains compatible with the general relational operations defined by
+\texttt{dplyr}. Thus, we define our algebra as an extension of the
+\texttt{dplyr} algebra, and borrow its syntax conventions and design
+principles.
+
+
+\hypertarget{algebraic-operations}{%
+\subsubsection{Algebraic operations}\label{algebraic-operations}}
+
+The \texttt{plyranges} DSL defines an expressive algebra for performing
+genomic operations with and between GRanges objects (see table
+\ref{tab:grammar}). The grammar includes several classes of operation
+that cover most use cases in genomics data analysis. There are range
+arithmetic operators, such as for resizing ranges or finding their
+intersection, and operators for merging, filtering and aggregating by
+range-specific notions like overlap and proximity.
+
+Arithmetic operations transform range coordinates, as defined by their
+\emph{start}, \emph{end} and \emph{width}. The three dimensions are
+mutually dependent and partially redundant, so direct manipulation of
+them is problematic. For example, changing the \emph{width} column needs
+to change either the \emph{start}, \emph{end} or both to preserve
+integrity of the object. We introduce the \emph{anchor} modifier to
+disambiguate these adjustments. Supported anchor points include the
+start, end and midpoint, as well as the 3' and 5' ends for
+strand-directed ranges. For example, if we anchor the start, then
+setting the width will adjust the end while leaving the start
+stationary.
+
+The algebra also defines conveniences for relative coordinate
+adjustments: \emph{shift} (unanchored adjustment to both start and end)
+and \emph{stretch} (anchored adjustment of width). We can perform any
+relative adjustment by some combination of those two operations. The
+\emph{stretch} operation requires an anchor and assumes the midpoint by
+default. Since \emph{shift} is unanchored, the user specifies a suffix
+for indicating the direction: left/right or, for stranded features,
+upstream/downstream. For example, \emph{shift\_right} shifts a range to
+the right.
+
+The \emph{flank} operation generates new ranges that are adjacent to
+existing ones. This is useful, for example, when generating upstream
+promoter regions for genes. Analogous to \emph{shift}, a suffix
+indicates the side of the input range to flank.
+
+As with other genomic grammars, we define set operations that treat
+ranges as sets of integers, including \emph{intersect}, \emph{union},
+\emph{difference}, and \emph{complement}. There are two sets of these:
+parallel and merging. For example, the parallel intersection (\emph{x
+\%intersect\% y}) finds the intersecting range between \emph{xi} and
+\emph{yi} for \emph{i} in \emph{1\ldots{}n}, where \emph{n} is the
+length of both \emph{x} and \emph{y}. In contrast, the merging
+intersection (\emph{intersect\_ranges(x, y)}) returns a new set of
+disjoint ranges representing wherever there was overlap between a range
+in \emph{x} and a range in \emph{y}. Finding the parallel union will
+fail when two ranges have a gap, so we introduce a \emph{span} operator
+that takes the union while filling any gap. The \emph{complement}
+operation is unique in that it is unary. It finds the regions not
+covered by any of the ranges in a single set. Closely related is the
+\emph{between} parallel operation, which finds the gap separating
+\emph{xi} and \emph{yi}. The binary operations are callable from within
+arithmetic, restriction and aggregation expressions.
+
+To support merging, our algebra recasts finding overlaps or nearest
+neighbors between two genomic regions as variants of the relational join
+operator. A join acts on two GRanges objects: \emph{x} and \emph{y}. The
+join operator is relational in the sense that metadata from the \emph{x}
+and \emph{y} ranges are retained in the joined range. All join operators
+in the \texttt{plyranges} DSL generate a set of hits based on overlap or
+proximity of ranges and use those hits to merge the two datasets in
+different ways. There are four supported matching algorithms:
+\emph{overlap}, \emph{nearest}, \emph{precede}, and \emph{follow}
+(figure \ref{fig:olaps-fig}). We can further restrict the matching by
+whether the query is completely \emph{within} the subject, and adding
+the \emph{directed} suffix ensures that matching ranges have the same
+direction (strand).
+
+For merging based on the hits, we have three modes: \emph{inner},
+\emph{intersect} and \emph{left}. The \emph{inner} overlap join is
+similar to the conventional inner join in that there is a row in the
+result for every match. A major difference is that the matching is not
+by identity, so we have to choose one of the ranges from each pair. We
+always choose the left range. The \emph{intersect} join uses the
+intersection instead of the left range. Finally, the overlap \emph{left}
+join is akin to left outer join in Codd's relational algebra: it
+performs an overlap inner join but also returns all \emph{x} ranges that
+are not hit by the \emph{y} ranges.
+
+Since the GRanges object is a tabular data structure, our grammar
+includes operators to filter, sort and aggregate by columns in a
+GRanges. These operations can be performed over partitions formed using
+the \emph{group\_by} modifier. Together with our algebra for arithmetic
+and merging, these operations conform to the semantics and syntax of the
+\texttt{dplyr} grammar. Consequently, \texttt{plyranges} code is
+generally more compact than the equivalent \texttt{GenomicRanges} code
+(figure \ref{fig:code}).
+
+\hypertarget{developing-workflows-with-plyranges}{%
+\subsection{\texorpdfstring{Developing workflows with
+\texttt{plyranges}}{Developing workflows with plyranges}}\label{developing-workflows-with-plyranges}}
+
+Here we provide illustrative examples of using the \texttt{plyranges}
+DSL to show how our grammar could be integrated into genomic data
+workflows. As we construct the workflows we show the data output
+intermittently to assist the reader in understanding the pipeline steps.
+The workflows highlight how interoperability with existing Bioconductor
+infrastructure, enables easy access to public datasets and methods for
+analysis and visualization.
+
+\hypertarget{peak-finding}{%
+\subsubsection{Peak Finding}\label{peak-finding}}
+
+In the workflow of ChIP-seq data analysis, we are interested in finding
+peaks from islands of coverage over chromosome. Here we will use
+\texttt{plyranges} to call peaks from islands of coverage above 8 then
+plot the region surrounding the tallest peak.
+
+Using \texttt{plyranges} and the the Bioconductor package
+\texttt{AnnotationHub} \cite{R-ahub} we can download and read BigWig
+files from ChIP-Seq experiments from the Human Epigenome Roadmap project
+\cite{Roadmap-Epigenomics-Consortium2015-pr}. Here we analyse a BigWig
+file corresponding to H3 lysine 27 trimethylation (H3K27Me3) of primary
+T CD8+ memory cells from peripheral blood, focussing on coverage islands
+over chromosome 10.
+
+First, we extract the genome information from the BigWig file and filter
+to get the range for chromosome 10. This range will be used as a filter
+when reading the file.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(plyranges)}
+\NormalTok{chr10_ranges <-}\StringTok{ }\NormalTok{bw_file }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{get_genome_info}\NormalTok{() }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(seqnames }\OperatorTok{==}\StringTok{ "chr10"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Then we read the BigWig file only extracting scores if they overlap
+chromosome 10. We also add the genome build information to the resulting
+ranges. This book-keeping is good practice as it ensures the integrity
+of any downstream operations such as finding overlaps.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{chr10_scores <-}\StringTok{ }\NormalTok{bw_file }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{read_bigwig}\NormalTok{(}\DataTypeTok{overlap_ranges =}\NormalTok{ chr10_ranges) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{set_genome_info}\NormalTok{(}\DataTypeTok{genome =} \StringTok{"hg19"}\NormalTok{)}
+\NormalTok{chr10_scores}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+#> GRanges object with 5789841 ranges and 1 metadata column:
+#>             seqnames              ranges strand |              score
+#>                <Rle>           <IRanges>  <Rle> |          <numeric>
+#>         [1]    chr10             1-60602      * | 0.0422799997031689
+#>         [2]    chr10         60603-60781      * |  0.163240000605583
+#>         [3]    chr10         60782-60816      * |  0.372139990329742
+#>         [4]    chr10         60817-60995      * |  0.163240000605583
+#>         [5]    chr10         60996-61625      * | 0.0422799997031689
+#>         ...      ...                 ...    ... .                ...
+#>   [5789837]    chr10 135524723-135524734      * |  0.144319996237755
+#>   [5789838]    chr10 135524735-135524775      * |  0.250230014324188
+#>   [5789839]    chr10 135524776-135524784      * |  0.427789986133575
+#>   [5789840]    chr10 135524785-135524806      * |  0.730019986629486
+#>   [5789841]    chr10 135524807-135524837      * |   1.03103005886078
+#>   -------
+#>   seqinfo: 25 sequences from hg19 genome
+\end{verbatim}
+
+We then filter for regions with a coverage score greater than 8, and
+following this reduce individual runs to ranges representing the islands
+of coverage. This is achieved with the \texttt{reduce\_ranges()}
+function, which allows a summary to be computed over each island: in
+this case we take the maximum of the scores to find the coverage peaks
+over chromosome 10.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{all_peaks <-}\StringTok{ }\NormalTok{chr10_scores }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(score }\OperatorTok{>}\StringTok{ }\DecValTok{8}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{reduce_ranges}\NormalTok{(}\DataTypeTok{score =} \KeywordTok{max}\NormalTok{(score))}
+\NormalTok{all_peaks}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+#> GRanges object with 1085 ranges and 1 metadata column:
+#>          seqnames              ranges strand |            score
+#>             <Rle>           <IRanges>  <Rle> |        <numeric>
+#>      [1]    chr10     1299144-1299370      * | 13.2264003753662
+#>      [2]    chr10     1778600-1778616      * | 8.20512008666992
+#>      [3]    chr10     4613068-4613078      * | 8.76027011871338
+#>      [4]    chr10     4613081-4613084      * | 8.43659973144531
+#>      [5]    chr10             4613086      * | 8.11507987976074
+#>      ...      ...                 ...    ... .              ...
+#>   [1081]    chr10 135344482-135344488      * | 9.23237991333008
+#>   [1082]    chr10 135344558-135344661      * |  11.843409538269
+#>   [1083]    chr10 135344663-135344665      * | 8.26965999603271
+#>   [1084]    chr10 135344670-135344674      * | 8.26965999603271
+#>   [1085]    chr10 135345440-135345441      * | 8.26965999603271
+#>   -------
+#>   seqinfo: 25 sequences from hg19 genome
+\end{verbatim}
+
+Returning to the GRanges object containing normalized coverage scores,
+we filter to find the coordinates of the peak containing the maximum
+coverage score. We can then find a 5000 nt region centered around the
+maximum position by anchoring and modifying the width.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{chr10_max_score_region <-}\StringTok{ }\NormalTok{chr10_scores }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(score }\OperatorTok{==}\StringTok{ }\KeywordTok{max}\NormalTok{(score)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{anchor_center}\NormalTok{() }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{width =} \DecValTok{5000}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Finally, the overlap inner join is used to restrict the chromosome 10
+coverage islands, to the islands that are contained in the 5000nt region
+that surrounds the max peak (figure \ref{fig:peak-viz}).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{peak_region <-}\StringTok{ }\NormalTok{chr10_scores }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{join_overlap_inner}\NormalTok{(chr10_max_score_region)}
+\NormalTok{peak_region}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+#> GRanges object with 890 ranges and 2 metadata columns:
+#>         seqnames            ranges strand |            score.x
+#>            <Rle>         <IRanges>  <Rle> |          <numeric>
+#>     [1]    chr10 21805891-21805988      * | 0.0206599999219179
+#>     [2]    chr10 21805989-21806000      * | 0.0211200006306171
+#>     [3]    chr10 21806001-21806044      * |  0.022069999948144
+#>     [4]    chr10 21806045-21806049      * | 0.0215900000184774
+#>     [5]    chr10 21806050-21806081      * | 0.0211200006306171
+#>     ...      ...               ...    ... .                ...
+#>   [886]    chr10          21810878      * |   5.24951982498169
+#>   [887]    chr10          21810879      * |   5.83534002304077
+#>   [888]    chr10 21810880-21810884      * |   6.44267988204956
+#>   [889]    chr10 21810885-21810895      * |   7.07054996490479
+#>   [890]    chr10 21810896-21810911      * |   6.44267988204956
+#>                  score.y
+#>                <numeric>
+#>     [1] 29.9573001861572
+#>     [2] 29.9573001861572
+#>     [3] 29.9573001861572
+#>     [4] 29.9573001861572
+#>     [5] 29.9573001861572
+#>     ...              ...
+#>   [886] 29.9573001861572
+#>   [887] 29.9573001861572
+#>   [888] 29.9573001861572
+#>   [889] 29.9573001861572
+#>   [890] 29.9573001861572
+#>   -------
+#>   seqinfo: 25 sequences from hg19 genome
+\end{verbatim}
+
+
+
+\hypertarget{computing-windowed-statistics}{%
+\subsubsection{Computing Windowed
+Statistics}\label{computing-windowed-statistics}}
+
+Another common operation in genomics data analysis is to compute data
+summaries over genomic windows. In \texttt{plyranges} this can be
+achieved via the \texttt{group\_by\_overlaps()} operator. We bin and
+count and find the average GC content of reads from a H3K27Me3 ChIP-seq
+experiment by the Human Epigenome Roadmap Consortium.
+
+We can directly obtain the genome information from the header of the BAM
+file: in this case the reads were aligned to the hg19 genome build and
+there are no reads overlapping the mitochondrial genome.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{locations <-}\StringTok{ }\NormalTok{h1_bam_sorted }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{read_bam}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{get_genome_info}\NormalTok{() }
+\end{Highlighting}
+\end{Shaded}
+
+Next we only read in alignments that overlap the genomic locations we
+are interested in and select the query sequence. Note that the reading
+of the BAM file is deferred: only alignments that pass the filter are
+loaded into memory. We can add another column representing the GC
+proportion for each alignment using the \texttt{letterFrequency()}
+function from the \texttt{Biostrings} package \cite{R-biostrings}. After
+computing the GC proportion as the score column, we drop all other
+columns in the GRanges object.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{alignments <-}\StringTok{ }\NormalTok{h1_bam_sorted }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{read_bam}\NormalTok{() }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter_by_overlaps}\NormalTok{(locations) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{select}\NormalTok{(seq) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}
+    \DataTypeTok{score =} \KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{letterFrequency}\NormalTok{(seq, }\StringTok{"GC"}\NormalTok{, }\DataTypeTok{as.prob =} \OtherTok{TRUE}\NormalTok{))}
+\NormalTok{  ) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{select}\NormalTok{(score)}
+\NormalTok{alignments}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+#> GRanges object with 8275595 ranges and 1 metadata column:
+#>             seqnames            ranges strand |             score
+#>                <Rle>         <IRanges>  <Rle> |         <numeric>
+#>         [1]    chr10       50044-50119      - | 0.276315789473684
+#>         [2]    chr10       50050-50119      + |              0.25
+#>         [3]    chr10       50141-50213      - | 0.447368421052632
+#>         [4]    chr10       50203-50278      + | 0.263157894736842
+#>         [5]    chr10       50616-50690      + | 0.276315789473684
+#>         ...      ...               ...    ... .               ...
+#>   [8275591]     chrY 57772745-57772805      - | 0.513157894736842
+#>   [8275592]     chrY 57772751-57772800      + | 0.526315789473684
+#>   [8275593]     chrY 57772767-57772820      + | 0.565789473684211
+#>   [8275594]     chrY 57772812-57772845      + |              0.25
+#>   [8275595]     chrY 57772858-57772912      + | 0.592105263157895
+#>   -------
+#>   seqinfo: 24 sequences from an unspecified genome
+\end{verbatim}
+
+Finally, we create 10000nt tiles over the genome and compute the number
+of reads and average GC content over all reads that fall within each
+tile using an overlap join and merging endpoints.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bins <-}\StringTok{ }\NormalTok{locations }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{tile_ranges}\NormalTok{(}\DataTypeTok{width =}\NormalTok{ 10000L)}
+
+\NormalTok{alignments_summary <-}\StringTok{ }\NormalTok{bins }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{join_overlap_inner}\NormalTok{(alignments) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{disjoin_ranges}\NormalTok{(}\DataTypeTok{n =} \KeywordTok{n}\NormalTok{(), }\DataTypeTok{avg_gc =} \KeywordTok{mean}\NormalTok{(score))}
+\NormalTok{alignments_summary}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+#> GRanges object with 286030 ranges and 2 metadata columns:
+#>            seqnames            ranges strand |         n            avg_gc
+#>               <Rle>         <IRanges>  <Rle> | <integer>         <numeric>
+#>        [1]    chr10       49999-59997      * |        88 0.369019138755981
+#>        [2]    chr10       59998-69997      * |        65 0.434210526315789
+#>        [3]    chr10       69998-79996      * |        56 0.386513157894737
+#>        [4]    chr10       79997-89996      * |        71  0.51297257227576
+#>        [5]    chr10       89997-99996      * |        64 0.387746710526316
+#>        ...      ...               ...    ... .       ...               ...
+#>   [286026]     chrY 57722961-57732958      * |        36 0.468201754385965
+#>   [286027]     chrY 57732959-57742957      * |        38 0.469529085872576
+#>   [286028]     chrY 57742958-57752956      * |        38 0.542936288088643
+#>   [286029]     chrY 57752957-57762955      * |        42 0.510651629072682
+#>   [286030]     chrY 57762956-57772954      * |       504 0.526942355889723
+#>   -------
+#>   seqinfo: 24 sequences from an unspecified genome; no seqlengths
+\end{verbatim}
+
+\hypertarget{quality-control-metrics}{%
+\subsubsection{Quality Control Metrics}\label{quality-control-metrics}}
+
+We have created a GRanges object from genotyping performed on the H1
+cell line, consisting of approximately two million single nucleotide
+polymorphisms (SNPs) and short insertion/deletions (indels). The GRanges
+object consists of 7 columns, relating to the alleles of a SNP or indel,
+the B-allele frequency, log relative intensity of the probes, GC content
+score over a probe, and the name of the probe. We can use this
+information to compute the transition-transversion ratio, a quality
+control metric, within each chromosome in GRanges object.
+
+First we filter out the indels and mitochondrial variants. Then we
+create a logical vector corresponding to whether there is a transition
+event.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{h1_snp_array <-}\StringTok{ }\NormalTok{h1_snp_array }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(}\OperatorTok{!}\NormalTok{(ref }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"I"}\NormalTok{, }\StringTok{"D"}\NormalTok{)), seqnames }\OperatorTok{!=}\StringTok{ "M"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{transition =}\NormalTok{ (ref }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"A"}\NormalTok{, }\StringTok{"G"}\NormalTok{) }\OperatorTok{&}\StringTok{ }\NormalTok{alt }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"G"}\NormalTok{,}\StringTok{"A"}\NormalTok{))}\OperatorTok{|}
+\StringTok{                      }\NormalTok{(ref }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"C"}\NormalTok{,}\StringTok{"T"}\NormalTok{) }\OperatorTok{&}\StringTok{ }\NormalTok{alt }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"T"}\NormalTok{, }\StringTok{"C"}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+We then compute the transition-transversion ratio over each chromosome
+using \texttt{group\_by()} in combination with \texttt{summarize()}
+(figure \ref{fig:titv-viz}).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ti_tv_results <-}\StringTok{ }\NormalTok{h1_snp_array }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(seqnames) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{summarize}\NormalTok{(}\DataTypeTok{n_snps =} \KeywordTok{n}\NormalTok{(),}
+            \DataTypeTok{ti_tv =} \KeywordTok{sum}\NormalTok{(transition) }\OperatorTok{/}\StringTok{ }\KeywordTok{sum}\NormalTok{(}\OperatorTok{!}\NormalTok{transition)) }
+\NormalTok{ti_tv_results}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+#> DataFrame with 24 rows and 3 columns
+#>     seqnames    n_snps            ti_tv
+#>        <Rle> <integer>        <numeric>
+#> 1          Y      2226  1.4381161007667
+#> 2          6    154246 3.32013219807305
+#> 3         13     83736 3.40669403220714
+#> 4         10    120035 3.49400973418195
+#> 5          4    153243 3.29528828096533
+#> ...      ...       ...              ...
+#> 20        16     77538 3.19827819589583
+#> 21        12    113208 3.47851887016378
+#> 22        20     57073  3.7121036988111
+#> 23        21     32349 3.50480434479877
+#> 24         X     55495 3.58219800181653
+\end{verbatim}
+
+
+
+\hypertarget{discussion}{%
+\section{Discussion}\label{discussion}}
+
+The design of \texttt{plyranges} adheres to well understood principles
+of language and API design: cognitive consistency, cohesion,
+endomorphism and expressiveness \cite{Green1996-qg}. To varying degrees,
+these principles also underlie the design of \texttt{dplyr} and the
+Bioconductor infrastructure.
+
+We have aimed for \texttt{plyranges} to have a simple and direct mapping
+to the user's cognitive model, i.e., how the user thinks about the data.
+This requires careful selection of the level of abstraction so that the
+user can express workflows in the language of genomics. This motivates
+the adoption of the tidy GRanges object as our central data structure.
+The basic data.frame and \texttt{dplyr} tibble lack any notion of
+genomic ranges and so could not easily support our genomic grammar, with
+its specific verbs for range-oriented data manipulation. Another example
+of cognitive consistency is how \texttt{plyranges} is insensitive to
+direction/strand by default when, e.g., detecting overlaps.
+\texttt{GenomicRanges} has the opposite behavior. We believe that
+defaulting to purely spatial overlap is most intuitive to most users.
+
+To further enable cognitive consistency, \texttt{plyranges} functions
+are cohesive. A function is defined to be cohesive if it performs a
+singular task without producing any side-effects. Singular tasks can
+always be broken down further at lower levels of abstraction. For
+example, to resize a range, the user needs to specify which position
+(start, end, midpoint) should be invariant over the transformation. The
+\texttt{resize()} function from the \texttt{GenomicRanges} package has a
+\texttt{fix} argument that sets the anchor, so calling \texttt{resize()}
+coalesces anchoring and width modification. The coupling at the function
+call level is justified since the effect of setting the width depends on
+the anchor. However, \texttt{plyranges} increases cohesion and decouples
+the anchoring into its own function call.
+
+Increasing cohesion simplifies the interface to each operation, makes
+the meaning of arguments more intuitive, and relies on function names as
+the primary means of expression, instead of a more complex mixture of
+function and argument names. This results in the user being able to
+conceptualize the \texttt{plyranges} DSL as a flat catalog of functions,
+without having to descend further into documentation to understand a
+function's arguments. A flat function catalog also enhances API
+discoverability, particularly through auto-completion in integrated
+developer environments (IDEs). One downside of pushing cohesion to this
+extreme is that function calls become coupled, and care is necessary to
+treat them as a group when modifying code.
+
+Like \texttt{dplyr}, \texttt{plyranges} verbs are functional: they are
+free of side effects and are generally endomorphic, meaning that when
+the input is a GRanges object they return a GRanges object. This enables
+chaining of verbs through syntax like the forward pipe operator from the
+\texttt{magrittr} package. This syntax has a direct cognitive mapping to
+natural language and the intuitive notion of pipelines. The low-level
+object-oriented APIs of Bioconductor tend to manipulate data via
+sub-replacement functions, like \texttt{start(gr)\ \textless{}-\ x}.
+These ultimately produce the side effect of replacing a symbol mapping
+in the current environment and thus are not amenable to so-called fluent
+syntax.
+
+Expressiveness relates to the information content in code: the
+programmer should be able to clarify intent without unnecessary
+verbosity. For example, our overlap-based join operations are more
+concise than the multiple steps necessary to achieve the same effect in
+the original \texttt{GenomicRanges} API. In other cases, the
+\texttt{plyranges} API increases verbosity for the sake of clarity and
+cohesion. Explicitly calling \emph{anchor()} can require more typing,
+but the code is easier to comprehend. Another example is the set of
+routines for importing genomic annotations, including
+\emph{read\_gff()}, \emph{read\_bed()}, and \emph{read\_bam()}. Compared
+to the generic \emph{import()} in \texttt{rtracklayer}, the explicit
+format-based naming in \texttt{plyranges} clarifies intent and the type
+of data being returned. Similarly, every \texttt{plyranges} function
+that computes with strand information indicates its intentions by
+including suffixes such as \emph{directed}, \emph{upstream} or
+\emph{downstream} in its name, otherwise strand is ignored. The
+\texttt{GenomicRanges} API does not make this distinction explicit in
+its function naming, instead relying on a parameter that defaults to
+strand sensitivity, an arguably confusing behavior.
+
+The implementation of \texttt{plyranges} is built on top of Bioconductor
+infrastructure, meaning most functions are constructed by composing
+generic functions from core Bioconductor packages. As a result, any
+Bioconductor packages that uses data structures that inherit from
+GRanges will be able to use \texttt{plyranges} for free. Another
+consequence of building on top of Bioconductor generics is that the
+speed and memory usage of \texttt{plyranges} functions are similar to
+the highly optimized methods implemented in Bioconductor for GRanges
+objects.
+
+A caveat to constructing a compatible interface with \texttt{dplyr} is
+that \texttt{plyranges} makes extensive use of non-standard evaluation
+in R via the \texttt{rlang} package \cite{R-rlang}. Simply, this means
+that computations are evaluated in the context of the GRanges objects.
+Both \texttt{dplyr} and \texttt{plyranges} are based on the
+\texttt{rlang} language, because it allows for more expressive code that
+is free of repeated references to the container. Implicitly referencing
+the container is particularly convenient when programming interactively.
+Consequently, when programming with \texttt{plyranges}, a user needs to
+generally understand the \texttt{rlang} language and how to adapt their
+code accordingly. Users familiar with the tidyverse should already have
+such knowledge.
+
+\hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
+
+We have shown how to create expressive and reproducible genomic
+workflows using the \texttt{plyranges} DSL. By realising that the
+GRanges data model is tidy we have highlighted how to implement a
+grammar for performing genomic arithmetic, aggregation, restriction and
+merging. Our examples show that \texttt{plyranges} code is succinct,
+human readable and can take advantage of the interoperability provided
+by the Bioconductor ecosystem and the R language.
+
+We also note that the grammar elements and design principles we have
+described are programming language agnostic and could be easily be
+implemented in another language where genomic information could be
+represented as a tabular data structure. We chose R because it is what
+we are familiar with and because the aforementioned Bioconductor
+packages have implemented the GRanges data structure.
+
+We aim to continue developing the \texttt{plyranges} package and to
+extend it for use with more complex data structures, such as the
+SummarizedExperiment class, the core Bioconductor data structure for
+representing experimental results (e.g., counts) from multiple sample
+experiments in conjunction with feature and sample metadata. Although,
+the SummarizedExperiment is not strictly tidy, it does consist of three
+tidy data structures that are related by feature and sample identifiers.
+Therefore, the grammar and design of the \texttt{plryanges} DSL is
+naturally extensible to the SummarizedExperiment.
+
+As the \texttt{plyranges} interface encourages tidy data practices, it
+integrates well with the grammar of graphics \cite{Wickham2016-gz}. To
+achieve responsive performance, interactive graphics rely on lazy data
+access and computing patterns, so the deferred mechanisms within
+\texttt{plyranges} should help support interactive genomics
+applications.
+
+\hypertarget{declarations}{%
+\section{Declarations}\label{declarations}}
+
+\hypertarget{acknowledgements}{%
+\subsection{Acknowledgements}\label{acknowledgements}}
+
+We would like to thank Dr Matthew Ritchie at the Walter and Eliza Hall
+Institute and Dr Paul Harrison for their feedback on earlier drafts of
+this work. We would also like to thank Lori Shepherd and Hèrve Pages for
+the code review they performed and users who have submitted feedback and
+pull requests.
+
+\hypertarget{availabliity-of-data-and-materials}{%
+\subsection{Availabliity of data and
+Materials}\label{availabliity-of-data-and-materials}}
+
+The BigWig file for the H3K27Me3 primary T CD8+ memory cells from
+peripheral blood ChIP-seq data from the Human Roadmap Epigenomics
+project\\
+was downloaded from the \texttt{AnnotationHub} package (2.13.1) under
+accession AH33458 \cite{R-ahub, Roadmap-Epigenomics-Consortium2015-pr}.
+The BAM file corresponding to the H1 cell line ChIP-seq data is
+available at NCBI GEO under accession
+\href{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM433167}{GSM433167}
+\cite{ncbi-geo, Roadmap-Epigenomics-Consortium2015-pr}. The SNP array
+data for the H1 cell line data is available at NCBI GEO under accession
+\href{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL18952}{GPL18952}
+\cite{Roadmap-Epigenomics-Consortium2015-pr}.
+
+The \texttt{plyranges} package is open source under an Artistic 2.0
+license \cite{R-plyranges-z}. The version (1.1.10) used in the paper is
+archived under DOI:
+\href{https://doi.org/10.5281/zenodo.1469841}{10.5281/zenodo.1469841}.
+The software can be obtained via the Bioconductor project website
+\url{https://bioconductor.org} or accessed via Github
+\url{https://github.com/sa-lee/plyranges}.
+
+To produce the workflows as described in results section we used R
+version 3.5 with the development version of \texttt{plyranges}
+(1.1.10)\\
+and the \texttt{BioStrings} package (2.49.0) installed
+\cite{r-core, R-plyranges-z, R-biostrings}.
+
+This article was written with \texttt{knitr} \cite{R-knitr} and the
+figures were made with \texttt{ggbio} \cite{R-ggbio}. All code required
+to reproduce this article is available at
+\url{https://github.com/sa-lee/plyranges-paper}.
+
+\hypertarget{funding}{%
+\subsection{Funding}\label{funding}}
+
+SL is funded by an Australian Government Research Training Program (RTP)
+scholarship and receives an additional top up scholarship from CSL.
+Funding bodies had no role in data collection, analysis, and
+interpretation.
+
+\hypertarget{authors-contributions}{%
+\subsection{Authors Contributions}\label{authors-contributions}}
+
+SL, DC, ML contributed ideas towards the software. SL wrote the
+manuscript and analysed data. SL and ML wrote the software. DC and ML
+supervised the research and revised the manuscript. All authors have
+read and approved the final version of the manuscript.
+
+\hypertarget{ethics-approval-and-consent-to-participate}{%
+\subsection{Ethics approval and consent to
+participate}\label{ethics-approval-and-consent-to-participate}}
+
+Not applicable to the current manuscript.
+
+\hypertarget{competing-interests}{%
+\subsection{Competing Interests}\label{competing-interests}}
+
+Not applicable to the current manuscript.
+
+\newpage
+\singlespacing 
+\printbibliography[title=References]
+
+% table and figures
+\begin{table}[!htbp]
+\centering
+\begin{tabular}{|l|l|p{6cm}|}
+  \hline
+  & Verb &  Description \\ 
+  \hline
+   & \textbf{\emph{summarize()}} & aggregate over column(s) \\ 
+   Aggregate & \emph{disjoin\_ranges()} & aggregate column(s) over the union of end coordinates \\
+   &  \emph{reduce\_ranges()} & aggregate column(s) by merging overlapping and neighboring ranges \\
+   \hline
+   &  \textbf{\emph{mutate()}} & modifies any column \\
+   & \textbf{\emph{select()}} & select columns \\
+  Modify (Unary) & \textbf{\emph{arrange()}} & sort by columns \\
+   & \emph{stretch()} & extend range by fixed amount \\
+   &  \emph{shift\_(direction)} & shift coordinates \\
+   & \emph{flank\_(direction)} & generate flanking regions \\
+   & \emph{\%intersection\% } & row-wise intersection \\
+   & \emph{\%union\%} & row-wise union \\
+   & \emph{compute\_coverage} & coverage over all ranges \\
+  Modify (Binary) &  \emph{\%setdiff\%} & row-wise set difference \\
+   & \emph{between()} & row-wise gap range \\
+   & \emph{span()} & row-wise spanning range \\
+   \hline
+    & \emph{join\_overlap\_*()} & merge by overlapping ranges \\
+    & \emph{join\_nearest} & merge by nearest neighbor ranges \\
+    & \emph{join\_follow} & merge by following ranges \\
+    Merge & \emph{join\_precedes} & merge by preceding ranges \\
+    & \emph{union\_ranges} & range-wise union \\
+    & \emph{intersect\_ranges} & range-wise intersect \\
+    & \emph{setdiff\_ranges} & range-wise set difference \\
+    & \emph{complement\_ranges} & range-wise set complement \\
+  \hline
+   & \emph{anchor\_direction()} & fix coordinates at direction \\
+  Operate & \textbf{\emph{group\_by()}} & partition by column(s)  \\ 
+   & \emph{group\_by\_overlaps()} & partition by overlaps \\
+   \hline
+   & \textbf{\emph{filter()}} & subset rows \\
+  Restrict & \emph{filter\_by\_overlaps()} & subset by overlap \\
+    & \emph{filter\_by\_non\_overlaps()} & subset by no overlap \\
+   \hline
+\end{tabular}
+\caption{Overview of the \texttt{plyranges} grammar. The core verbs are
+briefly described and categorized into one of the following higher level 
+categories: aggregate, modify, merge, operate, or restrict. A verb is given bold text if
+its origin is from the \texttt{dplyr} grammar.}\label{tab:grammar}
+\end{table}
+
+
+
+\begin{figure}
+\includegraphics[width=\textwidth]{diagrams/GRanges}
+\caption{An illustration of the GRanges data model for a
+sample from an RNA-seq experiment. The core components of the data model
+include a seqname column (representing the chromosome), a ranges column
+which consists of start and end coordinates for a genomic region, and a
+strand identifier (either positive, negative, or unstranded). Metadata
+are included as columns to the right of the dotted line as annotations
+(gene\_id) or range level covariates (score).}
+\label{fig:GRanges} 
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{diagrams/olap-fig}
+\caption{Illustration of the three overlap join operators. Each join takes two 
+GRanges objects, \textit{x} and \textit{y} as input. A 'Hits' object for the 
+join is computed which consists of two components. The first component contains 
+the indices of the ranges in \textit{x} that have been overlapped 
+(the rectangles of \textit{x} that cross the orange lines). The second 
+component consists of the indices of the ranges in \textit{y} that overlap 
+the ranges in \textit{x}. In this case a range in \textit{y} overlaps the 
+ranges in \textit{x} three times, so the index is repeated three times. The 
+resulting 'Hits' object is used to modify \textit{x} by where it was 'hit' by
+\textit{y} and merge all metadata columns from \textit{x} and \textit{y} 
+based on the indices contained in the 'Hits' object. This procedure is applied 
+generally in the \texttt{plyranges} DSL for both overlap and nearest neighbor
+operations. The join semantics alter what is returned: \textbf{A}: for an 
+\textbf{inner} join the \textit{x} ranges that are overlapped by \textit{y} 
+are returned. The returned ranges also include the metadata from the \textit{y}
+range that overlapped the three \textit{x} ranges. \textbf{B} An 
+\textbf{intersect} join is identical to an inner join except that the 
+intersection is taken between the overlapped \textit{x} ranges and the 
+\textit{y} ranges. \textbf{C} For the \textbf{left} join all 
+\textit{x} ranges are returned regardless of whether they are overlapped by 
+\textit{y}. In this case the third range (rectangle with the asterisk next to it)
+of the join would have missing values on metadata columns that came from \textit{y}.}
+\label{fig:olaps-fig}
+\end{figure}
+
+
+\begin{figure}
+\includegraphics[width=\textwidth]{diagrams/code-comparison.pdf}
+\caption{Idiomatic code examples for \texttt{plyranges} (\textbf{A}) and 
+\texttt{GenomicRanges} (\textbf{B}) illustrating an overlap and aggregate 
+operation that returns the same result. 
+In each example, we have two BED files consisting of SNPs that are
+genome-wide association study (GWAS) hits and reference exons. Each code block
+counts for each SNP the number of distinct exons it overlaps. The 
+\texttt{plyranges} code achieves this with an overlap join followed by partitioning
+and aggregation. Strand is ignored by default here. 
+The \texttt{GenomicRanges} code achieves this using the 'Hits' and 'List' 
+classes and their methods.}
+\label{fig:code}
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics{./diagrams/peak-viz-1} 
+
+}
+
+\caption{The final result of the \texttt{plyranges} operations to find a 5000nt region surrounding the peak of normalised coverage scores over chromosome 10, displayed as a density plot.}\label{fig:peak-viz}
+\end{figure}
+\end{document}
+
+\begin{figure}
+
+{\centering \includegraphics{./diagrams/titv-viz-1} 
+
+}
+
+\caption{The final result of computing quality control metrics over the SNP array data with \texttt{plyranges}, displayed as a dot plot. Chromosomes are ordered by their estimated transition-transversion ratio. A white reference line is drawn at the expected ratio for a human exome.}\label{fig:titv-viz}
+\end{figure}
