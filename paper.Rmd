@@ -5,7 +5,7 @@ author:
     email: stuart.lee1@monash.edu
   - name: Dianne Cook $^{\ref{monash}}$
     email: di.cook@monash.edu 
-  - name: Michael Lawrence \footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author} 
+  - name: Michael Lawrence \footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author \href{mailto:michael.lawerence@gene.com}{michael.lawerence@gene.com} } 
     email: lawrence.michael@gene.com
 abstract: "There is a cognitive load placed on users in learning a data abstraction from the Bioconductor project and understanding its appropriate use. Users must navigate these abstractions to perform a genomic analysis task, when a single data abstraction, a GRanges object will suffice. By recognizing that the GRanges class follows 'tidy' data principles, we create a grammar of genomic data transformation, defining verbs for performing actions on and between genomic interval data and providing a way of performing common data analysis tasks through a coherent interface to existing Bioconductor infrastructure. We implement this grammar as a Bioconductor/R package called \texttt{plyranges}."
 keywords: "Bioconductor, Grammar, Genomes, Data Analysis" 
@@ -28,7 +28,8 @@ opts_chunk$set(message = FALSE,
                comment = "#>", 
                fig.width = 5, 
                fig.height = 3, 
-               fig.align = "center")
+               fig.align = "center",
+               fig.path = "diagrams")
 # for peak figures
 library(ggbio)
 
@@ -756,26 +757,55 @@ accessed via Github
 
 # Methods
 ## Data Availability
+
 The BigWig file for the H3K27Me3 primary T CD8+ memory cells from peripheral 
-blood ChIP-seq data was downloaded from the `AnnotationHub` package (2.12.0)
-under accession AH33458. The BAM file corresponding to the
-H1 cell line ChIP-seq data is available at GEO under accession GSM433167. 
-The SNP array data for the H1 cell line data is available at GEO under accession
-GSM1463263.
+blood ChIP-seq data from the Human Roadmap Epigenomics project  
+was downloaded from the `AnnotationHub` package (2.13.1)
+under accession AH33458 \cite{R-ahub, Roadmap-Epigenomics-Consortium2015-pr}. 
+The BAM file corresponding to the H1 cell line ChIP-seq data is available at 
+NCBI GEO under accession [GSM433167](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM433167) \cite{ncbi-geo, Roadmap-Epigenomics-Consortium2015-pr}. 
+The SNP array data for the H1 cell line data is available at  NCBI GEO under accession
+[GPL18952](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL18952) 
+\cite{Roadmap-Epigenomics-Consortium2015-pr}.
 
 ## Software Versions
 To produce the workflows as described in results section we used 
-R version 3.5 with the development version of `plyranges` (1.1.10) 
-and the  `BioStrings` package (2.48.0) installed. 
+R version 3.5 with the development version of `plyranges` (1.1.10)   
+and the `BioStrings` package (2.49.0) installed \cite{r-core, plyranges-zenodo, R-biostrings}. 
 
-All code required to reproduce this article is available at https://github.com/sa-lee/plyranges-paper.
+All code required to reproduce this article is available at 
+https://github.com/sa-lee/plyranges-paper.
 
-# Acknowledgements
+# Declarations
+
+## Acknowledgements
 
 We would like to thank Dr Matthew Ritchie at the Walter and Eliza Hall 
 Institute and Dr Paul Harrison for their feedback on earlier drafts of
 this work. We would also like to thank Lori Shepherd and Hèrve Pages
-for the code review they performed. This article was written with
-`knitr` \cite{R-knitr} and the figures were made with `ggbio` \cite{R-ggbio}. 
+for the code review they performed and users who have submitted feedback
+and pull requests. This article was written with `knitr` \cite{R-knitr} and 
+the figures were made with `ggbio` \cite{R-ggbio}.
+
+## Funding
+
+SL is funded by an Australian Government Research Training Program (RTP) 
+scholarship and receives an additional top up scholarship from CSL. Funding 
+bodies had no role in data collection, analysis, and interpretation.
+
+## Authors Contributions
+
+SL, DC, ML contributed ideas towards the software. SL wrote 
+the manuscript and analysed data. SL and ML wrote the software. 
+DC and ML supervised the research and revised the manuscript. 
+All authors have read and approved the final version of the manuscript.
+
+## Ethics approval and consent to participate
+
+Not applicable to the current manuscript.
+
+## Competing Interests
+
+Not applicable to the current manuscript.
 
 # References {#references .unnumbered}
