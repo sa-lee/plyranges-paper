@@ -13,8 +13,6 @@
 
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 
-% highlight changes
-\usepackage{soul}
 
 \usepackage{abstract}
 \renewcommand{\abstractname}{}    % clear the title
@@ -97,13 +95,13 @@
 % using explicit options in \includegraphics[width, height, ...]{}
 \setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
 
-\title{plyranges: A grammar of genomic data transformation  }
+\title{plyranges: a grammar of genomic data transformation  }
 
 
 
 \author{\Large Stuart Lee
 \footnote{\label{monash}Department of Econometrics and Business Statistics, Monash University, Clayton, Australia}\footnote{Molecular Medicine Division, Walter and Eliza Hall Institute, Parkville, Australia}\vspace{0.05in} \newline\normalsize\emph{}   \and \Large Dianne Cook \(^{\ref{monash}}\)\vspace{0.05in} \newline\normalsize\emph{}   \and \Large Michael Lawrence
-\footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author}\vspace{0.05in} \newline\normalsize\emph{}  }
+\footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author \href{mailto:michael.lawerence@gene.com}{michael.lawerence@gene.com} }\vspace{0.05in} \newline\normalsize\emph{}  }
 
 
 \date{}
@@ -149,9 +147,9 @@
             bookmarks=true,
             pdfauthor={Stuart Lee
 \footnote{\label{monash}Department of Econometrics and Business Statistics, Monash University, Clayton, Australia}\footnote{Molecular Medicine Division, Walter and Eliza Hall Institute, Parkville, Australia} () and Dianne Cook \(^{\ref{monash}}\) () and Michael Lawrence
-\footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author} ()},
+\footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author \href{mailto:michael.lawerence@gene.com}{michael.lawerence@gene.com} } ()},
              pdfkeywords = {Bioconductor, Grammar, Genomes, Data Analysis},  
-            pdftitle={plyranges: A grammar of genomic data transformation},
+            pdftitle={plyranges: a grammar of genomic data transformation},
             colorlinks=true,
             citecolor=blue,
             urlcolor=blue,
@@ -188,7 +186,7 @@
    \vskip 13.5pt\relax \normalsize\fontsize{11}{12} 
 \textbf{\authorfont Stuart Lee
 \footnote{\label{monash}Department of Econometrics and Business Statistics, Monash University, Clayton, Australia}\footnote{Molecular Medicine Division, Walter and Eliza Hall Institute, Parkville, Australia}} \hskip 15pt \emph{\small }   \par \textbf{\authorfont Dianne Cook \(^{\ref{monash}}\)} \hskip 15pt \emph{\small }   \par \textbf{\authorfont Michael Lawrence
-\footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author}} \hskip 15pt \emph{\small }   
+\footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author \href{mailto:michael.lawerence@gene.com}{michael.lawerence@gene.com} }} \hskip 15pt \emph{\small }   
 
 }
 
@@ -207,19 +205,16 @@
 
     \vskip 8.5pt % \small 
 
-\noindent The Bioconductor project provides many interoperable data abstractions
-for analyzing high-throughput genomics experiments; however implementing
-a typical genomic workflow with Bioconductor requires learning these
-abstractions and understanding them at an integrative level. This places
-a large cognitive burden on the user, especially for non-programmers. To
-reduce this burden we have created a grammar of genomic data
-transformation that operates on a single, central Bioconductor data
-structure, GRanges, which naturally represents genomic intervals and
-their associated measurements. The grammar defines verbs for performing
-actions on and between genomic interval data through a simplified,
-coherent interface to existing Bioconductor infrastructure, resulting in
-fluent analysis workflows. We have implemented this grammar as an
-R/Bioconductor package called \texttt{plyranges}.
+\noindent There is a cognitive load placed on users in learning a data abstraction
+from the Bioconductor project and understanding its appropriate use.
+Users must navigate these abstractions to perform a genomic analysis
+task, when a single data abstraction, a GRanges object will suffice. By
+recognizing that the GRanges class follows `tidy' data principles, we
+create a grammar of genomic data transformation, defining verbs for
+performing actions on and between genomic interval data and providing a
+way of performing common data analysis tasks through a coherent
+interface to existing Bioconductor infrastructure. We implement this
+grammar as a Bioconductor/R package called \texttt{plyranges}.
 
 
 \vskip 8.5pt \noindent \emph{Keywords}: Bioconductor, Grammar, Genomes, Data Analysis \par
@@ -302,7 +297,7 @@ all measurements pertain to a single observational unit. The tidy data
 pattern is useful because it allows us to see how the data relate to the
 design of an experiment and the variables measured. The \texttt{dplyr}
 package \cite{Wickham2017-dplyr} defines an application programming
-interface (API) that maps notions from query languages such as SQL to
+interface (API) that maps notions from the general relational algebra to
 verbs that act on tidy data. These verbs can be composed together on one
 or more tidy datasets with the pipe operator from the \texttt{magrittr}
 package \cite{R-magrittr}. Taken together these features enable a user
@@ -393,7 +388,7 @@ principles.
     & \emph{union\_ranges} & range-wise union \\
     & \emph{intersect\_ranges} & range-wise intersect \\
     & \emph{setdiff\_ranges} & range-wise set difference \\
-    & \emph{complement\_ranges} & range-wise union \\
+    & \emph{complement\_ranges} & range-wise set complement \\
   \hline
    & \emph{anchor\_direction()} & fix coordinates at direction \\
   Operate & \textbf{\emph{group\_by()}} & partition by column(s)  \\ 
@@ -711,7 +706,7 @@ that surrounds the max peak (figure \ref{fig:peak-viz}).
 
 \begin{figure}
 
-{\centering \includegraphics{paper_files/figure-latex/peak-viz-1} 
+{\centering \includegraphics{./diagrams/peak-viz-1} 
 
 }
 
@@ -875,7 +870,7 @@ using \texttt{group\_by()} in combination with \texttt{summarize()}
 
 \begin{figure}
 
-{\centering \includegraphics{paper_files/figure-latex/titv-viz-1} 
+{\centering \includegraphics{./diagrams/titv-viz-1} 
 
 }
 
@@ -887,7 +882,7 @@ using \texttt{group\_by()} in combination with \texttt{summarize()}
 
 The design of \texttt{plyranges} adheres to well understood principles
 of language and API design: cognitive consistency, cohesion,
-expressiveness and endomorphism \cite{Green1996-qg}. To varying degrees,
+endomorphism and expressiveness \cite{Green1996-qg}. To varying degrees,
 these principles also underlie the design of \texttt{dplyr} and the
 Bioconductor infrastructure.
 
@@ -1019,42 +1014,80 @@ access and computing patterns, so the deferred mechanisms within
 \texttt{plyranges} should help support interactive genomics
 applications.
 
-The \texttt{plyranges} package can be obtained via the Bioconductor
-project website \url{https://bioconductor.org} or accessed via Github
-\url{https://github.com/sa-lee/plyranges}.
-
-\hypertarget{methods}{%
-\section{Methods}\label{methods}}
-
-\hypertarget{data-availability}{%
-\subsection{Data Availability}\label{data-availability}}
-
-The BigWig file for the H3K27Me3 primary T CD8+ memory cells from
-peripheral blood ChIP-seq data was downloaded from the
-\texttt{AnnotationHub} package (2.12.0) under accession AH33458. The BAM
-file corresponding to the H1 cell line ChIP-seq data is available at GEO
-under accession GSM433167. The SNP array data for the H1 cell line data
-is available at GEO under accession GSM1463263.
-
-\hypertarget{software-versions}{%
-\subsection{Software Versions}\label{software-versions}}
-
-To produce the workflows as described in results section we used R
-version 3.5 with the development version of \texttt{plyranges} (1.1.10)
-and the \texttt{BioStrings} package (2.48.0) installed.
-
-All code required to reproduce this article is available at
-\url{https://github.com/sa-lee/plyranges-paper}.
+\hypertarget{declarations}{%
+\section{Declarations}\label{declarations}}
 
 \hypertarget{acknowledgements}{%
-\section{Acknowledgements}\label{acknowledgements}}
+\subsection{Acknowledgements}\label{acknowledgements}}
 
 We would like to thank Dr Matthew Ritchie at the Walter and Eliza Hall
 Institute and Dr Paul Harrison for their feedback on earlier drafts of
 this work. We would also like to thank Lori Shepherd and Hèrve Pages for
-the code review they performed. This article was written with
-\texttt{knitr} \cite{R-knitr} and the figures were made with
-\texttt{ggbio} \cite{R-ggbio}.
+the code review they performed and users who have submitted feedback and
+pull requests.
+
+\hypertarget{availabliity-of-data-and-materials}{%
+\subsection{Availabliity of data and
+Materials}\label{availabliity-of-data-and-materials}}
+
+The BigWig file for the H3K27Me3 primary T CD8+ memory cells from
+peripheral blood ChIP-seq data from the Human Roadmap Epigenomics
+project\\
+was downloaded from the \texttt{AnnotationHub} package (2.13.1) under
+accession AH33458 \cite{R-ahub, Roadmap-Epigenomics-Consortium2015-pr}.
+The BAM file corresponding to the H1 cell line ChIP-seq data is
+available at NCBI GEO under accession
+\href{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM433167}{GSM433167}
+\cite{ncbi-geo, Roadmap-Epigenomics-Consortium2015-pr}. The SNP array
+data for the H1 cell line data is available at NCBI GEO under accession
+\href{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL18952}{GPL18952}
+\cite{Roadmap-Epigenomics-Consortium2015-pr}.
+
+The \texttt{plyranges} package is open source under an Artistic 2.0
+license \cite{R-plyranges-z}. The version (1.1.10) used in the paper is
+archived under DOI:
+\href{https://doi.org/10.5281/zenodo.1469841}{10.5281/zenodo.1469841}.
+The software can be obtained via the Bioconductor project website
+\url{https://bioconductor.org} or accessed via Github
+\url{https://github.com/sa-lee/plyranges}.
+
+To produce the workflows as described in results section we used R
+version 3.5 with the development version of \texttt{plyranges}
+(1.1.10)\\
+and the \texttt{BioStrings} package (2.49.0) installed
+\cite{r-core, R-plyranges-z, R-biostrings}.
+
+This article was written with \texttt{knitr} \cite{R-knitr} and the
+figures were made with \texttt{ggbio} \cite{R-ggbio}. All code required
+to reproduce this article is available at
+\url{https://github.com/sa-lee/plyranges-paper}.
+
+\hypertarget{funding}{%
+\subsection{Funding}\label{funding}}
+
+SL is funded by an Australian Government Research Training Program (RTP)
+scholarship and receives an additional top up scholarship from CSL.
+Funding bodies had no role in data collection, analysis, and
+interpretation.
+
+\hypertarget{authors-contributions}{%
+\subsection{Authors Contributions}\label{authors-contributions}}
+
+SL, DC, ML contributed ideas towards the software. SL wrote the
+manuscript and analysed data. SL and ML wrote the software. DC and ML
+supervised the research and revised the manuscript. All authors have
+read and approved the final version of the manuscript.
+
+\hypertarget{ethics-approval-and-consent-to-participate}{%
+\subsection{Ethics approval and consent to
+participate}\label{ethics-approval-and-consent-to-participate}}
+
+Not applicable to the current manuscript.
+
+\hypertarget{competing-interests}{%
+\subsection{Competing Interests}\label{competing-interests}}
+
+Not applicable to the current manuscript.
 
 
 

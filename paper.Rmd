@@ -7,7 +7,7 @@ author:
     email: di.cook@monash.edu 
   - name: Michael Lawrence \footnote{Bioinformatics and Computational Biology, Genentech Research and Early Development, South San Francisco, United States of America}\footnote{corresponding author \href{mailto:michael.lawerence@gene.com}{michael.lawerence@gene.com} } 
     email: lawrence.michael@gene.com
-abstract: "There is a cognitive load placed on users in learning a data abstraction from the Bioconductor project and understanding its appropriate use. Users must navigate these abstractions to perform a genomic analysis task, when a single data abstraction, a GRanges object will suffice. By recognizing that the GRanges class follows 'tidy' data principles, we create a grammar of genomic data transformation, defining verbs for performing actions on and between genomic interval data and providing a way of performing common data analysis tasks through a coherent interface to existing Bioconductor infrastructure. We implement this grammar as a Bioconductor/R package called \texttt{plyranges}."
+abstract: "There is a cognitive load placed on users in learning a data abstraction from the Bioconductor project and understanding its appropriate use. Users must navigate these abstractions to perform a genomic analysis task, when a single data abstraction, a GRanges object will suffice. By recognizing that the GRanges class follows 'tidy' data principles, we create a grammar of genomic data transformation, defining verbs for performing actions on and between genomic interval data and providing a way of performing common data analysis tasks through a coherent interface to existing Bioconductor infrastructure. We implement this grammar as a Bioconductor/R package called \\texttt{plyranges}."
 keywords: "Bioconductor, Grammar, Genomes, Data Analysis" 
 bibliography: references.bib 
 output: 
@@ -29,7 +29,7 @@ opts_chunk$set(message = FALSE,
                fig.width = 5, 
                fig.height = 3, 
                fig.align = "center",
-               fig.path = "diagrams")
+               fig.path = "./diagrams/")
 # for peak figures
 library(ggbio)
 
@@ -235,7 +235,7 @@ algebra, and borrow its syntax conventions and design principles.
     & \emph{union\_ranges} & range-wise union \\
     & \emph{intersect\_ranges} & range-wise intersect \\
     & \emph{setdiff\_ranges} & range-wise set difference \\
-    & \emph{complement\_ranges} & range-wise union \\
+    & \emph{complement\_ranges} & range-wise set complement \\
   \hline
    & \emph{anchor\_direction()} & fix coordinates at direction \\
   Operate & \textbf{\emph{group\_by()}} & partition by column(s)  \\ 
@@ -612,7 +612,7 @@ genomic coordinates?
 
 The design of `plyranges` adheres to well understood principles of
 language and API design: cognitive consistency, cohesion,
-expressiveness and endomorphism \cite{Green1996-qg}. 
+endomorphism and expressiveness \cite{Green1996-qg}. 
 To varying degrees, these principles also underlie the
 design of `dplyr` and the Bioconductor infrastructure.
 
@@ -749,14 +749,19 @@ achieve responsive performance, interactive graphics rely on lazy data
 access and computing patterns, so the deferred mechanisms within
 `plyranges` should help support interactive genomics applications.
 
-The `plyranges` package can be obtained via the Bioconductor project
-website [https://bioconductor.org](https://bioconductor.org) or
-accessed via Github 
-[https://github.com/sa-lee/plyranges](https://github.com/sa-lee/plyranges).
+
+# Declarations
+
+## Acknowledgements
+
+We would like to thank Dr Matthew Ritchie at the Walter and Eliza Hall 
+Institute and Dr Paul Harrison for their feedback on earlier drafts of
+this work. We would also like to thank Lori Shepherd and Hèrve Pages
+for the code review they performed and users who have submitted feedback
+and pull requests. 
 
 
-# Methods
-## Data Availability
+## Availabliity of data and Materials
 
 The BigWig file for the H3K27Me3 primary T CD8+ memory cells from peripheral 
 blood ChIP-seq data from the Human Roadmap Epigenomics project  
@@ -768,24 +773,20 @@ The SNP array data for the H1 cell line data is available at  NCBI GEO under acc
 [GPL18952](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL18952) 
 \cite{Roadmap-Epigenomics-Consortium2015-pr}.
 
-## Software Versions
+The `plyranges` package is open source under an Artistic 2.0 license 
+\cite{R-plyranges-z}. 
+The  version (1.1.10) used in the paper is archived under DOI: [10.5281/zenodo.1469841](https://doi.org/10.5281/zenodo.1469841). The software 
+can be obtained via the Bioconductor project website 
+[https://bioconductor.org](https://bioconductor.org) or accessed via Github 
+[https://github.com/sa-lee/plyranges](https://github.com/sa-lee/plyranges).
+
 To produce the workflows as described in results section we used 
 R version 3.5 with the development version of `plyranges` (1.1.10)   
-and the `BioStrings` package (2.49.0) installed \cite{r-core, plyranges-zenodo, R-biostrings}. 
+and the `BioStrings` package (2.49.0) installed \cite{r-core, R-plyranges-z, R-biostrings}.
 
-All code required to reproduce this article is available at 
-https://github.com/sa-lee/plyranges-paper.
-
-# Declarations
-
-## Acknowledgements
-
-We would like to thank Dr Matthew Ritchie at the Walter and Eliza Hall 
-Institute and Dr Paul Harrison for their feedback on earlier drafts of
-this work. We would also like to thank Lori Shepherd and Hèrve Pages
-for the code review they performed and users who have submitted feedback
-and pull requests. This article was written with `knitr` \cite{R-knitr} and 
-the figures were made with `ggbio` \cite{R-ggbio}.
+This article was written with `knitr` \cite{R-knitr} and 
+the figures were made with `ggbio` \cite{R-ggbio}. All code required to 
+reproduce this article is available at https://github.com/sa-lee/plyranges-paper.
 
 ## Funding
 
